@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Rental, MaintenanceRecord, Expense, Vehicle } from '../types';
 import { MaintenanceStatus } from '../types';
-import { PlusIcon, DownloadIcon, PencilIcon, TrashIcon, SearchIcon } from './icons';
+import { PlusIcon, DownloadIcon, PencilIcon, TrashIcon, SearchIcon, CarIcon } from './icons';
 import Modal from './Modal';
 
 // Déclarez jsPDF pour TypeScript car il est chargé via une balise script
@@ -144,6 +143,56 @@ const RevenueChart: React.FC<{ rentals: Rental[] }> = ({ rentals }) => {
     )
 }
 
+const RevenueByVehicleChart: React.FC<{ rentals: Rental[], vehicles: Vehicle[] }> = ({ rentals, vehicles }) => {
+    const revenueByVehicle = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        return vehicles.map(vehicle => {
+            const vehicleRentals = rentals.filter(r => r.vehicleId === vehicle.id);
+            const vehicleRevenue = vehicleRentals
+                .flatMap(r => r.payments)
+                .filter(p => new Date(p.date).getFullYear() === currentYear)
+                .reduce((sum, p) => sum + p.amount, 0);
+            
+            return {
+                vehicleName: `${vehicle.make} ${vehicle.model}`,
+                revenue: vehicleRevenue
+            };
+        })
+        .filter(item => item.revenue > 0)
+        .sort((a, b) => b.revenue - a.revenue);
+    }, [vehicles, rentals]);
+
+    if (revenueByVehicle.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                <CarIcon className="w-12 h-12 text-gray-300 mb-2"/>
+                <p>Aucun revenu de véhicule enregistré pour cette année.</p>
+            </div>
+        );
+    }
+
+    const maxRevenue = Math.max(...revenueByVehicle.map(v => v.revenue), 1);
+
+    return (
+        <div className="space-y-4 p-4">
+            {revenueByVehicle.slice(0, 10).map(item => (
+                <div key={item.vehicleName}>
+                    <div className="flex justify-between items-center mb-1 text-sm">
+                        <span className="font-medium text-gray-800">{item.vehicleName}</span>
+                        <span className="font-semibold text-gray-700">{item.revenue.toLocaleString('fr-FR')} FCFA</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                            className="bg-green-500 h-2.5 rounded-full"
+                            style={{ width: `${(item.revenue / maxRevenue) * 100}%` }}
+                        ></div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 interface AccountingProps {
   rentals: Rental[];
   maintenanceRecords: MaintenanceRecord[];
@@ -257,17 +306,23 @@ export const Accounting: React.FC<AccountingProps> = ({ rentals, maintenanceReco
         switch (activeTab) {
             case 'dashboard':
                 return (
-                    <>
+                    <div className="space-y-6">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                             <StatCard title="Revenu Total Brut" value={`${totalRevenue.toLocaleString('fr-FR')} FCFA`} color="bg-green-500" description="Historique complet des revenus."/>
                             <StatCard title="Coûts Totaux" value={`${totalCosts.toLocaleString('fr-FR')} FCFA`} color="bg-red-500" description="Historique complet des coûts."/>
                             <StatCard title="Bénéfice Net Global" value={`${netProfit.toLocaleString('fr-FR')} FCFA`} color="bg-blue-500" description="Performance globale de l'entreprise."/>
                         </div>
-                        <div className="p-6 bg-white rounded-lg shadow-md">
-                           <h2 className="text-xl font-semibold text-gray-700 mb-2">Revenus par mois ({new Date().getFullYear()})</h2>
-                           <RevenueChart rentals={rentals} />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="p-6 bg-white rounded-lg shadow-md">
+                               <h2 className="text-xl font-semibold text-gray-700 mb-2">Revenus par mois ({new Date().getFullYear()})</h2>
+                               <RevenueChart rentals={rentals} />
+                            </div>
+                             <div className="p-6 bg-white rounded-lg shadow-md">
+                                <h2 className="text-xl font-semibold text-gray-700 mb-2">Revenus par véhicule ({new Date().getFullYear()})</h2>
+                                <RevenueByVehicleChart rentals={rentals} vehicles={vehicles} />
+                            </div>
                         </div>
-                    </>
+                    </div>
                 );
             case 'transactions':
                 return (

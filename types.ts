@@ -147,6 +147,7 @@ export interface Accident {
     insuranceClaimId?: string;
     repairedParts?: string;
     replacedParts?: string;
+    mileage?: number;
 }
 
 export interface Expense {

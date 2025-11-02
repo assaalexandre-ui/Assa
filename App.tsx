@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -238,9 +239,35 @@ const App: React.FC = () => {
     addHistoryLog('maintenance', newRecord.id, `Maintenance planifiée pour le véhicule.`);
   };
   const updateMaintenanceStatus = (id: string, status: MaintenanceStatus) => {
-    setMaintenanceRecords(prev => prev.map(m => m.id === id ? { ...m, status } : m));
+    let recordToUpdate: MaintenanceRecord | undefined;
+    setMaintenanceRecords(prev => {
+        const newRecords = prev.map(m => {
+            if (m.id === id) {
+                recordToUpdate = { ...m, status };
+                return recordToUpdate;
+            }
+            return m;
+        });
+        return newRecords;
+    });
+
+    if (status === MaintenanceStatus.Completed && recordToUpdate) {
+        const vehicleId = recordToUpdate.vehicleId;
+        const newMileage = recordToUpdate.mileage;
+
+        setVehicles(prevVehicles =>
+            prevVehicles.map(v => {
+                if (v.id === vehicleId && newMileage > v.currentMileage) {
+                    return { ...v, currentMileage: newMileage };
+                }
+                return v;
+            })
+        );
+         addHistoryLog('vehicle', vehicleId, `Kilométrage mis à jour à ${newMileage.toLocaleString('fr-FR')} km après maintenance.`);
+    }
+
     addHistoryLog('maintenance', id, `Statut de maintenance mis à jour à ${status}.`);
-  };
+};
   const deleteMaintenance = (id: string) => {
     setMaintenanceRecords(prev => prev.filter(m => m.id !== id));
     addHistoryLog('maintenance', id, `Tâche de maintenance supprimée.`);
@@ -295,9 +322,36 @@ const App: React.FC = () => {
     addHistoryLog('accident', newAccident.id, `Accident déclaré pour le véhicule.`);
   };
   const updateAccidentStatus = (id: string, status: AccidentStatus) => {
-    setAccidents(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+    let accidentToUpdate: Accident | undefined;
+
+    setAccidents(prev => {
+        const newAccidents = prev.map(a => {
+            if (a.id === id) {
+                accidentToUpdate = { ...a, status };
+                return accidentToUpdate;
+            }
+            return a;
+        });
+        return newAccidents;
+    });
+
+    if ((status === AccidentStatus.Repaired || status === AccidentStatus.Closed) && accidentToUpdate?.mileage) {
+        const vehicleId = accidentToUpdate.vehicleId;
+        const newMileage = accidentToUpdate.mileage;
+
+        setVehicles(prevVehicles =>
+            prevVehicles.map(v => {
+                if (v.id === vehicleId && newMileage > v.currentMileage) {
+                    return { ...v, currentMileage: newMileage };
+                }
+                return v;
+            })
+        );
+        addHistoryLog('vehicle', vehicleId, `Kilométrage mis à jour à ${newMileage.toLocaleString('fr-FR')} km après réparation d'un accident.`);
+    }
+
     addHistoryLog('accident', id, `Statut de l'accident mis à jour à ${status}.`);
-  };
+};
   const deleteAccident = (id: string) => {
     setAccidents(prev => prev.filter(a => a.id !== id));
     addHistoryLog('accident', id, `Dossier d'accident supprimé.`);

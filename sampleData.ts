@@ -1,4 +1,5 @@
 
+
 import { Owner, Vehicle, Client, Rental, Accident, VehicleStatus, RentalStatus, AccidentStatus } from './types';
 
 // --- SAMPLE DATA ---
@@ -139,5 +140,6 @@ export const SAMPLE_ACCIDENT_1: Accident = {
     estimatedCost: 150000,
     status: AccidentStatus.Repaired,
     finalCost: 135000,
-    replacedParts: 'Pare-choc avant'
+    replacedParts: 'Pare-choc avant',
+    mileage: 41500,
 };

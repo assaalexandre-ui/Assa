@@ -57,9 +57,8 @@ export const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, add
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
-      <div className="p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Gestion des Chauffeurs</h1>
+      <>
+        <div className="flex justify-end items-center mb-8">
           <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center px-4 py-2 text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-colors"
@@ -112,6 +111,6 @@ export const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, add
         )}
 
         <AddDriverModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} addDriver={addDriver} />
-      </div>
+      </>
     );
 };

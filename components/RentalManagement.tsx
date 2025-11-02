@@ -1,204 +1,223 @@
-import React, { useState } from 'react';
-import type { Rental, Vehicle, Client, Driver, Payment } from '../types';
-import { VehicleStatus } from '../types';
-import { PlusIcon, CheckCircleIcon, CalendarIcon } from './icons';
+import React, { useState, useMemo } from 'react';
+import type { Rental, Vehicle, Client, Driver, Affiliate, Payment, Contravention } from '../types';
+import { RentalStatus, VehicleStatus, ContraventionStatus } from '../types';
+import { PlusIcon, CalendarIcon, SearchIcon, PencilIcon, TrashIcon, CashIcon, SteeringWheelIcon, ExclamationShieldIcon, ClockIcon, CheckCircleIcon, ClipboardCheckIcon, BriefcaseIcon, UsersIcon } from './icons';
 import Modal from './Modal';
+import { DriverManagement } from './DriverManagement';
+import { AffiliateManagement } from './AffiliateManagement';
+import { ContraventionManagement } from './ContraventionManagement';
 
-// Déclarez jsPDF pour TypeScript car il est chargé via une balise script
-declare const jspdf: any;
+type Tab = 'rentals' | 'drivers' | 'partners' | 'contraventions';
 
 interface RentalManagementProps {
   rentals: Rental[];
   vehicles: Vehicle[];
   clients: Client[];
   drivers: Driver[];
-  addRental: (rental: Omit<Rental, 'id' | 'isCompleted' | 'customerName' | 'payments' | 'amountPaid' | 'balanceDue'>) => void;
-  completeRental: (id: string) => void;
-  addPaymentToRental: (rentalId: string, amount: number, date: string) => void;
+  affiliates: Affiliate[];
+  contraventions: Contravention[];
+  addRental: (rental: Omit<Rental, 'id' | 'payments' | 'amountPaid' | 'balanceDue' | 'status'>) => void;
+  updateRentalStatus: (id: string, status: RentalStatus) => void;
+  deleteRental: (id: string) => void;
+  addPayment: (rentalId: string, payment: Omit<Payment, 'id'>) => void;
+  addDriver: (driver: Omit<Driver, 'id' | 'isAvailable'>) => void;
+  deleteDriver: (id: string) => void;
+  updateDriverAvailability: (id: string, isAvailable: boolean) => void;
+  addAffiliate: (affiliate: Omit<Affiliate, 'id'>) => void;
+  deleteAffiliate: (id: string) => void;
+  addContravention: (record: Omit<Contravention, 'id'>) => void;
+  updateContraventionStatus: (id: string, status: ContraventionStatus) => void;
+  deleteContravention: (id: string) => void;
 }
-
-const getStatusBadge = (isCompleted: boolean) => {
-    return isCompleted
-      ? <span className="px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-200 rounded-full">Terminée</span>
-      : <span className="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>;
-};
 
 const AddPaymentModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
+  onAddPayment: (amount: number, date: string) => void;
+  balanceDue: number;
+}> = ({ isOpen, onClose, onAddPayment, balanceDue }) => {
+  const [amount, setAmount] = useState<number | ''>('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (Number(amount) > 0) {
+      onAddPayment(Number(amount), date);
+      onClose();
+      setAmount('');
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Ajouter un Paiement">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Montant (FCFA)</label>
+          <input type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} max={balanceDue} min="1" required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
+          <p className="text-xs text-gray-500 mt-1">Solde restant : {balanceDue.toLocaleString('fr-FR')} FCFA</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Date du paiement</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
+        </div>
+        <div className="flex justify-end pt-4">
+          <button type="button" onClick={onClose} className="px-4 py-2 mr-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Annuler</button>
+          <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Ajouter</button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+const ContraventionDetailModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
   rental: Rental;
-  addPaymentToRental: (rentalId: string, amount: number, date: string) => void;
-}> = ({ isOpen, onClose, rental, addPaymentToRental }) => {
-    const [amount, setAmount] = useState<number | ''>(rental.balanceDue > 0 ? rental.balanceDue : '');
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  vehicle?: Vehicle;
+  client?: Client;
+  contraventions: Contravention[];
+}> = ({ isOpen, onClose, rental, vehicle, client, contraventions }) => {
+  const rentalContraventions = contraventions.filter(c => c.rentalId === rental.id);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (amount === '' || amount <= 0 || amount > rental.balanceDue) {
-            alert("Veuillez entrer un montant valide.");
-            return;
-        }
-        addPaymentToRental(rental.id, Number(amount), date);
-        onClose();
-    };
-
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Ajouter un paiement pour ${rental.customerName}`}>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="p-4 bg-gray-100 rounded-lg">
-                    <p>Montant total: <span className="font-bold">{rental.price.toLocaleString('fr-FR')} FCFA</span></p>
-                    <p>Montant payé: <span className="font-bold text-green-600">{rental.amountPaid.toLocaleString('fr-FR')} FCFA</span></p>
-                    <p>Solde restant: <span className="font-bold text-red-600">{rental.balanceDue.toLocaleString('fr-FR')} FCFA</span></p>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Date du paiement</label>
-                    <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500"/>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Montant à payer</label>
-                    <input type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} max={rental.balanceDue} min="1" required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500"/>
-                </div>
-                <div className="flex justify-end pt-4">
-                    <button type="button" onClick={onClose} className="px-4 py-2 mr-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Annuler</button>
-                    <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Enregistrer</button>
-                </div>
-            </form>
-        </Modal>
-    )
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={`Contraventions pour la location`}>
+      <div className="space-y-4">
+        <div>
+          <p className="text-sm text-gray-500">Véhicule</p>
+          <p className="font-semibold text-gray-800">{vehicle ? `${vehicle.make} ${vehicle.model} (${vehicle.plate})` : 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Client</p>
+          <p className="font-semibold text-gray-800">{client ? client.name : 'N/A'}</p>
+        </div>
+        <div className="border-t pt-4">
+          <h4 className="font-semibold text-gray-800 mb-2">Liste des contraventions ({rentalContraventions.length})</h4>
+          {rentalContraventions.length > 0 ? (
+            <ul className="space-y-2 max-h-60 overflow-y-auto">
+              {rentalContraventions.map(c => (
+                <li key={c.id} className="p-3 bg-red-50 rounded-lg border border-red-200">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold text-red-800">{c.description}</p>
+                      <p className="text-sm text-gray-600">Date: {new Date(c.date).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-red-700">{c.amount.toLocaleString('fr-FR')} FCFA</p>
+                      <p className="text-xs font-semibold text-gray-600">{c.status}</p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-center text-gray-500 py-4">Aucune contravention pour cette location.</p>
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
 };
 
 const RentalCard: React.FC<{
-    rental: Rental;
-    vehicle?: Vehicle;
-    client?: Client;
-    driver?: Driver;
-    completeRental: (id: string) => void;
-    addPaymentToRental: (rentalId: string, amount: number, date: string) => void;
-}> = ({ rental, vehicle, client, driver, completeRental, addPaymentToRental }) => {
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    
-    const generateContract = () => {
-        if (!vehicle || !client) return;
+  rental: Rental;
+  vehicle?: Vehicle;
+  client?: Client;
+  driver?: Driver;
+  affiliate?: Affiliate;
+  contraventions: Contravention[];
+  updateRentalStatus: (id: string, status: RentalStatus) => void;
+  deleteRental: (id: string) => void;
+  onAddPayment: () => void;
+  onViewContraventions: (rental: Rental) => void;
+}> = ({ rental, vehicle, client, driver, affiliate, contraventions, updateRentalStatus, deleteRental, onAddPayment, onViewContraventions }) => {
+  const progress = rental.price > 0 ? (rental.amountPaid / rental.price) * 100 : 0;
+  const rentalContraventions = contraventions.filter(c => c.rentalId === rental.id);
+  const isPaid = rental.balanceDue <= 0;
+  
+  const getStatusInfo = (status: RentalStatus): { color: string; icon: React.ReactNode } => {
+    switch(status) {
+      case RentalStatus.Active: return { color: 'bg-green-100 text-green-800', icon: <CheckCircleIcon className="w-4 h-4 mr-1.5"/> };
+      case RentalStatus.Reserved: return { color: 'bg-indigo-100 text-indigo-800', icon: <ClockIcon className="w-4 h-4 mr-1.5"/> };
+      case RentalStatus.Completed: return { color: 'bg-gray-200 text-gray-800', icon: <ClipboardCheckIcon className="w-4 h-4 mr-1.5"/> };
+      default: return { color: 'bg-gray-100 text-gray-700', icon: null };
+    }
+  };
 
-        const { jsPDF } = jspdf;
-        const doc = new jsPDF();
-        
-        doc.setFontSize(22);
-        doc.setFont('helvetica', 'bold');
-        doc.text("CARMIXT APPS", 20, 20);
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text("Contrat de Location de Véhicule", 20, 28);
-        doc.line(20, 30, 190, 30);
-        
-        doc.setFontSize(12);
-        doc.text(`Contrat N°: ${rental.id}`, 140, 40);
-        doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, 140, 47);
+  const statusInfo = getStatusInfo(rental.status);
 
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text("Entre les soussignés :", 20, 45);
-        
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text("Le Loueur : CARMIXT APPS, Dakar, Sénégal", 25, 55);
-        doc.text(`Le Locataire : ${client.name}`, 25, 62);
-        doc.text(`Téléphone: ${client.phone}, Email: ${client.email}`, 25, 69);
-        doc.text(`Permis N°: ${client.licenseNumber}`, 25, 76);
+  const getSelectStatusColor = (status: RentalStatus) => {
+    switch(status) {
+      case RentalStatus.Active: return 'bg-green-200 text-green-800 border-green-300';
+      case RentalStatus.Reserved: return 'bg-indigo-200 text-indigo-800 border-indigo-300';
+      case RentalStatus.Completed: return 'bg-gray-200 text-gray-800 border-gray-300';
+    }
+  };
 
-        doc.autoTable({
-            startY: 85,
-            head: [['Véhicule', 'Immatriculation', 'Kilométrage']],
-            body: [[`${vehicle.make} ${vehicle.model}`, vehicle.plate, `${vehicle.currentMileage.toLocaleString('fr-FR')} km`]],
-            theme: 'grid',
-            headStyles: { fillColor: [217, 35, 50] }
-        });
-
-        doc.autoTable({
-            startY: doc.lastAutoTable.finalY + 10,
-            head: [['Date de Début', 'Date de Fin', 'Prix Total']],
-            body: [[
-                new Date(rental.startDate).toLocaleDateString('fr-FR'),
-                new Date(rental.endDate).toLocaleDateString('fr-FR'),
-                `${rental.price.toLocaleString('fr-FR')} FCFA`
-            ]],
-            theme: 'grid',
-            headStyles: { fillColor: [217, 35, 50] }
-        });
-
-        if (rental.payments.length > 0) {
-            doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 10,
-                head: [['Historique des Paiements']],
-                body: rental.payments.map(p => [
-                    `Payé le ${new Date(p.date).toLocaleDateString('fr-FR')}: ${p.amount.toLocaleString('fr-FR')} FCFA`
-                ]),
-                theme: 'striped',
-                headStyles: { fillColor: [100, 100, 100] }
-            });
-        }
-        
-        doc.text(`Montant payé: ${rental.amountPaid.toLocaleString('fr-FR')} FCFA`, 20, doc.lastAutoTable.finalY + 10);
-        doc.text(`Solde restant: ${rental.balanceDue.toLocaleString('fr-FR')} FCFA`, 20, doc.lastAutoTable.finalY + 17);
-
-        doc.text("Signature du Locataire", 30, doc.internal.pageSize.height - 40);
-        doc.line(25, doc.internal.pageSize.height - 45, 85, doc.internal.pageSize.height - 45);
-        doc.text("Signature du Loueur", 135, doc.internal.pageSize.height - 40);
-        doc.line(130, doc.internal.pageSize.height - 45, 190, doc.internal.pageSize.height - 45);
-        
-        doc.save(`contrat-${rental.id}.pdf`);
-    };
-
-    const paymentProgress = (rental.amountPaid / rental.price) * 100;
-
-    return (
-        <>
-            <div className="bg-white rounded-lg shadow-md p-6 flex flex-col justify-between hover:shadow-lg transition-shadow duration-300">
-                <div>
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-800">{rental.customerName}</h3>
-                            <p className="text-sm text-red-600 font-semibold">{vehicle ? `${vehicle.make} ${vehicle.model}` : 'Véhicule inconnu'}</p>
-                            {driver && <p className="text-xs text-gray-500 mt-1">Chauffeur: {driver.name}</p>}
-                        </div>
-                        {getStatusBadge(rental.isCompleted)}
-                    </div>
-                    <div className="border-t pt-4">
-                        <div className="flex justify-between items-baseline mb-2">
-                            <p className="text-sm font-semibold text-gray-600">Total à payer</p>
-                            <p className="text-lg font-bold text-gray-800">{rental.price.toLocaleString('fr-FR')} FCFA</p>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                            <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${paymentProgress}%` }}></div>
-                        </div>
-                        <div className="flex justify-between text-xs font-medium text-gray-500">
-                            <span>Payé: {rental.amountPaid.toLocaleString('fr-FR')}</span>
-                            <span>Restant: {rental.balanceDue.toLocaleString('fr-FR')}</span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mt-4">
-                            <div><p className="font-medium">Début:</p><p>{new Date(rental.startDate).toLocaleDateString('fr-FR')}</p></div>
-                            <div><p className="font-medium">Fin:</p><p>{new Date(rental.endDate).toLocaleDateString('fr-FR')}</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div className="mt-6 flex flex-col space-y-2">
-                     <button onClick={() => setIsPaymentModalOpen(true)} disabled={rental.balanceDue <= 0} className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-blue-300 transition-colors">
-                        Ajouter Paiement
-                     </button>
-                     {!rental.isCompleted && (
-                         <button onClick={() => completeRental(rental.id)} className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors">
-                            <CheckCircleIcon className="w-5 h-5 mr-2" />
-                            Marquer comme terminée
-                         </button>
-                    )}
-                     <button onClick={generateContract} className="w-full px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors">
-                        Générer Contrat
-                     </button>
-                </div>
+  return (
+    <div className="bg-white rounded-lg shadow-md flex flex-col">
+      <div className="p-4 flex-grow">
+        <div className="flex justify-between items-start">
+            <div>
+                <h3 className="text-lg font-bold text-gray-800">{vehicle ? `${vehicle.make} ${vehicle.model}` : 'Véhicule supprimé'}</h3>
+                <p className="text-sm text-gray-600">Client: <span className="font-medium">{client ? client.name : 'Client supprimé'}</span></p>
+                {driver && (
+                    <p className="text-xs text-gray-500 flex items-center mt-1">
+                        <SteeringWheelIcon className="w-4 h-4 mr-1.5 text-gray-400" />
+                        Chauffeur: <span className="font-medium text-gray-700 ml-1">{driver.name}</span>
+                    </p>
+                )}
+                {affiliate && (
+                    <p className="text-xs text-gray-500 flex items-center mt-1">
+                        <BriefcaseIcon className="w-4 h-4 mr-1.5 text-gray-400" />
+                        Partenaire: <span className="font-medium text-gray-700 ml-1">{affiliate.name}</span>
+                    </p>
+                )}
             </div>
-            {isPaymentModalOpen && <AddPaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} rental={rental} addPaymentToRental={addPaymentToRental} />}
-        </>
-    );
+            <div className="flex flex-col items-end space-y-2">
+                <span className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${statusInfo.color}`}>
+                    {statusInfo.icon}
+                    {rental.status}
+                </span>
+                {isPaid && rental.status !== RentalStatus.Completed && (
+                    <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800">
+                        <CheckCircleIcon className="w-4 h-4 mr-1.5"/>
+                        Payé
+                    </span>
+                )}
+                {rentalContraventions.length > 0 && (
+                    <button onClick={() => onViewContraventions(rental)} className="flex items-center text-orange-600 hover:text-orange-800" title={`${rentalContraventions.length} contravention(s)`}>
+                        <ExclamationShieldIcon className="w-5 h-5" />
+                        <span className="font-bold text-sm ml-1">{rentalContraventions.length}</span>
+                    </button>
+                )}
+            </div>
+        </div>
+        <div className="mt-3 text-sm text-gray-500">
+            <p>Du: <span className="font-medium text-gray-700">{new Date(rental.startDate).toLocaleDateString('fr-FR')}</span></p>
+            <p>Au: <span className="font-medium text-gray-700">{new Date(rental.endDate).toLocaleDateString('fr-FR')}</span></p>
+        </div>
+        <div className="mt-4">
+            <div className="flex justify-between text-sm font-medium text-gray-700">
+                <span>Paiement</span>
+                <span>{rental.amountPaid.toLocaleString('fr-FR')} / {rental.price.toLocaleString('fr-FR')} FCFA</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+            </div>
+            <p className="text-right text-xs text-gray-500 mt-1">Restant: {rental.balanceDue.toLocaleString('fr-FR')} FCFA</p>
+        </div>
+      </div>
+      <div className="bg-gray-50 p-3 flex space-x-2">
+        <button onClick={onAddPayment} disabled={rental.status === RentalStatus.Completed || rental.balanceDue <= 0} className="flex-1 text-sm flex items-center justify-center px-3 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 disabled:bg-green-300"><CashIcon className="w-4 h-4 mr-1"/> Paiement</button>
+        <select value={rental.status} onChange={(e) => updateRentalStatus(rental.id, e.target.value as RentalStatus)} className={`flex-1 text-sm rounded-md shadow-sm font-semibold border focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-200 ${getSelectStatusColor(rental.status)}`}>
+            <option value={RentalStatus.Reserved}>Réservé</option>
+            <option value={RentalStatus.Active}>Active</option>
+            <option value={RentalStatus.Completed}>Terminée</option>
+        </select>
+        <button onClick={() => deleteRental(rental.id)} className="px-3 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"><TrashIcon className="w-4 h-4"/></button>
+      </div>
+    </div>
+  );
 };
 
 const AddRentalModal: React.FC<{
@@ -207,118 +226,204 @@ const AddRentalModal: React.FC<{
   vehicles: Vehicle[];
   clients: Client[];
   drivers: Driver[];
-  addRental: (rental: Omit<Rental, 'id' | 'isCompleted' | 'customerName' | 'payments' | 'amountPaid' | 'balanceDue'>) => void;
-}> = ({ isOpen, onClose, vehicles, clients, drivers, addRental }) => {
-  const [clientId, setClientId] = useState('');
+  affiliates: Affiliate[];
+  addRental: (rental: Omit<Rental, 'id' | 'payments' | 'amountPaid' | 'balanceDue' | 'status'>) => void;
+}> = ({ isOpen, onClose, vehicles, clients, drivers, affiliates, addRental }) => {
   const [vehicleId, setVehicleId] = useState('');
+  const [clientId, setClientId] = useState('');
   const [driverId, setDriverId] = useState<string | undefined>(undefined);
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [affiliateId, setAffiliateId] = useState<string | undefined>(undefined);
+  const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [price, setPrice] = useState(0);
-
-  const availableVehicles = vehicles.filter(v => v.status === VehicleStatus.Available);
-  const availableDrivers = drivers.filter(d => d.isAvailable);
+  const [price, setPrice] = useState<number | ''>('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clientId || !vehicleId || !startDate || !endDate || price <= 0) return;
-    addRental({ clientId, vehicleId, driverId, startDate, endDate, price });
+    const client = clients.find(c => c.id === clientId);
+    if (!vehicleId || !clientId || !startDate || !endDate || Number(price) <= 0 || !client) return;
+    
+    addRental({
+      vehicleId,
+      clientId,
+      driverId,
+      affiliateId,
+      customerName: client.name,
+      startDate,
+      endDate,
+      price: Number(price),
+    });
     onClose();
-    setClientId('');
-    setVehicleId('');
-    setDriverId(undefined);
-    setStartDate(new Date().toISOString().split('T')[0]);
-    setEndDate('');
-    setPrice(0);
+    // Reset form
+    setVehicleId(''); setClientId(''); setDriverId(undefined); setAffiliateId(undefined);
+    setStartDate(''); setEndDate(''); setPrice('');
   };
-  
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Créer une nouvelle location">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Client</label>
-          <select value={clientId} onChange={(e) => setClientId(e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500">
-            <option value="" disabled>Sélectionner un client</option>
-            {clients.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-           {clients.length === 0 && <p className="text-xs text-red-500 mt-1">Aucun client. Ajoutez-en un depuis l'onglet Clients.</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Véhicule</label>
-          <select value={vehicleId} onChange={(e) => setVehicleId(e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500">
-            <option value="" disabled>Sélectionner un véhicule</option>
-            {availableVehicles.map(v => (
-              <option key={v.id} value={v.id}>{v.make} {v.model} - {v.plate}</option>
-            ))}
-          </select>
-          {availableVehicles.length === 0 && <p className="text-xs text-red-500 mt-1">Aucun véhicule disponible.</p>}
-        </div>
-         <div>
-          <label className="block text-sm font-medium text-gray-700">Chauffeur (Optionnel)</label>
-          <select value={driverId || ''} onChange={(e) => setDriverId(e.target.value || undefined)} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500">
-            <option value="">Sans chauffeur</option>
-            {availableDrivers.map(d => (
-              <option key={d.id} value={d.id}>{d.name}</option>
-            ))}
-          </select>
-        </div>
         <div className="grid grid-cols-2 gap-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Date de début</label>
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} min={new Date().toISOString().split('T')[0]} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500"/>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Date de fin</label>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={startDate} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500"/>
-            </div>
+          <div><label className="block text-sm font-medium text-gray-700">Client</label><select value={clientId} onChange={(e) => setClientId(e.target.value)} required className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"><option value="" disabled>Sélectionner...</option>{clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+          <div><label className="block text-sm font-medium text-gray-700">Véhicule</label><select value={vehicleId} onChange={(e) => setVehicleId(e.target.value)} required className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"><option value="" disabled>Sélectionner...</option>{vehicles.filter(v => v.status === VehicleStatus.Available).map(v => <option key={v.id} value={v.id}>{`${v.make} ${v.model}`}</option>)}</select></div>
+          <div><label className="block text-sm font-medium text-gray-700">Chauffeur (Optionnel)</label><select value={driverId || ''} onChange={(e) => setDriverId(e.target.value || undefined)} className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"><option value="">Aucun</option>{drivers.filter(d => d.isAvailable).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
+          <div><label className="block text-sm font-medium text-gray-700">Partenaire (Optionnel)</label><select value={affiliateId || ''} onChange={(e) => setAffiliateId(e.target.value || undefined)} className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"><option value="">Aucun</option>{affiliates.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+          <div><label className="block text-sm font-medium text-gray-700">Date de début</label><input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/></div>
+          <div><label className="block text-sm font-medium text-gray-700">Date de fin</label><input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/></div>
         </div>
-         <div>
-            <label className="block text-sm font-medium text-gray-700">Prix de la location (FCFA)</label>
-            <input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} required min="1" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500"/>
-        </div>
-        <div className="flex justify-end pt-4">
-          <button type="button" onClick={onClose} className="px-4 py-2 mr-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Annuler</button>
-          <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:bg-red-300" disabled={availableVehicles.length === 0 || clients.length === 0}>Créer</button>
-        </div>
+        <div><label className="block text-sm font-medium text-gray-700">Prix Total (FCFA)</label><input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} required min="1" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/></div>
+        <div className="flex justify-end pt-4"><button type="button" onClick={onClose} className="px-4 py-2 mr-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">Annuler</button><button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Créer</button></div>
       </form>
     </Modal>
   );
 };
 
-export const RentalManagement: React.FC<RentalManagementProps> = ({ rentals, vehicles, clients, drivers, addRental, completeRental, addPaymentToRental }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const sortedRentals = [...rentals].sort((a, b) => (a.isCompleted === b.isCompleted) ? new Date(b.startDate).getTime() - new Date(a.startDate).getTime() : a.isCompleted ? 1 : -1);
+export const RentalManagement: React.FC<RentalManagementProps> = (props) => {
+    const { rentals, vehicles, clients, drivers, affiliates, contraventions, addRental, updateRentalStatus, deleteRental, addPayment, addDriver, deleteDriver, updateDriverAvailability, addAffiliate, deleteAffiliate, addContravention, updateContraventionStatus, deleteContravention } = props;
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [selectedRental, setSelectedRental] = useState<Rental | null>(null);
+    const [statusFilter, setStatusFilter] = useState<RentalStatus | 'all'>('all');
+    const [clientFilter, setClientFilter] = useState<string | 'all'>('all');
+    const [isContraventionModalOpen, setIsContraventionModalOpen] = useState(false);
+    const [selectedRentalForContraventions, setSelectedRentalForContraventions] = useState<Rental | null>(null);
+    const [activeTab, setActiveTab] = useState<Tab>('rentals');
+
+    const filteredRentals = useMemo(() => {
+        return rentals
+          .filter(r => {
+              const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
+              const matchesClient = clientFilter === 'all' || r.clientId === clientFilter;
+              return matchesStatus && matchesClient;
+          })
+          .sort((a,b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+    }, [rentals, statusFilter, clientFilter]);
+
+    const handleOpenPaymentModal = (rental: Rental) => {
+      setSelectedRental(rental);
+      setIsPaymentModalOpen(true);
+    };
+
+    const handleAddPayment = (amount: number, date: string) => {
+        if(selectedRental) {
+            addPayment(selectedRental.id, { date, amount });
+        }
+    };
     
+    const handleViewContraventions = (rental: Rental) => {
+        setSelectedRentalForContraventions(rental);
+        setIsContraventionModalOpen(true);
+    };
+
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'rentals':
+                return (
+                    <>
+                        <div className="mb-8 p-4 bg-gray-50 rounded-lg border flex flex-wrap items-center gap-4">
+                            <div>
+                                <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700">Filtrer par statut :</label>
+                                <select id="status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as RentalStatus | 'all')} className="mt-1 block w-full max-w-xs py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+                                    <option value="all">Toutes</option>
+                                    {Object.values(RentalStatus).map(status => <option key={status} value={status}>{status}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label htmlFor="client-filter" className="block text-sm font-medium text-gray-700">Filtrer par client :</label>
+                                <select id="client-filter" value={clientFilter} onChange={(e) => setClientFilter(e.target.value)} className="mt-1 block w-full max-w-xs py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
+                                    <option value="all">Tous les clients</option>
+                                    {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                          {filteredRentals.map(rental => {
+                            const driver = drivers.find(d => d.id === rental.driverId);
+                            const affiliate = affiliates.find(a => a.id === rental.affiliateId);
+                            return (
+                                <RentalCard 
+                                key={rental.id} 
+                                rental={rental}
+                                vehicle={vehicles.find(v => v.id === rental.vehicleId)}
+                                client={clients.find(c => c.id === rental.clientId)}
+                                driver={driver}
+                                affiliate={affiliate}
+                                contraventions={contraventions}
+                                updateRentalStatus={updateRentalStatus}
+                                deleteRental={deleteRental}
+                                onAddPayment={() => handleOpenPaymentModal(rental)}
+                                onViewContraventions={handleViewContraventions}
+                                />
+                            );
+                          })}
+                        </div>
+                        {rentals.length === 0 && (
+                          <div className="text-center py-16 bg-white rounded-lg shadow-md">
+                            <CalendarIcon className="w-16 h-16 mx-auto text-gray-300" />
+                            <h3 className="mt-4 text-lg font-medium text-gray-800">Aucune location trouvée</h3>
+                            <p className="mt-1 text-sm text-gray-500">Commencez par créer une nouvelle location.</p>
+                          </div>
+                        )}
+                        {rentals.length > 0 && filteredRentals.length === 0 && (
+                          <div className="text-center py-16 bg-white rounded-lg shadow-md col-span-full">
+                            <SearchIcon className="w-16 h-16 mx-auto text-gray-300" />
+                            <h3 className="mt-4 text-lg font-medium text-gray-800">Aucune location ne correspond à votre filtre</h3>
+                            <p className="mt-1 text-sm text-gray-500">Essayez de sélectionner un autre statut ou client.</p>
+                          </div>
+                        )}
+                    </>
+                );
+            case 'drivers':
+                return <DriverManagement drivers={drivers} addDriver={addDriver} deleteDriver={deleteDriver} updateDriverAvailability={updateDriverAvailability} />;
+            case 'partners':
+                return <AffiliateManagement affiliates={affiliates} addAffiliate={addAffiliate} deleteAffiliate={deleteAffiliate} />;
+            case 'contraventions':
+                return <ContraventionManagement contraventions={contraventions} vehicles={vehicles} rentals={rentals} clients={clients} addContravention={addContravention} updateContraventionStatus={updateContraventionStatus} deleteContravention={deleteContravention} />;
+            default:
+                return null;
+        }
+    };
+    
+    const TabButton: React.FC<{tab: Tab, label: string, icon: React.ReactNode}> = ({ tab, label, icon }) => (
+        <button
+            onClick={() => setActiveTab(tab)}
+            className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${activeTab === tab ? 'bg-red-600 text-white shadow' : 'text-gray-600 hover:bg-gray-200'}`}
+        >
+            {icon}
+            <span className="ml-2">{label}</span>
+        </button>
+    );
+
     return (
       <div className="p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Gestion des Locations</h1>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center px-4 py-2 text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-colors"
-          >
-            <PlusIcon className="w-5 h-5 mr-2"/>
-            Nouvelle Location
-          </button>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-4xl font-bold text-gray-800">Gestion des Locations & Opérations</h1>
+           {activeTab === 'rentals' && <button onClick={() => setIsAddModalOpen(true)} className="flex items-center px-4 py-2 text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-colors"><PlusIcon className="w-5 h-5 mr-2"/>Nouvelle Location</button>}
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {sortedRentals.map(rental => {
-                const vehicle = vehicles.find(v => v.id === rental.vehicleId);
-                const client = clients.find(c => c.id === rental.clientId);
-                const driver = drivers.find(d => d.id === rental.driverId);
-                return <RentalCard key={rental.id} rental={rental} vehicle={vehicle} client={client} driver={driver} completeRental={completeRental} addPaymentToRental={addPaymentToRental} />
-            })}
+
+        <div className="mb-8 border-b border-gray-200">
+            <nav className="flex space-x-2" aria-label="Tabs">
+               <TabButton tab="rentals" label="Locations" icon={<CalendarIcon className="w-5 h-5"/>} />
+               <TabButton tab="drivers" label="Chauffeurs" icon={<SteeringWheelIcon className="w-5 h-5"/>} />
+               <TabButton tab="partners" label="Partenaires" icon={<BriefcaseIcon className="w-5 h-5"/>} />
+               <TabButton tab="contraventions" label="Contraventions" icon={<ExclamationShieldIcon className="w-5 h-5"/>} />
+            </nav>
         </div>
-        {rentals.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-lg shadow-md">
-            <CalendarIcon className="w-16 h-16 mx-auto text-gray-300" />
-            <h3 className="mt-4 text-lg font-medium text-gray-800">Aucune location trouvée</h3>
-            <p className="mt-1 text-sm text-gray-500">Créez une nouvelle location pour commencer.</p>
-          </div>
+        
+        <div className="mt-8">
+            {renderTabContent()}
+        </div>
+
+        <AddRentalModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} vehicles={vehicles} clients={clients} drivers={drivers} affiliates={affiliates} addRental={addRental} />
+        {selectedRental && <AddPaymentModal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} onAddPayment={handleAddPayment} balanceDue={selectedRental.balanceDue}/>}
+        {selectedRentalForContraventions && (
+            <ContraventionDetailModal 
+                isOpen={isContraventionModalOpen} 
+                onClose={() => setIsContraventionModalOpen(false)}
+                rental={selectedRentalForContraventions}
+                vehicle={vehicles.find(v => v.id === selectedRentalForContraventions.vehicleId)}
+                client={clients.find(c => c.id === selectedRentalForContraventions.clientId)}
+                contraventions={contraventions}
+            />
         )}
-        <AddRentalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} vehicles={vehicles} clients={clients} drivers={drivers} addRental={addRental} />
       </div>
     );
 };

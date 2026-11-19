@@ -21,3 +21,4 @@ Les demandes d'Alexandre dans l'ordre, et ce qui a été fait. Utile pour compre
 | 6 nov. | Rubrique Recommandations (performance, problèmes, objectifs, alternatives) | Règles automatiques + analyse Claude, réservée à la direction |
 | 6 nov. | Recommandations dans le rapport PDF | Ajoutées (tableaux par thème + dernières analyses) |
 | 19 nov. | Tout transférer dans Claude Code | Ce dépôt : application, documentation, CLAUDE.md, logo, données de référence, tests |
+| 19 nov. | Passer à Next.js + Supabase pour que des responsables testent ; accès simples, sans nom de domaine | « Petit test » : Accueil, Fidèles, Bergers, ADNH, Administration ; approche C (tables simples + église + droits en table) ; connexion email + mot de passe, comptes créés par l'admin ; berger : crée et rattache ses brebis (noms seulement pour les fidèles sans berger) ; données fictives ; guide `docs/mise-en-ligne.md` |

@@ -9,6 +9,7 @@ Porteur du projet : Alexandre (DG de Carmixt Mobility, designer graphique). Il t
 
 - **v1 actuelle** : une seule église (EMCV, Abidjan). Le modèle doit rester extensible à plusieurs assemblées et pays (ministère international) sans réécriture.
 - **Forme actuelle** : une application web d'une seule page, `app/index.html` (~1 840 lignes, HTML + CSS + JavaScript sans framework), publiée comme artefact claude.ai.
+- **Version de test Next.js + Supabase** (« petit test », nov. 2026) : `web/` + `supabase/`. Menus Accueil, Fidèles, Bergers, ADNH, Administration ; connexion email + mot de passe ; droits appliqués par la base ; données fictives. Conception : `docs/superpowers/specs/2026-11-19-nextjs-supabase-petit-test-design.md` ; mise en ligne : `docs/mise-en-ligne.md`.
 - **Cible de production** : Next.js (TypeScript) + Supabase (PostgreSQL avec RLS), connexion par téléphone +225 et code SMS. Voir `docs/cahier-de-conception.md`.
 
 ## Préférences du porteur de projet (à respecter)
@@ -54,6 +55,13 @@ brand/canevas-logo/             Sources du canevas de logo (2 concepts + déclin
 data/seed/*.json                Données de référence (classes, départements, 12 GC, églises) — aucune donnée personnelle
 tests/smoke.mjs                 Rend chaque écran pour chaque rôle avec des données d'exemple (node)
 tests/captures.mjs              Captures d'écran ordinateur + téléphone (Playwright)
+web/                            Version de test Next.js (voir web/README.md)
+supabase/migrations/            Schéma, fonctions et règles d'accès (RLS) de la version de test
+supabase/seed.sql               Données FICTIVES de test (généré par scripts/seed.mjs)
+scripts/creer-admin.mjs         Crée le premier compte administrateur
+tests/db/                       Tests des droits contre la base locale (vitest + pg)
+tests/e2e/parcours.spec.mjs     Parcours complet : admin, création d'un berger, périmètre, API directe
+docs/mise-en-ligne.md           Guide pas à pas : Supabase + Vercel
 ```
 
 ## Architecture de `app/index.html`
@@ -107,6 +115,16 @@ Détail complet : `docs/cahier-de-conception.md`.
 
 ## Sécurité : ce qui est vraiment protégé
 
+### Version de test Next.js + Supabase (`web/`, `supabase/`)
+
+- **Tout est appliqué par la base** (RLS) : droits par rôle et par menu (table `role_menu`, fonction `peut()`), périmètre du berger (`mon_berger()`), limite de 15 brebis (déclencheur), un administrateur ne peut pas se retirer son propre accès.
+- Les actions sensibles passent par des fonctions SQL qui vérifient elles-mêmes les droits : `rattacher_brebis`, `creer_brebis`, `enregistrer_releve`, `valider_integration`, `fideles_sans_berger` (noms seulement).
+- La vue `annuaire` n'expose que des noms (jamais de contact) à tout compte actif.
+- La clé secrète Supabase ne sert qu'à créer les comptes, côté serveur, après vérification que l'appelant est administrateur.
+- Toute nouvelle table doit avoir la RLS activée et un test dans `tests/db/`.
+
+### Version artefact (`app/index.html`)
+
 - **Verrouillé au niveau des données** : seuls les administrateurs de l'artefact écrivent dans `roles` et `objectifs` ; chaque personne n'écrit que sa propre demande d'accès.
 - **Filtré seulement dans l'interface** : les menus par rôle et le périmètre des bergers/responsables. Toute personne qui a accès au lien peut techniquement lire les autres collections. C'est la limite principale de la version artefact ; la version Next.js + Supabase doit appliquer ces règles en RLS.
 - L'appartenance religieuse est une **donnée sensible** (loi ivoirienne n° 2013-450) : autorisation préalable de l'ARTCI avant la mise en production, attention au lieu d'hébergement.
@@ -120,6 +138,17 @@ npm test               # tests/smoke.mjs : chaque sous-menu, pour chaque rôle, 
 npm run captures       # tests/captures.mjs : captures dans tests/captures/
 ```
 
+Version de test Next.js + Supabase (Docker nécessaire pour la base locale) :
+
+```bash
+npx supabase start     # base locale (migrations + données fictives)
+npm run test:db        # droits par rôle, périmètre berger, fonctions SQL
+npm --prefix web run test
+npm run test:e2e       # parcours complet dans un navigateur (lance next start sur le port 3100)
+```
+
+Après `test:e2e`, relancer `npx supabase db reset` pour retrouver les données fictives d'origine.
+
 Le PDF dépend de jsPDF chargé depuis cdnjs : sans réseau, la génération est désactivée proprement (message à l'écran).
 
 ## Points ouverts (à confirmer avec l'église)
@@ -132,6 +161,6 @@ Le PDF dépend de jsPDF chargé depuis cdnjs : sans réseau, la génération est
 
 ## Suite prévue
 
-1. Passage en production : Next.js + Supabase (RLS par rôle et par périmètre), connexion par SMS, PWA hors ligne.
+1. Passage en production : étendre la version de test aux autres menus (lot suivant : cellules, GC, agenda, jour de culte), connexion par SMS, PWA hors ligne.
 2. Paiements Mobile Money réels et envoi WhatsApp/SMS (aujourd'hui : messages à copier).
 3. Application mobile des fidèles (React Native / Expo).

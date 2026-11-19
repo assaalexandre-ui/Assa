@@ -9,6 +9,10 @@ Fidèles, nouveaux (ADNH), cellules, bergers, groupes de communion, formations, 
 - En ligne : https://claude.ai/artifact/ELRbehENjkRz9YHePCL1RX (privée ; partage depuis le menu Partager).
 - En local, pour regarder l'interface : ouvrir `app/index.html` dans un navigateur. Hors de claude.ai, les données ne se chargent pas (bandeau d'avertissement) ; l'interface et la navigation restent visibles.
 
+## Version de test Next.js + Supabase
+
+Une première version « production » (Accueil, Fidèles, Bergers, ADNH, Administration) se trouve dans `web/` et `supabase/`. Les droits y sont appliqués par la base de données. Pour la mettre en ligne, suivez `docs/mise-en-ligne.md` ; pour la lancer en local, `web/README.md`.
+
 ## Travailler sur le projet avec Claude Code
 
 ```bash
@@ -28,7 +32,9 @@ Claude Code lit automatiquement `CLAUDE.md`, qui décrit l'architecture, les con
 | `docs/sources/` | Notes manuscrites d'origine, Word original, anciennes versions |
 | `brand/` | Logo EMCV (SVG) et sources du canevas de logo |
 | `data/seed/` | Données de référence (classes, départements, GC, églises) |
-| `tests/` | Test de rendu de tous les écrans, captures d'écran |
+| `tests/` | Test de rendu de tous les écrans, captures d'écran ; tests de la base (`tests/db`) et parcours complet (`tests/e2e`) |
+| `web/` | Version de test Next.js |
+| `supabase/` | Base de la version de test : migrations, règles d'accès, données fictives |
 
 ## Tests
 

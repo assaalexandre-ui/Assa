@@ -6,9 +6,17 @@
   "type": "module",
   "scripts": {
     "test": "node tests/smoke.mjs",
-    "captures": "node tests/captures.mjs"
+    "captures": "node tests/captures.mjs",
+    "test:db": "vitest run --config vitest.config.ts",
+    "db:reset": "supabase db reset",
+    "test:e2e": "node tests/e2e/parcours.spec.mjs"
   },
   "devDependencies": {
-    "playwright": "1.48.2"
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.1",
+    "playwright": "1.48.2",
+    "supabase": "^3.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.1"
   }
 }

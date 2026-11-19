@@ -2,3 +2,11 @@ node_modules/
 tests/captures/
 .DS_Store
 *.log
+.env*
+!.env.example
+web/.next/
+web/next-env.d.ts
+*.tsbuildinfo
+test-results/
+playwright-report/
+.superpowers/

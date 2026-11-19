@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { messageErreur } from '@/lib/erreurs';
+import { messageCreationCompte, messageErreur } from '@/lib/erreurs';
 import { motDePasseProvisoire } from '@/lib/motdepasse';
 
 export type EtatCompte = { erreur?: string; motDePasse?: string; email?: string };
@@ -23,10 +23,14 @@ export async function creerUtilisateur(_: EtatCompte, f: FormData): Promise<Etat
   const manque = [!nom && 'Nom', !email && 'Email', !role && 'Rôle'].filter(Boolean);
   if (manque.length) return { erreur: 'Champ obligatoire : ' + manque.join(', ') + '.' };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email!)) return { erreur: "L'adresse email n'est pas valide." };
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return { erreur: messageCreationCompte(null, false) };
   const motDePasse = motDePasseProvisoire();
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.createUser({ email: email!, password: motDePasse, email_confirm: true });
-  if (error || !data.user) return { erreur: /already|exists|registered/i.test(error?.message ?? '') ? 'Un compte existe déjà avec cet email.' : 'Création du compte impossible, réessayez.' };
+  if (error || !data.user) {
+    console.error('creerUtilisateur: refus de Supabase', { status: error?.status, code: error?.code, message: error?.message });
+    return { erreur: messageCreationCompte(error, true) };
+  }
   const { error: e2 } = await admin.from('profil').insert({
     id: data.user.id, eglise_id: s.profil.eglise_id, nom, email, role_code: role, fonction: txt(f, 'fonction'),
     berger_id: role === 'berger' ? txt(f, 'berger_id') : null,
@@ -56,8 +60,12 @@ export async function reinitialiserMotDePasse(_: EtatCompte, f: FormData): Promi
   const supabase = await createClient();
   const { data: p } = await supabase.from('profil').select('email').eq('id', id).maybeSingle();
   if (!p) return { erreur: 'Compte introuvable.' };
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return { erreur: messageCreationCompte(null, false) };
   const motDePasse = motDePasseProvisoire();
   const { error } = await createAdminClient().auth.admin.updateUserById(id, { password: motDePasse });
-  if (error) return { erreur: 'Réinitialisation impossible, réessayez.' };
+  if (error) {
+    console.error('reinitialiserMotDePasse: refus de Supabase', { status: error.status, code: error.code, message: error.message });
+    return { erreur: messageCreationCompte(error, true).replace('Création du compte impossible', 'Réinitialisation impossible') };
+  }
   return { motDePasse, email: p.email ?? undefined };
 }

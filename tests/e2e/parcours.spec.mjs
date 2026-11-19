@@ -54,7 +54,7 @@ try {
 
   etape('connexion administrateur');
   await connexion('admin@e2e.local', mdpAdmin);
-  assert.deepEqual(await menus(), ['Accueil', 'Bergers', 'ADNH', 'Fidèles', 'Administration']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'GC', 'Programmation', 'Fidèles', 'Jour de culte', 'Administration']);
   await page.getByText('Version de test : données fictives').first().waitFor();
 
   etape("l'administrateur ouvre la fiche d'un berger et celle d'un nouveau (boutons de suppression)");
@@ -73,11 +73,30 @@ try {
   const mdpBerger = (await page.locator('.secret').textContent({ timeout: 10000 }))?.trim();
   assert.ok(mdpBerger && mdpBerger.length >= 12, 'mot de passe provisoire affiché');
 
+  etape("lot 2 : saisie d'un comptage au jour de culte");
+  await page.goto(BASE + '/culte/comptage?fiche=nouveau');
+  await page.fill('#f-hommes', '301'); await page.fill('#f-femmes', '402'); await page.fill('#f-enfants', '103');
+  await page.click('.modal button[type=submit]');
+  await page.waitForURL(BASE + '/culte/comptage');
+  await page.locator('main table tbody tr', { hasText: '806' }).first().waitFor();
+
+  etape("lot 2 : création d'un responsable de GC relié au GC 1");
+  await page.goto(BASE + '/admin/utilisateurs');
+  await page.fill('#f-nom', 'Resp GC E2E'); await page.fill('#f-email', 'respgc@e2e.local');
+  await page.selectOption('#f-role_code', 'resp_gc');
+  await page.selectOption('#f-gc_id', 'gc01');
+  await page.click('form#creer button[type=submit]');
+  const mdpGc = (await page.locator('.secret').textContent({ timeout: 10000 }))?.trim();
+
   etape('déconnexion puis connexion du berger');
   await page.click('aside .links button');
   await page.waitForURL(BASE + '/connexion');
   await connexion('berger@e2e.local', mdpBerger);
-  assert.deepEqual(await menus(), ['Accueil', 'Bergers', 'Fidèles']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'Programmation', 'Fidèles']);
+
+  etape('lot 2 : le berger ne voit que ses 2 cellules');
+  await page.goto(BASE + '/cellules/liste');
+  assert.equal(await page.locator('main table tbody tr').count(), 2);
 
   etape('le berger ne voit que ses 12 brebis');
   await page.goto(BASE + '/fideles/liste');
@@ -104,6 +123,19 @@ try {
   assert.equal(n.length, 0, 'aucun accès aux nouveaux');
   const { error } = await sb.from('profil').update({ role_code: 'admin' }).eq('email', 'berger@e2e.local');
   assert.ok(error, 'le berger ne peut pas se donner le rôle administrateur');
+
+  etape('lot 2 : le responsable de GC ne voit que son GC et ses membres');
+  await page.goto(BASE + '/');
+  await page.click('aside .links button');
+  await page.waitForURL(BASE + '/connexion');
+  await connexion('respgc@e2e.local', mdpGc);
+  assert.deepEqual(await menus(), ['Accueil', 'GC', 'Programmation', 'Fidèles']);
+  await page.goto(BASE + '/gc/groupes');
+  assert.equal(await page.locator('.card').count(), 1);
+  const sbGc = createClient(URL_SB, PUB, { auth: { persistSession: false } });
+  await sbGc.auth.signInWithPassword({ email: 'respgc@e2e.local', password: mdpGc });
+  const { data: fg } = await sbGc.from('fidele').select('gc_id');
+  assert.ok(fg.length > 0 && fg.every(x => x.gc_id === 'gc01'), 'seulement les membres du GC 1');
 
   console.log('\nParcours complet : OK');
 } finally {

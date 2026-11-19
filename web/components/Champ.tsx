@@ -1,6 +1,6 @@
 // Champ de formulaire au format de l'artefact (libellé, saisie, aide).
 type Base = { k: string; label: string; req?: boolean; full?: boolean; ro?: boolean; hint?: string; v?: string | number | null };
-type Props = Base & ({ type?: 'text' | 'date' | 'email' | 'tel' | 'number' | 'textarea'; options?: never } | { type: 'select'; options: (string | [string, string])[] });
+type Props = Base & ({ type?: 'text' | 'date' | 'time' | 'email' | 'tel' | 'number' | 'textarea'; options?: never } | { type: 'select'; options: (string | [string, string])[] });
 
 export function Champ({ k, label, req, full, ro, hint, v, type = 'text', options }: Props) {
   const id = 'f-' + k;

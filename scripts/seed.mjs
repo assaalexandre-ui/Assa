@@ -137,7 +137,7 @@ const activites = [
   ['Culte de Noël', 'Culte', 0, '2026-12-25', null], ['Culte de fin d\'année', 'Culte', 2, '2026-12-31', null],
 ];
 lot2.push('insert into evenement (id, eglise_id, titre, type, assemblee_id, date, date_fin, heure, lieu, responsable, description) values');
-lot2.push(activites.map(([t, ty, a, d, f], i) => `  (${[uuid('55000000', i + 1), EGLISE, t, ty, assemblees[a].id, d, f, ty === 'Veillée de prière' ? '21:00' : '08:30', assemblees[a].nom, `Pasteur ${choix(NOMS)}`, 'Activité fictive de test'].map(q).join(', ')})`).join(',\n') + ';', '');
+lot2.push(activites.map(([t, ty, a, d, f], i) => `  (${[uuid('55000000', i + 1), EGLISE, t, ty, assemblees[a].id, d, f, ty === 'Veillée de prière' ? '21:00' : '08:30', ['Temple principal', 'Salle polyvalente', 'Esplanade du temple'][i % 3], `Pasteur ${choix(NOMS)}`, 'Activité fictive de test'].map(q).join(', ')})`).join(',\n') + ';', '');
 
 // Jour de culte : 8 dimanches comptés, 4 postes d'accueil le dernier dimanche.
 const dimanches = ['2026-09-27', '2026-10-04', '2026-10-11', '2026-10-18', '2026-10-25', '2026-11-01', '2026-11-08', '2026-11-15'];

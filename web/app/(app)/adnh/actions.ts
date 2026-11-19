@@ -40,10 +40,10 @@ export async function orienter(_: Resultat, f: FormData): Promise<Resultat> {
   const supabase = await createClient();
   const id = txt(f, 'nouveau');
   const classe = txt(f, 'classe');
-  const v = { gc_id: txt(f, 'gc_id'), classe: classe ? Number(classe) : null, berger_id: txt(f, 'berger_id') };
+  const v = { gc_id: txt(f, 'gc_id'), classe: classe ? Number(classe) : null, berger_id: txt(f, 'berger_id'), cellule_id: txt(f, 'cellule_id') };
   if (f.get('intention') === 'integrer') {
     if (!v.gc_id || !v.classe) return { erreur: 'Choisissez le GC et la classe.' };
-    const { error } = await supabase.rpc('valider_integration', { p_nouveau: id, p_gc: v.gc_id, p_classe: v.classe, p_berger: v.berger_id });
+    const { error } = await supabase.rpc('valider_integration', { p_nouveau: id, p_gc: v.gc_id, p_classe: v.classe, p_berger: v.berger_id, p_cellule: v.cellule_id });
     if (error) return { erreur: messageErreur(error) };
   } else {
     const { error } = await supabase.from('nouveau').update(v).eq('id', id);

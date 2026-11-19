@@ -9,7 +9,7 @@ Porteur du projet : Alexandre (DG de Carmixt Mobility, designer graphique). Il t
 
 - **v1 actuelle** : une seule église (EMCV, Abidjan). Le modèle doit rester extensible à plusieurs assemblées et pays (ministère international) sans réécriture.
 - **Forme actuelle** : une application web d'une seule page, `app/index.html` (~1 840 lignes, HTML + CSS + JavaScript sans framework), publiée comme artefact claude.ai.
-- **Version de test Next.js + Supabase** (« petit test », nov. 2026) : `web/` + `supabase/`. Menus Accueil, Fidèles, Bergers, ADNH, Administration ; connexion email + mot de passe ; droits appliqués par la base ; données fictives. Conception : `docs/superpowers/specs/2026-11-19-nextjs-supabase-petit-test-design.md` ; mise en ligne : `docs/mise-en-ligne.md`.
+- **Version de test Next.js + Supabase** (« petit test », nov. 2026) : `web/` + `supabase/`. Lot 1 : Accueil, Fidèles, Bergers, ADNH, Administration. Lot 2 (20 nov.) : Cellules, GC, Programmation, Jour de culte. Connexion email + mot de passe ; droits appliqués par la base ; données fictives. Conception : `docs/superpowers/specs/2026-11-19-nextjs-supabase-petit-test-design.md` ; mise en ligne : `docs/mise-en-ligne.md`.
 - **Cible de production** : Next.js (TypeScript) + Supabase (PostgreSQL avec RLS), connexion par téléphone +225 et code SMS. Voir `docs/cahier-de-conception.md`.
 
 ## Préférences du porteur de projet (à respecter)
@@ -22,6 +22,8 @@ Porteur du projet : Alexandre (DG de Carmixt Mobility, designer graphique). Il t
 ## Où est l'application en ligne
 
 - **Version de test Next.js** : https://emcv-test.vercel.app (Vercel, projet `emcv-test`, dossier `web`, serveur à Paris). Base Supabase `smbhlxhspfhdwgdtueee` (Europe). Chaque envoi sur `main` redéploie le site.
+- Mise à jour d'une base en ligne : coller dans l'éditeur SQL le fichier `supabase/mise-a-jour-lotN.sql` du lot (migration + données fictives du lot), **avant** de fusionner le code du lot dans `main` (le nouveau code lit les nouvelles colonnes).
+- Les listes simples des lots 2+ sont déclarées dans `web/lib/entites.ts` (champs, menu) et enregistrées par `web/app/(app)/fiches/actions.ts` ; les droits restent vérifiés par la base.
 - Après toute modification de `supabase/migrations/` ou `supabase/seed.sql`, lancer `npm run sql:installation` pour régénérer `supabase/installation-complete.sql` (installation par l'éditeur SQL de Supabase). Une nouvelle migration sur une base déjà en ligne se colle seule dans l'éditeur SQL.
 
 - Artefact claude.ai (privé, propriétaire Alexandre) : https://claude.ai/artifact/ELRbehENjkRz9YHePCL1RX
@@ -165,6 +167,6 @@ Le PDF dépend de jsPDF chargé depuis cdnjs : sans réseau, la génération est
 
 ## Suite prévue
 
-1. Passage en production : étendre la version de test aux autres menus (lot suivant : cellules, GC, agenda, jour de culte), connexion par SMS, PWA hors ligne.
+1. Passage en production : étendre la version de test aux autres menus, par lots de 4 (lot 2 fait : cellules, GC, programmation, jour de culte), connexion par SMS, PWA hors ligne.
 2. Paiements Mobile Money réels et envoi WhatsApp/SMS (aujourd'hui : messages à copier).
 3. Application mobile des fidèles (React Native / Expo).

@@ -15,7 +15,7 @@ export async function lireFiche(f: FormData) {
   return {
     nom: txt(f, 'nom'), prenoms: txt(f, 'prenoms'), sexe: txt(f, 'sexe'), date_naissance: txt(f, 'date_naissance'),
     telephone: txt(f, 'telephone') ? phone(txt(f, 'telephone')) : null, commune: txt(f, 'commune'), quartier: txt(f, 'quartier'),
-    statut: txt(f, 'statut') ?? 'Membre', gc_id: txt(f, 'gc_id'), classe: classe ? Number(classe) : null, notes: txt(f, 'notes'),
+    statut: txt(f, 'statut') ?? 'Membre', gc_id: txt(f, 'gc_id'), cellule_id: txt(f, 'cellule_id'), classe: classe ? Number(classe) : null, notes: txt(f, 'notes'),
   };
 }
 

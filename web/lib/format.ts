@@ -44,3 +44,8 @@ export const weekLabel = (wk: string) => 'semaine ' + Number(wk.split('-W')[1]);
 export function fullName(f: Nom): string {
   return f ? [f.nom, f.prenoms].filter(Boolean).join(' ') || '—' : '—';
 }
+
+/** Montant en FCFA entiers : « 1 250 000 F ». */
+export function money(n: number | string | null | undefined): string {
+  return Math.round(Number(n) || 0).toLocaleString('fr-FR').replace(/[  ]/g, ' ') + ' F';
+}

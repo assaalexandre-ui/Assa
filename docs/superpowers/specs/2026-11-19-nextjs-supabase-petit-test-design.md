@@ -89,6 +89,8 @@ Le champ « cellule » de l'artefact (fiche fidèle, intégration ADNH) n'existe
 - Lecture : la fiche appartient à mon église **et** mon rôle a au moins `r` sur le menu concerné.
 - Écriture : idem avec `w`.
 - Périmètre berger : un compte de rôle « berger » relié à une fiche ne voit et ne modifie que sa fiche, ses brebis (`fidele.berger_id`), ses relevés d'absence. Sans fiche reliée, il ne voit aucune brebis.
+- **Ce que le berger fait sur ses brebis** (décidé par Alexandre, comme dans l'artefact) : depuis sa fiche, il peut créer une nouvelle brebis (elle lui est rattachée d'office), rattacher un fidèle qui n'a pas encore de berger, et modifier toute la fiche de ses brebis. Pour les fidèles sans berger, il ne voit que l'identifiant et le nom, jamais le contact ni le reste de la fiche. Ces actions passent par des fonctions SQL dédiées qui vérifient le rôle, le rattachement et la limite de 15 ; il ne peut ni détacher ni rattacher une brebis d'un autre berger.
+- Qui change le berger d'un fidèle : tout rôle qui a `w` sur Fidèles (formulaire de la fiche) ou `w` sur Bergers (fiche du berger), comme dans l'artefact.
 - `role`, `role_menu`, `profil` (sauf son propre nom) : écriture réservée à l'administrateur.
 - Limite de 15 brebis par berger vérifiée par la base (déclencheur), pas seulement par l'interface.
 - L'intégration d'un nouveau (création de la fiche fidèle + mise à jour du nouveau) se fait en une seule transaction, via une fonction SQL qui respecte les droits de l'appelant.

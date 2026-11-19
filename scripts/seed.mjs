@@ -147,9 +147,63 @@ const postes = [['Entrée principale', null], ['Parking', 64], ['Accueil des nou
 lot2.push('insert into poste_accueil (id, eglise_id, date, poste, agent, contact, places) values');
 lot2.push(postes.map(([p, pl], i) => `  (${[uuid('57000000', i + 1), EGLISE, '2026-11-15', p, `${choix(NOMS)} ${choix(PRENOMS)[0]}`, telephone(), pl].map(q).join(', ')})`).join(',\n') + ';', '');
 
-writeFileSync(out, [...lignes, ...lot2].join('\n'));
+// ===================== Lot 3 : formations, départements, réunions, organigramme =====================
+const lot3 = ['-- Données FICTIVES du lot 3 (formations, départements, réunions, organigramme).', ''];
+const nomPersonne = () => `${choix(NOMS)} ${choix(PRENOMS)[0]}`;
+
+// 3 sessions : classe 1 en cours, classe 2 à venir, classe 3 terminée ; 5 inscrits chacune.
+const sessions = [[1, '2026-09-07', '2026-12-13'], [2, '2027-01-11', '2027-04-18'], [3, '2026-03-02', '2026-06-14']]
+  .map(([classe, d, f], i) => ({ id: uuid('60000000', i + 1), classe, d, f, formateur: `Formateur ${choix(NOMS)}` }));
+lot3.push('insert into session_formation (id, eglise_id, classe, date_debut, date_fin, formateur, lieu) values');
+lot3.push(sessions.map(x => `  (${[x.id, EGLISE, x.classe, x.d, x.f, x.formateur, 'Salle de formation'].map(q).join(', ')})`).join(',\n') + ';', '');
+const inscrits = [];
+sessions.forEach((x, k) => fideles.filter(f => f.classe === x.classe).slice(0, 5).forEach((f, i) =>
+  inscrits.push([uuid('61000000', inscrits.length + 1), x.id, f.id, Math.floor(hasard() * 3), k === 2 && i < 4])));
+while (inscrits.length < 15) { const x = sessions[inscrits.length % 3]; const f = fideles[inscrits.length]; if (!inscrits.some(i => i[1] === x.id && i[2] === f.id)) inscrits.push([uuid('61000000', inscrits.length + 1), x.id, f.id, 0, false]); }
+lot3.push('insert into inscription_formation (id, session_id, fidele_id, absences, valide) values');
+lot3.push(inscrits.map(i => `  (${i.map(v => typeof v === 'boolean' ? String(v) : q(v)).join(', ')})`).join(',\n') + ';', '');
+
+// Départements : responsable, contact, jour et quelques membres fictifs.
+const JOURS_DEP = ['Mardi soir', 'Jeudi soir', 'Samedi matin'];
+for (let i = 1; i <= 12; i++) {
+  const membres = Array.from({ length: 2 + Math.floor(hasard() * 4) }, nomPersonne);
+  lot3.push(`update departement set responsable = ${q(nomPersonne())}, contact = ${q(telephone())}, jour = ${q(choix(JOURS_DEP))}, membres = array[${membres.map(q).join(', ')}] where id = ${q('d' + pad(i))};`);
+}
+lot3.push('');
+const creneaux = [['2026-11-22', 'd01', 'Entrée principale'], ['2026-11-22', 'd04', 'Caméra 1'], ['2026-11-22', 'd05', 'Console son'], ['2026-11-29', 'd01', 'Placement'], ['2026-11-29', 'd07', 'Chant'], ['2026-11-29', 'd08', 'Classe des 6-9 ans']];
+lot3.push('insert into planning_service (id, eglise_id, date, activite, departement_id, poste, personne, contact, confirme) values');
+lot3.push(creneaux.map(([d, dep, poste], i) => `  (${[uuid('62000000', i + 1), EGLISE, d, 'Culte du dimanche', dep, poste, nomPersonne(), telephone()].map(q).join(', ')}, ${i % 3 !== 2})`).join(',\n') + ';', '');
+const rapportsDep = [['d04', '2026-10', 'Validé'], ['d04', '2026-11', 'Soumis'], ['d07', '2026-11', 'Soumis'], ['d08', '2026-10', 'À revoir']];
+lot3.push('insert into rapport_departement (id, eglise_id, departement_id, periode, activites, resultats, difficultes, effectif, statut) values');
+lot3.push(rapportsDep.map(([dep, per, st], i) => `  (${[uuid('63000000', i + 1), EGLISE, dep, per, 'Service assuré à chaque culte du mois.', 'Équipe au complet trois dimanches sur quatre.', 'Besoin de deux volontaires supplémentaires.', 4 + Math.floor(hasard() * 8), st].map(q).join(', ')})`).join(',\n') + ';', '');
+
+// Réunions et tâches du conseil.
+const reunions = [
+  ['2026-09-08', 'Conseil', 'Rentrée des cellules', 'Calendrier de rentrée\nRépartition des bergers', 'Rentrée des cellules le 6 septembre'],
+  ['2026-10-13', 'Responsables', 'Préparation de la convention 2027', 'Lieu et budget\nTransport des participants', 'Réserver la salle avant fin novembre\nFrais d\'inscription fixés à 5 000 FCFA'],
+  ['2026-11-10', 'Conseil', 'Budget 2027', 'Prévisions de dépenses\nTravaux du temple', 'Adopter le budget en décembre'],
+  ['2026-11-17', 'Pasteurs', 'Suivi des nouveaux', 'Taux d\'intégration\nAppels non faits', 'Appeler chaque nouveau dans la semaine'],
+].map(([d, inst, obj, disc, dec], i) => ({ id: uuid('64000000', i + 1), d, inst, obj, disc, dec }));
+lot3.push('insert into reunion (id, eglise_id, date, instance, assemblee_id, lieu, objet, presents, discussions, decisions) values');
+lot3.push(reunions.map(r => `  (${[r.id, EGLISE, r.d, r.inst, assemblees[0].id, 'Bureau pastoral', r.obj, 'Membres du conseil (fictifs)', r.disc, r.dec].map(q).join(', ')})`).join(',\n') + ';', '');
+const taches = [
+  ['Réserver la salle de la convention', '2026-11-30', 'En cours', 1], ['Publier les frais d\'inscription', '2026-11-15', 'À faire', 1],
+  ['Préparer le projet de budget', '2026-12-05', 'En cours', 2], ['Obtenir les devis des travaux', '2026-11-12', 'À faire', 2],
+  ['Envoyer la liste des nouveaux aux bergers', '2026-11-20', 'Terminée', 3], ['Former deux nouveaux bergers', '2026-10-30', 'Terminée', 0],
+];
+lot3.push('insert into tache (id, eglise_id, titre, responsable, echeance, statut, reunion_id) values');
+lot3.push(taches.map(([t, e, st, r], i) => `  (${[uuid('65000000', i + 1), EGLISE, t, nomPersonne(), e, st, reunions[r].id].map(q).join(', ')})`).join(',\n') + ';', '');
+
+// Organigramme : 8 responsables fictifs.
+const resp = [['Pasteur principal', 'Direction'], ['Pasteur adjoint', 'Pasteurs'], ['Pasteur des jeunes', 'Pasteurs'], ['Ancien', 'Conseil'], ['Ancien', 'Conseil'], ['Secrétaire du conseil', 'Conseil'], ['Responsable de la louange', 'Responsables de ministère'], ['Responsable de l\'ADNH', 'Responsables de ministère']];
+lot3.push('insert into responsable (id, eglise_id, fonction, nom, contact, whatsapp, niveau, ordre) values');
+lot3.push(resp.map(([f, niv], i) => { const t = telephone(); return `  (${[uuid('66000000', i + 1), EGLISE, f, nomPersonne(), t, t, niv, i + 1].map(q).join(', ')})`; }).join(',\n') + ';', '');
+
+writeFileSync(out, [...lignes, ...lot2, ...lot3].join('\n'));
 // Fichier de mise à jour d'une base en ligne déjà installée avec le lot 1 : migration du lot 2 + ses données fictives.
 const dossier = fileURLToPath(new URL('../supabase/', import.meta.url));
 const migration = readFileSync(dossier + 'migrations/20261120000001_lot2.sql', 'utf8');
 writeFileSync(dossier + 'mise-a-jour-lot2.sql', "-- Mise à jour d'une base déjà installée (lot 1) vers le lot 2. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration + '\n\n' + lot2.join('\n'));
+const migration3 = readFileSync(dossier + 'migrations/20261121000001_lot3.sql', 'utf8');
+writeFileSync(dossier + 'mise-a-jour-lot3.sql', "-- Mise à jour d'une base déjà au lot 2 vers le lot 3. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration3 + '\n\n' + lot3.join('\n'));
 console.log(`seed.sql écrit : ${bergers.length} bergers, ${fideles.length} fidèles, ${nouveaux.length} nouveaux, ${appels.length} appels, ${cellules.length} cellules, ${activites.length} activités.`);

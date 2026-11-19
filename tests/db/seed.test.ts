@@ -41,4 +41,15 @@ describe('données fictives (supabase/seed.sql)', () => {
   it('une brebis est toujours dans une cellule de son berger', () => tx(async db => {
     expect(n(await db.q('select count(*) from fidele f join cellule c on c.id = f.cellule_id where c.berger_id is distinct from f.berger_id'))).toBe(0);
   }));
+
+  it('contient les données fictives du lot 3', () => tx(async db => {
+    expect(n(await db.q('select count(*) from session_formation'))).toBe(3);
+    expect(n(await db.q('select count(*) from inscription_formation'))).toBe(15);
+    expect(n(await db.q(`select count(*) from departement where responsable is not null`))).toBe(12);
+    expect(n(await db.q('select count(*) from planning_service'))).toBe(6);
+    expect(n(await db.q('select count(*) from rapport_departement'))).toBe(4);
+    expect(n(await db.q('select count(*) from reunion'))).toBe(4);
+    expect(n(await db.q('select count(*) from tache'))).toBe(6);
+    expect(n(await db.q('select count(*) from responsable'))).toBe(8);
+  }));
 });

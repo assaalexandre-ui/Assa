@@ -54,7 +54,7 @@ try {
 
   etape('connexion administrateur');
   await connexion('admin@e2e.local', mdpAdmin);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Organigramme', 'Fidèles', 'Jour de culte', 'Administration']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Organigramme', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Administration']);
   await page.getByText('Version de test : données fictives').first().waitFor();
 
   etape("l'administrateur ouvre la fiche d'un berger et celle d'un nouveau (boutons de suppression)");
@@ -79,6 +79,14 @@ try {
   await page.click('.modal button[type=submit]');
   await page.waitForURL(BASE + '/culte/comptage');
   await page.locator('main table tbody tr', { hasText: '806' }).first().waitFor();
+
+  etape('lot 4 : dépôt d’une requête de prière confidentielle');
+  await page.goto(BASE + '/priere/requetes?fiche=nouveau');
+  await page.selectOption('#f-visibilite', 'Confidentielle');
+  await page.fill('#f-sujet', 'Sujet confidentiel E2E');
+  await page.click('.modal button[type=submit]');
+  await page.waitForURL(BASE + '/priere/requetes');
+  await page.getByText('Sujet confidentiel E2E').first().waitFor();
 
   etape('lot 3 : marquer une tâche du conseil comme faite');
   await page.goto(BASE + '/reunions/taches?f=nonfaites');
@@ -106,7 +114,7 @@ try {
   await page.click('aside .links button');
   await page.waitForURL(BASE + '/connexion');
   await connexion('berger@e2e.local', mdpBerger);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'Programmation', 'Organigramme', 'Fidèles']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'Programmation', 'Organigramme', 'Fidèles', 'Requêtes de prière']);
 
   etape('lot 2 : le berger ne voit que ses 2 cellules');
   await page.goto(BASE + '/cellules/liste');
@@ -133,6 +141,8 @@ try {
   const { data: f } = await sb.from('fidele').select('id, berger_id');
   assert.equal(f.length, 13);
   assert.equal(new Set(f.map(x => x.berger_id)).size, 1);
+  const { data: pr } = await sb.from('priere').select('sujet');
+  assert.ok(!pr.some(x => x.sujet === 'Sujet confidentiel E2E'), 'le berger ne lit pas la requête confidentielle');
   const { data: n } = await sb.from('nouveau').select('id');
   assert.equal(n.length, 0, 'aucun accès aux nouveaux');
   const { error } = await sb.from('profil').update({ role_code: 'admin' }).eq('email', 'berger@e2e.local');

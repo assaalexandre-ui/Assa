@@ -4,8 +4,8 @@ import { phone } from './format';
 export type TypeChamp = 'text' | 'date' | 'time' | 'month' | 'tel' | 'number' | 'textarea' | 'select' | 'check';
 /** options : liste fixe, ou clé d'une liste dynamique fournie par la page (bergers, cellules, assemblées). */
 export type ChampDef = { k: string; label: string; type?: TypeChamp; req?: boolean; full?: boolean; options?: string[]; dyn?: Dyn; hint?: string };
-export type Dyn = 'bergers' | 'cellules' | 'assemblees' | 'classes' | 'departements' | 'reunions';
-export type EntiteDef = { table: string; menu: 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme'; nouveau: string; champs: ChampDef[] };
+export type Dyn = 'bergers' | 'cellules' | 'assemblees' | 'classes' | 'departements' | 'reunions' | 'evenements';
+export type EntiteDef = { table: string; menu: 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements'; nouveau: string; champs: ChampDef[] };
 
 export const COMMUNES = ['Abobo', 'Adjamé', 'Anyama', 'Attécoubé', 'Bingerville', 'Cocody', 'Koumassi', 'Marcory', 'Plateau', 'Port-Bouët', 'Songon', 'Treichville', 'Yopougon', 'Autre'];
 export const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -15,6 +15,12 @@ export const INSTANCES = ['Conseil', 'Pasteurs', 'Responsables', 'Assemblée gé
 export const STATUTS_TACHE = ['À faire', 'En cours', 'Terminée'];
 export const STATUTS_RAPPORT = ['Soumis', 'Validé', 'À revoir'];
 export const NIVEAUX = ['Direction', 'Pasteurs', 'Conseil', 'Responsables de ministère'];
+export const VISIBILITES = ['Confidentielle', "Équipe d'intercession", 'Publique'];
+export const SUIVIS_PRIERE = ['Reçue', 'En prière', 'Exaucée'];
+export const AGES = ['0–3 ans', '4–6 ans', '7–9 ans', '10–12 ans', '13 ans et plus'];
+export const TYPES_RDV = ['Bureau', 'Visite à domicile', "Visite à l'hôpital", 'Appel'];
+export const STATUTS_RDV = ['Prévu', 'Fait', 'Reporté', 'Annulé'];
+export const CANAUX = ['Espèces', 'Orange Money', 'MTN MoMo', 'Moov Money', 'Wave', 'Virement', 'Chèque'];
 export const POSTES = ['Entrée principale', 'Placement – nef', 'Placement – balcon', 'Parking', 'Accueil des nouveaux', 'Salle des enfants', 'Sécurité'];
 
 export const ENTITES = {
@@ -71,6 +77,22 @@ export const ENTITES = {
   responsable: { table: 'responsable', menu: 'organigramme', nouveau: 'Ajouter un responsable', champs: [
     { k: 'fonction', label: 'Fonction', req: true }, { k: 'nom', label: 'Nom et prénoms', req: true }, { k: 'contact', label: 'Téléphone', type: 'tel' },
     { k: 'whatsapp', label: 'WhatsApp', type: 'tel' }, { k: 'niveau', label: 'Niveau', type: 'select', options: NIVEAUX }, { k: 'ordre', label: "Ordre d'affichage", type: 'number' }] },
+  priere: { table: 'priere', menu: 'priere', nouveau: 'Déposer une requête', champs: [
+    { k: 'date', label: 'Date', type: 'date', req: true }, { k: 'demandeur', label: 'Demandeur' }, { k: 'contact', label: 'Contact', type: 'tel' },
+    { k: 'visibilite', label: 'Visibilité', type: 'select', options: VISIBILITES, req: true }, { k: 'sujet', label: 'Sujet de prière', type: 'textarea', req: true },
+    { k: 'statut', label: 'Suivi', type: 'select', options: SUIVIS_PRIERE }, { k: 'temoignage', label: 'Témoignage', type: 'textarea' }] },
+  enfant: { table: 'enfant', menu: 'enfants', nouveau: 'Inscrire un enfant', champs: [
+    { k: 'nom', label: "Nom et prénoms de l'enfant", req: true }, { k: 'date_naissance', label: 'Date de naissance', type: 'date' },
+    { k: 'groupe', label: "Classe d'âge", type: 'select', options: AGES }, { k: 'parent', label: 'Parent ou tuteur', req: true }, { k: 'contact', label: 'Contact du parent', type: 'tel' },
+    { k: 'code', label: 'Code de récupération', hint: 'Remis au parent pour la sortie' }, { k: 'notes', label: 'Allergies ou remarques', type: 'textarea' }] },
+  rdv: { table: 'rdv', menu: 'rdv', nouveau: 'Nouveau rendez-vous', champs: [
+    { k: 'date', label: 'Date', type: 'date', req: true }, { k: 'heure', label: 'Heure', type: 'time' }, { k: 'personne', label: 'Fidèle ou famille', req: true },
+    { k: 'contact', label: 'Contact', type: 'tel' }, { k: 'type', label: 'Type', type: 'select', options: TYPES_RDV }, { k: 'pasteur', label: 'Pasteur' },
+    { k: 'motif', label: 'Motif', full: true }, { k: 'statut', label: 'Statut', type: 'select', options: STATUTS_RDV }, { k: 'notes', label: 'Notes pastorales', type: 'textarea' }] },
+  inscription_evenement: { table: 'inscription_evenement', menu: 'evenements', nouveau: 'Inscrire une personne', champs: [
+    { k: 'evenement_id', label: 'Événement', type: 'select', dyn: 'evenements', req: true, full: true }, { k: 'nom', label: 'Nom et prénoms', req: true },
+    { k: 'contact', label: 'Contact', type: 'tel' }, { k: 'montant', label: 'Montant payé (FCFA)', type: 'number' }, { k: 'canal', label: 'Moyen de paiement', type: 'select', options: CANAUX },
+    { k: 'car', label: 'Car / transport' }, { k: 'depart', label: 'Point de départ', type: 'select', options: COMMUNES }] },
 } satisfies Record<string, EntiteDef>;
 
 export type EntiteCle = keyof typeof ENTITES;

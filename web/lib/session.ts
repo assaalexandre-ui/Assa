@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from './supabase/server';
 import type { Acces, Droits, MenuId } from './menus';
 
-export type Profil = { id: string; eglise_id: string; nom: string; email: string | null; role_code: string; fonction: string | null; berger_id: string | null; gc_id: string | null; actif: boolean };
+export type Profil = { id: string; eglise_id: string; nom: string; email: string | null; role_code: string; fonction: string | null; berger_id: string | null; gc_id: string | null; departement_id: string | null; actif: boolean };
 export type Session = { userId: string; profil: Profil; roleLibelle: string; droits: Droits };
 
 /** Session courante (profil + droits par menu), ou null si personne n'est connecté ou si le compte est désactivé. */
@@ -12,7 +12,7 @@ export const getSession = cache(async (): Promise<Session | null> => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) return null;
-  const { data: profil } = await supabase.from('profil').select('id, eglise_id, nom, email, role_code, fonction, berger_id, gc_id, actif').eq('id', data.user.id).maybeSingle();
+  const { data: profil } = await supabase.from('profil').select('id, eglise_id, nom, email, role_code, fonction, berger_id, gc_id, departement_id, actif').eq('id', data.user.id).maybeSingle();
   if (!profil || !profil.actif) return null;
   const [{ data: rm }, { data: role }] = await Promise.all([
     supabase.from('role_menu').select('menu, acces').eq('role_code', profil.role_code),

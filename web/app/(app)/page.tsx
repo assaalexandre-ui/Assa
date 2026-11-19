@@ -32,18 +32,28 @@ export default async function Accueil() {
     const c = data?.[0];
     k.push(['Dernier culte', c ? (c.hommes ?? 0) + (c.femmes ?? 0) + (c.enfants ?? 0) : '—', c ? frDate(c.date) : 'aucun comptage']);
   }
+  let taches: { id: string; titre: string; responsable: string; echeance: string | null }[] = [];
+  if (d.reunions) {
+    const { data } = await supabase.from('tache').select('id, titre, responsable, echeance').neq('statut', 'Terminée').order('echeance', { nullsFirst: false });
+    taches = data ?? [];
+    k.push(['Tâches en retard', taches.filter(t => t.echeance && t.echeance < today()).length, 'conseil']);
+  }
+  if (d.formations) {
+    const { count } = await supabase.from('session_formation').select('id', { count: 'exact', head: true }).lte('date_debut', today()).gte('date_fin', today());
+    k.push(['Formations en cours', count ?? 0, '']);
+  }
   let activites: { id: string; titre: string; date: string; heure: string | null; lieu: string | null }[] = [];
   if (d.agenda) {
     const { data } = await supabase.from('evenement').select('id, titre, date, heure, lieu, date_fin').or(`date.gte.${today()},date_fin.gte.${today()}`).order('date').limit(6);
     activites = data ?? [];
   }
-  const metier = d.fideles || d.adnh || d.bergers || d.admin || d.cellules || d.gc || d.culte;
+  const metier = d.fideles || d.adnh || d.bergers || d.admin || d.cellules || d.gc || d.culte || d.formations || d.departements || d.reunions;
   return (
     <>
       <PageHead id="accueil" />
       {!metier && <div className="banner info">Bienvenue, {s.profil.nom.split(' ')[0]}. Votre accès : {s.roleLibelle}. Pour un accès de responsable, adressez-vous à l&apos;administration de l&apos;église.</div>}
       {k.length > 0 && <Kpis items={k} />}
-      {(d.adnh || d.agenda) && (
+      {(d.adnh || d.agenda || d.reunions) && (
         <div className="grid2">
           {d.agenda && (
             <Panel titre="Prochaines activités" droite={<Link className="link" href="/agenda/calendrier">Programmation</Link>}>
@@ -52,6 +62,15 @@ export default async function Accueil() {
                   <tbody>{activites.map(e => <tr key={e.id}><td>{frDate(e.date)}{e.heure ? ' · ' + e.heure : ''}</td><td><Link href={`/agenda/avenir?fiche=${e.id}`} style={{ textDecoration: 'none', fontWeight: 600 }}>{e.titre}</Link></td><td>{e.lieu || '—'}</td></tr>)}</tbody>
                 </table></div>
               ) : <Empty titre="Aucune activité programmée" texte="Le programme de l'église s'affichera ici." />}
+            </Panel>
+          )}
+          {d.reunions && (
+            <Panel titre="Tâches du conseil" droite={<Link className="link" href="/reunions/taches">Toutes les tâches</Link>}>
+              {taches.length ? (
+                <div className="tw"><table><thead><tr><th>Tâche</th><th>Responsable</th><th>Échéance</th></tr></thead>
+                  <tbody>{taches.slice(0, 6).map(t => <tr key={t.id}><td><Link href={`/reunions/taches?fiche=${t.id}`} style={{ textDecoration: 'none', fontWeight: 600 }}>{t.titre}</Link></td><td>{t.responsable}</td><td>{t.echeance && t.echeance < today() ? <span className="pill b">{frDate(t.echeance)}</span> : frDate(t.echeance)}</td></tr>)}</tbody>
+                </table></div>
+              ) : <Empty titre="Aucune tâche ouverte" texte="Les tâches confiées par le conseil apparaîtront ici." />}
             </Panel>
           )}
           {d.adnh && <Panel titre="Nouveaux à appeler" droite={<Link className="link" href="/adnh/appels">ADNH</Link>}>

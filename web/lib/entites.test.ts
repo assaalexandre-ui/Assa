@@ -18,4 +18,14 @@ describe('lireChamps', () => {
   it('refuse une date de fin avant la date de début', () => {
     expect(lireChamps(ENTITES.evenement, fd({ titre: 'Convention', type: 'Convention', date: '2026-12-10', date_fin: '2026-12-08' }))).toEqual({ ok: false, erreur: 'La date de fin doit suivre la date de début.' });
   });
+  it('lit une case à cocher et un mois (planning, rapport de département)', () => {
+    const r = lireChamps(ENTITES.planning_service, fd({ date: '2026-11-29', activite: 'Culte', departement_id: 'd04', confirme: 'on' }));
+    expect(r.ok && r.valeurs.confirme).toBe(true);
+    const r2 = lireChamps(ENTITES.planning_service, fd({ date: '2026-11-29', activite: 'Culte', departement_id: 'd04' }));
+    expect(r2.ok && r2.valeurs.confirme).toBe(false);
+    expect(lireChamps(ENTITES.rapport_departement, fd({ departement_id: 'd04', periode: '2026-11', statut: 'Soumis' })).ok).toBe(true);
+  });
+  it('refuse une session dont la fin précède le début', () => {
+    expect(lireChamps(ENTITES.session_formation, fd({ classe: '1', date_debut: '2026-12-01', date_fin: '2026-11-01' }))).toEqual({ ok: false, erreur: 'La date de fin doit suivre la date de début.' });
+  });
 });

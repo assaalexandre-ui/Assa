@@ -47,12 +47,12 @@ export async function tx<T>(fn: (db: Db) => Promise<T>): Promise<T> {
 
 export const EGLISE = '00000000-0000-0000-0000-000000000001';
 
-export const COMPTES = ['admin', 'pasteur', 'secretariat', 'berger1', 'berger2', 'bergerSansFiche', 'adnh', 'membre', 'desactive', 'respGc', 'tresorier'] as const;
+export const COMPTES = ['admin', 'pasteur', 'secretariat', 'berger1', 'berger2', 'bergerSansFiche', 'adnh', 'membre', 'desactive', 'respGc', 'tresorier', 'formateur', 'conseil', 'respDep'] as const;
 export type Comptes = Record<(typeof COMPTES)[number], string>;
 
 const ROLE_DE: Record<(typeof COMPTES)[number], string> = {
   admin: 'admin', pasteur: 'pasteur', secretariat: 'secretariat', berger1: 'berger', berger2: 'berger',
-  bergerSansFiche: 'berger', adnh: 'adnh', membre: 'membre', desactive: 'pasteur', respGc: 'resp_gc', tresorier: 'tresorier',
+  bergerSansFiche: 'berger', adnh: 'adnh', membre: 'membre', desactive: 'pasteur', respGc: 'resp_gc', tresorier: 'tresorier', formateur: 'formateur', conseil: 'conseil', respDep: 'resp_dep',
 };
 
 /** Crée un compte (auth.users + profil) par rôle de test et renvoie leurs identifiants. */
@@ -61,6 +61,12 @@ export async function fixtures(db: Db): Promise<Comptes> {
   await db.q(`do $$ begin
     if to_regclass('public.cellule') is not null then
       delete from rapport_cellule; delete from gc_absence; delete from gc_presence; delete from gc_passage; delete from evenement; delete from assemblee; delete from comptage; delete from poste_accueil;
+    end if;
+  end $$`);
+  await db.q(`do $$ begin
+    if to_regclass('public.reunion') is not null then
+      delete from tache; delete from reunion; delete from inscription_formation; delete from session_formation;
+      delete from planning_service; delete from rapport_departement; delete from responsable;
     end if;
   end $$`);
   await db.q('delete from appel; delete from nouveau; delete from absence; delete from releve_absence; delete from fidele; update profil set berger_id = null; delete from berger');

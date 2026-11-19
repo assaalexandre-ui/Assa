@@ -54,7 +54,7 @@ try {
 
   etape('connexion administrateur');
   await connexion('admin@e2e.local', mdpAdmin);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'GC', 'Programmation', 'Fidèles', 'Jour de culte', 'Administration']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Organigramme', 'Fidèles', 'Jour de culte', 'Administration']);
   await page.getByText('Version de test : données fictives').first().waitFor();
 
   etape("l'administrateur ouvre la fiche d'un berger et celle d'un nouveau (boutons de suppression)");
@@ -80,6 +80,20 @@ try {
   await page.waitForURL(BASE + '/culte/comptage');
   await page.locator('main table tbody tr', { hasText: '806' }).first().waitFor();
 
+  etape('lot 3 : marquer une tâche du conseil comme faite');
+  await page.goto(BASE + '/reunions/taches?f=nonfaites');
+  const avant = await page.locator('main table tbody tr').count();
+  await page.locator('main table tbody tr').first().getByRole('button', { name: 'Marquer fait' }).click();
+  await page.waitForFunction(n => document.querySelectorAll('main table tbody tr').length === n - 1, avant);
+
+  etape("lot 3 : création d'un responsable de département relié à « Médias et audiovisuel »");
+  await page.goto(BASE + '/admin/utilisateurs');
+  await page.fill('#f-nom', 'Resp Dép E2E'); await page.fill('#f-email', 'respdep@e2e.local');
+  await page.selectOption('#f-role_code', 'resp_dep');
+  await page.selectOption('#f-departement_id', 'd04');
+  await page.click('form#creer button[type=submit]');
+  const mdpDep = (await page.locator('.secret').textContent({ timeout: 10000 }))?.trim();
+
   etape("lot 2 : création d'un responsable de GC relié au GC 1");
   await page.goto(BASE + '/admin/utilisateurs');
   await page.fill('#f-nom', 'Resp GC E2E'); await page.fill('#f-email', 'respgc@e2e.local');
@@ -92,7 +106,7 @@ try {
   await page.click('aside .links button');
   await page.waitForURL(BASE + '/connexion');
   await connexion('berger@e2e.local', mdpBerger);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'Programmation', 'Fidèles']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'Programmation', 'Organigramme', 'Fidèles']);
 
   etape('lot 2 : le berger ne voit que ses 2 cellules');
   await page.goto(BASE + '/cellules/liste');
@@ -129,13 +143,24 @@ try {
   await page.click('aside .links button');
   await page.waitForURL(BASE + '/connexion');
   await connexion('respgc@e2e.local', mdpGc);
-  assert.deepEqual(await menus(), ['Accueil', 'GC', 'Programmation', 'Fidèles']);
+  assert.deepEqual(await menus(), ['Accueil', 'GC', 'Programmation', 'Organigramme', 'Fidèles']);
   await page.goto(BASE + '/gc/groupes');
   assert.equal(await page.locator('.card').count(), 1);
   const sbGc = createClient(URL_SB, PUB, { auth: { persistSession: false } });
   await sbGc.auth.signInWithPassword({ email: 'respgc@e2e.local', password: mdpGc });
   const { data: fg } = await sbGc.from('fidele').select('gc_id');
   assert.ok(fg.length > 0 && fg.every(x => x.gc_id === 'gc01'), 'seulement les membres du GC 1');
+
+  etape('lot 3 : le responsable de département ne voit que son département');
+  await page.goto(BASE + '/');
+  await page.click('aside .links button');
+  await page.waitForURL(BASE + '/connexion');
+  await connexion('respdep@e2e.local', mdpDep);
+  assert.deepEqual(await menus(), ['Accueil', 'Départements', 'Programmation', 'Organigramme']);
+  await page.goto(BASE + '/departements/services');
+  assert.equal(await page.locator('.card').count(), 1);
+  await page.goto(BASE + '/departements/autres');
+  assert.equal(await page.locator('.card').count(), 0);
 
   console.log('\nParcours complet : OK');
 } finally {

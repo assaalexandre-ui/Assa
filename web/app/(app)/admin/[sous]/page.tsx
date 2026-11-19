@@ -11,7 +11,7 @@ import { chargerRefs } from '@/lib/ref';
 import { MENUS } from '@/lib/menus';
 import { creerUtilisateur, modifierUtilisateur, reinitialiserMotDePasse } from '../actions';
 
-type Compte = { id: string; nom: string; email: string | null; role_code: string; fonction: string | null; berger_id: string | null; gc_id: string | null; actif: boolean };
+type Compte = { id: string; nom: string; email: string | null; role_code: string; fonction: string | null; berger_id: string | null; gc_id: string | null; departement_id: string | null; actif: boolean };
 
 export default async function Admin({ params, searchParams }: { params: Promise<{ sous: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
   const { sous } = await params;
@@ -44,7 +44,8 @@ export default async function Admin({ params, searchParams }: { params: Promise<
     );
   }
 
-  const [{ data: comptes }, refs] = await Promise.all([supabase.from('profil').select('id, nom, email, role_code, fonction, berger_id, gc_id, actif').order('nom'), chargerRefs()]);
+  const [{ data: comptes }, refs, { data: depsData }] = await Promise.all([supabase.from('profil').select('id, nom, email, role_code, fonction, berger_id, gc_id, departement_id, actif').order('nom'), chargerRefs(), supabase.from('departement').select('id, nom').order('ordre')]);
+  const optDeps = (depsData ?? []).map(d => [d.id, d.nom] as [string, string]);
   const liste = (comptes ?? []) as Compte[];
   const edit = sp.compte ? liste.find(c => c.id === sp.compte) : undefined;
   return (
@@ -60,6 +61,7 @@ export default async function Admin({ params, searchParams }: { params: Promise<
             <Champ k="fonction" label="Fonction dans l'église" />
             <Champ k="berger_id" label="Fiche de berger (pour un berger)" type="select" options={refs.bergers} />
             <Champ k="gc_id" label="GC (pour un responsable de GC)" type="select" options={refs.gc} />
+            <Champ k="departement_id" label="Département (pour un responsable de département)" type="select" options={optDeps} full />
           </FormCompte>
         </div>
       </Panel>
@@ -69,7 +71,7 @@ export default async function Admin({ params, searchParams }: { params: Promise<
             <tr key={c.id}>
               <td><LienFiche href={`/admin/utilisateurs?compte=${c.id}`}>{c.nom}</LienFiche>{c.id === s.userId && <> <Pill c="a">vous</Pill></>}</td>
               <td className="mono">{c.email ?? '—'}</td><td><Pill>{libRole(c.role_code)}</Pill></td><td>{c.fonction || '—'}</td>
-              <td>{c.berger_id ? 'Berger : ' + (refs.noms[c.berger_id] ?? '—') : c.gc_id ? 'GC : ' + (refs.gc.find(g => g[0] === c.gc_id)?.[1] ?? '—') : '—'}</td>
+              <td>{c.berger_id ? 'Berger : ' + (refs.noms[c.berger_id] ?? '—') : c.gc_id ? 'GC : ' + (refs.gc.find(g => g[0] === c.gc_id)?.[1] ?? '—') : c.departement_id ? optDeps.find(d => d[0] === c.departement_id)?.[1] ?? '—' : '—'}</td>
               <td>{c.actif ? <Pill c="g">Actif</Pill> : <Pill c="n">Désactivé</Pill>}</td>
             </tr>
           ))}</tbody></table></div>
@@ -83,6 +85,7 @@ export default async function Admin({ params, searchParams }: { params: Promise<
             <Champ k="fonction" label="Fonction dans l'église" v={edit.fonction} />
             <Champ k="berger_id" label="Fiche de berger (pour un berger)" type="select" options={refs.bergers} v={edit.berger_id} />
             <Champ k="gc_id" label="GC (pour un responsable de GC)" type="select" options={refs.gc} v={edit.gc_id} />
+            <Champ k="departement_id" label="Département (pour un responsable de département)" type="select" options={optDeps} v={edit.departement_id} full />
             <div className="field full"><label style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 500, color: 'var(--ink)' }}><input type="checkbox" name="actif" defaultChecked={edit.actif} style={{ width: 18, height: 18, minHeight: 0 }} /> Compte actif</label></div>
           </FormCompte>
           <FormCompte action={reinitialiserMotDePasse} className="" bouton="Générer un nouveau mot de passe" boutonClasse="btn sm">

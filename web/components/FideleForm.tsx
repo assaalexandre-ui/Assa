@@ -10,7 +10,7 @@ type Opt = [string, string];
 export type FicheFidele = Record<string, string | number | null>;
 
 export function FideleForm({ fiche, refs, ro, choixBerger, suppression, retour }: {
-  fiche: FicheFidele | null; refs: { gc: Opt[]; classes: Opt[]; bergers: Opt[]; communes: string[]; statuts: string[] };
+  fiche: FicheFidele | null; refs: { gc: Opt[]; classes: Opt[]; bergers: Opt[]; cellules: Opt[]; communes: string[]; statuts: string[] };
   ro: boolean; choixBerger: boolean; suppression: boolean; retour: string;
 }) {
   const [etat, action, enCours] = useActionState<Resultat, FormData>(enregistrerFidele, {});
@@ -32,6 +32,7 @@ export function FideleForm({ fiche, refs, ro, choixBerger, suppression, retour }
         {choixBerger
           ? <Champ k="berger_id" label="Berger" type="select" options={refs.bergers} v={v.berger_id} ro={ro} />
           : <Champ k="berger_aff" label="Berger" type="select" options={refs.bergers} v={v.berger_id} ro hint="Le rattachement se change depuis la fiche du berger." />}
+        <Champ k="cellule_id" label="Cellule" type="select" options={refs.cellules} v={v.cellule_id} ro={ro} />
         <Champ k="gc_id" label="GC (tribu)" type="select" options={refs.gc} v={v.gc_id} ro={ro} />
         <Champ k="classe" label="Classe de formation" type="select" options={refs.classes} v={v.classe} ro={ro} />
         <Champ k="notes" label="Notes" type="textarea" v={v.notes} ro={ro} />

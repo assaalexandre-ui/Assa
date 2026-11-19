@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { phone, frDate, frMonth, isoWeek, weekLabel, fullName } from './format';
+import { phone, frDate, frMonth, isoWeek, weekLabel, fullName, money } from './format';
 
 describe('format', () => {
   it('normalise les numéros ivoiriens', () => {
@@ -24,5 +24,10 @@ describe('format', () => {
     expect(fullName({ nom: 'Yao', prenoms: 'Christelle' })).toBe('Yao Christelle');
     expect(fullName({ nom: 'Bamba', prenoms: null })).toBe('Bamba');
     expect(fullName(null)).toBe('—');
+  });
+  it('affiche les montants en FCFA entiers', () => {
+    expect(money(5000)).toBe('5 000 F');
+    expect(money(1250000)).toBe('1 250 000 F');
+    expect(money(null)).toBe('0 F');
   });
 });

@@ -24,4 +24,21 @@ describe('données fictives (supabase/seed.sql)', () => {
     expect(n(await db.q(`select count(*) from nouveau where contact not like '+225 07 00 0%'`))).toBe(0);
     expect(n(await db.q(`select count(*) from fidele where notes is distinct from 'Fiche fictive de test'`))).toBe(0);
   }));
+
+  it('contient les données fictives du lot 2', () => tx(async db => {
+    expect(n(await db.q('select count(*) from cellule'))).toBe(6);
+    expect(n(await db.q('select count(*) from cellule where berger_id is null'))).toBe(0);
+    expect(n(await db.q('select count(*) from fidele where cellule_id is not null'))).toBe(32);
+    expect(n(await db.q('select count(*) from rapport_cellule'))).toBe(12);
+    expect(n(await db.q(`select count(*) from gc where tribu <> ''`))).toBe(12);
+    expect(n(await db.q('select count(*) from gc_presence'))).toBe(3);
+    expect(n(await db.q('select count(*) from assemblee'))).toBe(3);
+    expect(n(await db.q('select count(*) from evenement'))).toBe(14);
+    expect(n(await db.q('select count(*) from comptage'))).toBe(8);
+    expect(n(await db.q('select count(*) from poste_accueil'))).toBe(4);
+  }));
+
+  it('une brebis est toujours dans une cellule de son berger', () => tx(async db => {
+    expect(n(await db.q('select count(*) from fidele f join cellule c on c.id = f.cellule_id where c.berger_id is distinct from f.berger_id'))).toBe(0);
+  }));
 });

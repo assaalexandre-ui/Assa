@@ -15,7 +15,7 @@ import { statsParMois } from '@/lib/adnh';
 import { enregistrerNouveau, noterAppel, supprimerNouveau } from '../actions';
 
 type Appel = { id: string; date: string; resultat: string; note: string | null };
-type Nouveau = { id: string; date_venue: string; nom: string; contact: string | null; commune: string | null; statut: string; gc_id: string | null; classe: number | null; berger_id: string | null; appel: Appel[] };
+type Nouveau = { id: string; date_venue: string; nom: string; contact: string | null; commune: string | null; statut: string; gc_id: string | null; classe: number | null; berger_id: string | null; cellule_id: string | null; appel: Appel[] };
 
 export default async function Adnh({ params, searchParams }: { params: Promise<{ sous: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
   const { sous } = await params;
@@ -25,7 +25,7 @@ export default async function Adnh({ params, searchParams }: { params: Promise<{
   const w = s.droits.adnh === 'w';
   const supabase = await createClient();
   const [{ data }, refs] = await Promise.all([
-    supabase.from('nouveau').select('id, date_venue, nom, contact, commune, statut, gc_id, classe, berger_id, appel(id, date, resultat, note)').order('date_venue', { ascending: false }),
+    supabase.from('nouveau').select('id, date_venue, nom, contact, commune, statut, gc_id, classe, berger_id, cellule_id, appel(id, date, resultat, note)').order('date_venue', { ascending: false }),
     chargerRefs(),
   ]);
   const tous = (data ?? []) as Nouveau[];
@@ -157,6 +157,7 @@ function ficheNouveau(n: Nouveau, refs: Refs, w: boolean, ici: string, retour: s
           <FormIntegration nouveau={n.id} retour={ici} integre={n.statut === 'intégré'} ro={!w}>
             <Champ k="gc_id" label="Tribu et GC" type="select" options={refs.gc} v={n.gc_id} ro={!w} />
             <Champ k="classe" label="Classe de formation" type="select" options={refs.classes} v={n.classe} ro={!w} />
+            <Champ k="cellule_id" label="Cellule" type="select" options={refs.cellules} v={n.cellule_id} ro={!w} />
             <Champ k="berger_id" label="Berger (facultatif)" type="select" options={bergers} v={n.berger_id} ro={!w} />
           </FormIntegration>
         </div>

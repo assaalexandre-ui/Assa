@@ -9,7 +9,7 @@ import { chargerRefs, libelle } from '@/lib/ref';
 import { COLONNES_FIDELE, peutModifierFidele, refsFormulaire } from '@/lib/fideles';
 import { frDate, fullName, today } from '@/lib/format';
 
-type Fidele = { id: string; nom: string; prenoms: string | null; telephone: string | null; commune: string | null; quartier: string | null; statut: string; berger_id: string | null; gc_id: string | null; classe: number | null; date_naissance: string | null } & Record<string, string | number | null>;
+type Fidele = { id: string; nom: string; prenoms: string | null; telephone: string | null; commune: string | null; quartier: string | null; statut: string; berger_id: string | null; cellule_id: string | null; gc_id: string | null; classe: number | null; date_naissance: string | null } & Record<string, string | number | null>;
 
 export default async function Fideles({ params, searchParams }: { params: Promise<{ sous: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
   const { sous } = await params;
@@ -37,13 +37,14 @@ export default async function Fideles({ params, searchParams }: { params: Promis
         <Panel>
           {rows.length ? (
             <div className="tw"><table>
-              <thead><tr><th>Nom et prénoms</th><th>Contact</th><th>Commune</th><th>Berger</th><th>GC</th><th>Classe</th><th>Statut</th></tr></thead>
+              <thead><tr><th>Nom et prénoms</th><th>Contact</th><th>Commune</th><th>Berger</th><th>Cellule</th><th>GC</th><th>Classe</th><th>Statut</th></tr></thead>
               <tbody>{rows.map(f => (
                 <tr key={f.id}>
                   <td><LienFiche href={avecQ('fiche=' + f.id)}>{fullName(f)}</LienFiche></td>
                   <td className="mono">{f.telephone || '—'}</td>
                   <td>{[f.commune, f.quartier].filter(Boolean).join(', ') || '—'}</td>
                   <td>{f.berger_id ? refs.noms[f.berger_id] ?? '—' : '—'}</td>
+                  <td>{f.cellule_id ? refs.noms[f.cellule_id] ?? '—' : '—'}</td>
                   <td>{libelle(refs.gc, f.gc_id).split(' · ')[0]}</td>
                   <td>{f.classe ? 'Classe ' + f.classe : '—'}</td>
                   <td><Pill c={f.statut === 'Inactif' ? 'n' : f.statut === 'Nouveau' ? 'w' : 'a'}>{f.statut}</Pill></td>

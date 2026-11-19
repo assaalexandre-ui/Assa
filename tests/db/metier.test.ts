@@ -80,4 +80,11 @@ describe('métier : fidèles, bergers, ADNH, relevés', () => {
     expect(n(await db.as(m.u.berger2, 'select count(*) from absence'))).toBe(0);
     expect(n(await db.as(m.u.pasteur, 'select count(*) from absence'))).toBe(1);
   }));
+
+  it("berger1 ne peut pas marquer absente la brebis d'un autre berger", () => tx(async db => {
+    const m = await monde(db);
+    const r = (await db.as(m.u.berger1, `insert into releve_absence (berger_id, semaine) values ($1, '2026-W47') returning id`, [m.b1])).rows[0].id;
+    await expect(db.as(m.u.berger1, 'insert into absence (releve_id, fidele_id) values ($1, $2)', [r, m.f2[0]])).rejects.toThrow(/row-level security/);
+    await expect(db.as(m.u.berger1, 'insert into absence (releve_id, fidele_id) values ($1, $2)', [r, m.libres[0]])).rejects.toThrow(/row-level security/);
+  }));
 });

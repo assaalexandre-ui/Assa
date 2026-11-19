@@ -1,0 +1,86 @@
+[
+  {
+    "id": "d01",
+    "groupe": "service",
+    "membres": [],
+    "nom": "Accueil et ordre",
+    "ordre": 1
+  },
+  {
+    "id": "d02",
+    "groupe": "service",
+    "membres": [],
+    "nom": "Protocole et sécurité",
+    "ordre": 2
+  },
+  {
+    "id": "d03",
+    "groupe": "service",
+    "membres": [],
+    "nom": "Entretien et hygiène",
+    "ordre": 3
+  },
+  {
+    "id": "d04",
+    "groupe": "service",
+    "membres": [],
+    "nom": "Médias et audiovisuel",
+    "ordre": 4
+  },
+  {
+    "id": "d05",
+    "groupe": "service",
+    "membres": [],
+    "nom": "Sono et régie",
+    "ordre": 5
+  },
+  {
+    "id": "d06",
+    "groupe": "service",
+    "membres": [],
+    "nom": "Patrimoine et gestion des biens",
+    "ordre": 6
+  },
+  {
+    "id": "d07",
+    "groupe": "service",
+    "membres": [],
+    "nom": "Groupe de louange",
+    "ordre": 7
+  },
+  {
+    "id": "d08",
+    "groupe": "service",
+    "membres": [],
+    "nom": "École du dimanche",
+    "ordre": 8
+  },
+  {
+    "id": "d09",
+    "groupe": "autre",
+    "membres": [],
+    "nom": "Département des femmes",
+    "ordre": 9
+  },
+  {
+    "id": "d10",
+    "groupe": "autre",
+    "membres": [],
+    "nom": "Départements sociaux : œuvres caritatives",
+    "ordre": 10
+  },
+  {
+    "id": "d11",
+    "groupe": "autre",
+    "membres": [],
+    "nom": "Département de la Sainte",
+    "ordre": 11
+  },
+  {
+    "id": "d12",
+    "groupe": "autre",
+    "membres": [],
+    "nom": "Département budget et trésorerie",
+    "ordre": 12
+  }
+]

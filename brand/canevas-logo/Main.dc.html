@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Logo EMCV – Lumière</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2f86d6}a:hover{color:#1b2636}
+</style>
+</helmet>
+<div style="width: 1200px; height: 720px; box-sizing: border-box; padding: 56px 72px; background: #f5f9fd; font-family: 'Sora', ui-sans-serif, system-ui, sans-serif; color: #1b2636; display: flex; flex-direction: column; justify-content: space-between">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<p style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5f6c7c">Concept 1 · Lumière</p>
+<p style="margin: 0; font-size: 13px; color: #5f6c7c">Logo principal</p>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 28px">
+<svg viewBox="-6 -6 662 176" width="760" height="202" role="img" aria-label="EMCV">
+<g fill="none" stroke="{{ink}}" stroke-width="28" stroke-linejoin="miter" stroke-miterlimit="2.5">
+<path d="M100 14 H14 V146 H100"></path>
+<path d="M14 80 H84"></path>
+<path d="M154 160 V14 L215 110 L276 14 V160"></path>
+<path d="M440.6 37.6 A66 66 0 1 0 440.6 122.4"></path>
+<path d="M510 14 L575 152 L640 14"></path>
+</g>
+<g fill="none" stroke="{{gold}}" stroke-width="10">
+<path d="M452 54 V106"></path>
+<path d="M436 70 H468"></path>
+</g>
+</svg>
+<p style="margin: 0; font-size: 18px; letter-spacing: 0.32em; text-transform: uppercase; color: #5f6c7c">[Nom complet de l'église] · Abidjan</p>
+</div>
+<div style="display: flex; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 36px; height: 36px; border-radius: 8px; background: #1b2636; display: block"></span><span style="font-size: 13px">Encre #1B2636</span></div>
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 36px; height: 36px; border-radius: 8px; background: #c48d1d; display: block"></span><span style="font-size: 13px">Or #C48D1D</span></div>
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 36px; height: 36px; border-radius: 8px; background: #2f86d6; display: block"></span><span style="font-size: 13px">Bleu EMCV #2F86D6</span></div>
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 36px; height: 36px; border-radius: 8px; background: #e6f2fc; border: 1px solid #d3e3f3; box-sizing: border-box; display: block"></span><span style="font-size: 13px">Ciel #E6F2FC</span></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"ink":{"editor":"color","default":"#1b2636","options":["#1b2636","#2f86d6","#0f3d6e"]},"gold":{"editor":"color","default":"#c48d1d","options":["#c48d1d","#2f86d6","#1b2636"]},"$preview":{"width":1200,"height":720}}'>
+class Component extends DCLogic {
+renderVals() {
+return { ink: this.props.ink ?? '#1b2636', gold: this.props.gold ?? '#c48d1d' };
+}
+}
+</script>
+</body>
+</html>

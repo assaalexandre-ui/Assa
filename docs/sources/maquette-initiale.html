@@ -1,0 +1,260 @@
+<title>EMCV Gestion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout : back-office en deux colonnes (navigation + espace de travail), une colonne sur téléphone */
+:root{
+  --bg:#f5f9fd; --surface:#ffffff; --ink:#1b2636; --muted:#5f6c7c; --line:#e0e8f1;
+  --accent:#2f86d6; --accent-soft:#e6f2fc; --gold:#c48d1d;
+  --good:#2f7d46; --warn:#b5761a; --bad:#b33a3a;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Figtree",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --surface:#17201e; --ink:#e6eeec; --muted:#93a4a0; --line:#2a3633;
+  --accent:#4cc0b1; --accent-soft:#163430; --gold:#d9aa52; --good:#5cbf7a; --warn:#e0a24a; --bad:#e07070; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#17201e; --ink:#e6eeec; --muted:#93a4a0; --line:#2a3633;
+  --accent:#4cc0b1; --accent-soft:#163430; --gold:#d9aa52; --good:#5cbf7a; --warn:#e0a24a; --bad:#e07070; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+aside{background:var(--surface);border-right:1px solid var(--line);padding-block:20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;display:flex;flex-direction:column;gap:18px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand i{width:10px;height:22px;background:var(--accent);border-radius:2px;display:inline-block}
+.brand small{display:block;font-family:var(--f-body);font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+label.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+select{width:100%;margin-top:6px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+nav{display:flex;flex-direction:column;gap:2px}
+nav .grp{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:12px 8px 4px;font-weight:600}
+nav button{all:unset;cursor:pointer;padding:8px 10px;border-radius:7px;display:flex;justify-content:space-between;align-items:center;color:var(--ink)}
+nav button:hover{background:var(--bg)}
+nav button:focus-visible{outline:2px solid var(--accent)}
+nav button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+nav button .new{font-size:10px;font-weight:600;color:var(--gold);border:1px solid currentColor;border-radius:999px;padding:0 6px;margin-left:8px}
+main{padding-block:24px;padding-left:28px;padding-right:max(28px,env(safe-area-inset-right,0px));min-width:0;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:700;font-size:28px;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.lead{color:var(--muted);margin:4px 0 0;max-width:62ch}
+.scope{font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);white-space:nowrap}
+.scope b{color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi strong{display:block;font-family:var(--f-display);font-size:26px;font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi em{font-style:normal;font-size:12px;color:var(--good)}
+.kpi em.w{color:var(--warn)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0}
+.panel h2{font-family:var(--f-display);font-size:16px;margin:0;padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.panel h2 button{font:600 12px var(--f-body);color:var(--accent);background:none;border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer}
+.panel .body{padding:14px 16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:10px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid currentColor}
+.pill.g{color:var(--good)} .pill.w{color:var(--warn)} .pill.b{color:var(--bad)} .pill.n{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:12.5px}
+ul.plain{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+ul.plain li{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;flex:1;max-width:220px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.step{border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
+.step b{display:block;font-family:var(--f-display);font-size:20px}
+.step span{font-size:12px;color:var(--muted)}
+.note{font-size:12px;color:var(--muted)}
+.lock{padding:40px 16px;text-align:center;color:var(--muted)}
+.tag{font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside{border-right:0;border-bottom:1px solid var(--line);padding-right:max(16px,env(safe-area-inset-right,0px))}
+  nav{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px}
+  nav .grp{display:none}
+  nav button{white-space:nowrap;border:1px solid var(--line)}
+  nav button .n{display:none}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .steps{grid-template-columns:repeat(3,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){.panel,.kpi{transition:border-color .15s}}
+</style>
+
+<div class="app">
+  <aside>
+    <div class="brand"><i></i><div>EMCV<small>Gestion de l'église</small></div></div>
+    <div>
+      <label class="lbl" for="role">Connecté en tant que</label>
+      <select id="role">
+        <option value="pp" selected>Pasteur principal</option>
+        <option value="pa">Pasteur assistant</option>
+        <option value="tresorier">Trésorier</option>
+        <option value="cellule">Berger – Cellule Angré 8e tranche</option>
+        <option value="accueil">Accueil et protocole</option>
+        <option value="fidele">Fidèle – Application mobile</option>
+      </select>
+      <p class="note" style="margin:8px 0 0">Changez de rôle pour voir les menus et le périmètre de chacun.</p>
+    </div>
+    <nav id="nav" aria-label="Menus"></nav>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<script>
+const MENUS=[
+ {id:'dash',t:'Tableau de bord',g:'Accueil',r:'/tableau-de-bord'},
+ {id:'fideles',t:'Fidèles',g:'Fidèles et croissance',r:'/fideles'},
+ {id:'integ',t:'Nouveaux et intégration',g:'Fidèles et croissance',r:'/nouveaux'},
+ {id:'cellules',t:'Cellules de maison',g:'Fidèles et croissance',r:'/cellules'},
+ {id:'gc',t:'Groupes de communion',g:'Fidèles et croissance',r:'/gc'},
+ {id:'form',t:'Formations',g:'Fidèles et croissance',r:'/formations'},
+ {id:'priere',t:'Requêtes de prière',g:'Fidèles et croissance',r:'/priere',n:1},
+ {id:'enfants',t:'Enfants et école du dimanche',g:'Fidèles et croissance',r:'/enfants',n:1},
+ {id:'evang',t:'Évangélisation et missions',g:'Cultes et vie de l\'église',r:'/evangelisation',n:1},
+ {id:'events',t:'Événements et inscriptions',g:'Cultes et vie de l\'église',r:'/evenements',n:1},
+ {id:'predic',t:'Culte en direct et prédications',g:'Cultes et vie de l\'église',r:'/predications',n:1},
+ {id:'prog',t:'Agenda et programmation',g:'Cultes et vie de l\'église',r:'/agenda'},
+ {id:'accueil',t:'Jour de culte',g:'Cultes et vie de l\'église',r:'/culte'},
+ {id:'ceremonies',t:'Sacrements et cérémonies',g:'Cultes et vie de l\'église',r:'/ceremonies'},
+ {id:'dep',t:'Départements et équipes',g:'Cultes et vie de l\'église',r:'/departements'},
+ {id:'social',t:'Œuvres sociales',g:'Cultes et vie de l\'église',r:'/social'},
+ {id:'reunions',t:'Réunions du conseil',g:'Gouvernance et pilotage',r:'/reunions'},
+ {id:'sup',t:'Pilotage',g:'Gouvernance et pilotage',r:'/pilotage'},
+ {id:'orga',t:'Organigramme et responsables',g:'Gouvernance et pilotage',r:'/organigramme'},
+ {id:'rdv',t:'Rendez-vous pastoraux',g:'Gouvernance et pilotage',r:'/rendez-vous',n:1},
+ {id:'dons',t:'Dîmes et offrandes',g:'Finances et communication',r:'/dons'},
+ {id:'finances',t:'Budget et trésorerie',g:'Finances et communication',r:'/finances'},
+ {id:'patri',t:'Patrimoine et inventaire',g:'Finances et communication',r:'/patrimoine',n:1},
+ {id:'com',t:'Communication',g:'Finances et communication',r:'/communication'},
+ {id:'param',t:'Paramètres',g:'Administration',r:'/parametres'},
+ {id:'app',t:'Espace fidèle',g:'Application fidèles',r:'app mobile'}
+];
+const ALL=MENUS.map(m=>m.id).filter(x=>x!=='app');
+const ROLES={
+ pp:{scope:'Toute l\'église',menus:ALL},
+ pa:{scope:'Toute l\'église · pôle croissance',menus:['dash','fideles','integ','cellules','gc','form','priere','enfants','prog','accueil','ceremonies','dep','social','evang','events','predic','sup','orga','rdv','com']},
+ tresorier:{scope:'Finances de l\'église',menus:['dash','dons','finances','patri','events','accueil']},
+ cellule:{scope:'Cellule Angré 8e tranche · 14 membres',menus:['cellules','integ','priere','social','evang','com','orga']},
+ accueil:{scope:'Jour de culte',menus:['accueil','integ','enfants','prog']},
+ fidele:{scope:'Mon profil',menus:['app']}
+};
+const roleSel=document.getElementById('role');
+let current='dash';
+try{const r=localStorage.getItem('ecc-role');if(r&&ROLES[r])roleSel.value=r}catch(e){}
+
+const pill=(t,c)=>`<span class="pill ${c}">${t}</span>`;
+const table=(h,rows)=>`<div class="tw"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const panel=(title,body,btn)=>`<section class="panel"><h2>${title}${btn?`<button type="button">${btn}</button>`:''}</h2>${body}</section>`;
+const kpis=a=>`<div class="kpis">${a.map(k=>`<div class="kpi"><span>${k[0]}</span><strong>${k[1]}</strong>${k[2]?`<em class="${k[3]||''}">${k[2]}</em>`:''}</div>`).join('')}</div>`;
+
+const VIEWS={
+ dash:{l:'Vue d\'ensemble de votre périmètre cette semaine.',b:r=>{
+   return kpis(r==='tresorier'?[['Collecte du mois','4 285 000 F','+8 %'],['Dont Mobile Money','62 %'],['Reçus émis','1 106'],['Écarts à valider','3','à vérifier','w']]:
+     [['Fidèles inscrits','1 284','+46 ce mois'],['Présents dimanche','912','71 %'],['Nouveaux de la semaine','18','12 appelés'],['Tâches en retard','4','à relancer','w']])
+   + `<div class="grid2">${panel('Alertes',`<div class="body"><ul class="plain">
+      <li>6 nouveaux fidèles sans appel depuis plus de 72 h ${pill('Urgent','b')}</li>
+      <li>Rapport de la cellule Riviera 2 non remis ${pill('En retard','w')}</li>
+      <li>Classe 3 : session du samedi sans formateur ${pill('À pourvoir','w')}</li></ul></div>`)}
+     ${panel('Présence aux cultes – 6 derniers dimanches',`<div class="body"><ul class="plain">${[['28 sept.',64],['5 oct.',68],['12 oct.',66],['19 oct.',70],['26 oct.',73],['2 nov.',71]].map(x=>`<li><span class="mono">${x[0]}</span><span class="bar"><i style="width:${x[1]}%"></i></span><span class="mono">${x[1]} %</span></li>`).join('')}</ul></div>`)}</div>`;}},
+ fideles:{l:'Fichier central des membres et des familles.',b:()=>kpis([['Fidèles','1 284'],['Familles','412'],['Ouvriers','236'],['Anniversaires cette semaine','17']])
+   +panel('Liste des fidèles',table(['Nom','Téléphone','Commune','Cellule','Statut'],[
+   ['Kouadio Ange','+225 07 07 12 34 56','Cocody','Angré 8e tranche',pill('Ouvrier','g')],['Bamba Mariam','+225 05 45 22 18 90','Cocody','Riviera 2',pill('Membre','g')],['N\'Dri Éric','+225 01 02 33 44 55','Bingerville','—',pill('Nouveau','w')],['Yao Christelle','+225 07 58 10 20 30','Abobo','Abobo Gare',pill('Membre','g')]]),'Ajouter un fidèle')},
+ priere:{l:'Requêtes déposées par les fidèles et suivies par l\'équipe d\'intercession.',b:()=>kpis([['Requêtes ce mois','64'],['En prière','41'],['Témoignages reçus','12','exaucées']])
+   +panel('Requêtes récentes',table(['Fidèle','Sujet','Visibilité','Statut'],[
+   ['Bamba Mariam','Santé de sa mère','Confidentielle',pill('En prière','w')],['Kouadio Ange','Emploi','Équipe d\'intercession',pill('Témoignage','g')],['Anonyme','Famille','Confidentielle',pill('En prière','w')],['Yao Christelle','Examens du BTS','Publique',pill('Reçue','n')]]),'Nouvelle requête')},
+ enfants:{l:'Classes par âge et pointage sécurisé : chaque parent reçoit un code pour récupérer son enfant.',b:()=>kpis([['Enfants présents','129'],['Moniteurs en poste','14'],['Enfants récupérés','96 / 129','33 encore en salle','w']])
+   +panel('Pointage du dimanche',table(['Enfant','Classe','Parent','Code','Sortie'],[
+   ['Kouadio Emmanuel','4–6 ans','Kouadio Ange','<span class="mono">K7-42</span>',pill('Récupéré','g')],['Bamba Inès','7–9 ans','Bamba Mariam','<span class="mono">B3-18</span>',pill('En salle','w')],['Yao Junior','0–3 ans','Yao Christelle','<span class="mono">Y1-05</span>',pill('En salle','w')]]),'Pointer un enfant')},
+ evang:{l:'Sorties d\'évangélisation ; les contacts recueillis passent directement au suivi des nouveaux.',b:()=>kpis([['Sorties ce mois','6'],['Personnes rencontrées','212'],['Contacts transmis au suivi','47']])
+   +panel('Sorties récentes',table(['Date','Lieu','Équipe','Contacts','Suivi'],[
+   ['25 oct.','Marché d\'Adjamé','Équipe 1 (12)','19',pill('Transmis','g')],['18 oct.','Abobo Gare','Équipe 2 (9)','14',pill('Transmis','g')],['11 oct.','Yopougon Siporex','Jeunesse (15)','14',pill('À saisir','w')]]),'Planifier une sortie')},
+ events:{l:'Conventions, séminaires et retraites : inscription, paiement Mobile Money, transport en car.',b:()=>panel('Convention annuelle · 12–14 décembre',`<div class="body">${kpis([['Inscrits','846'],['Frais payés','612','72 %'],['Places en car','288 / 350']])}</div>`
+   +table(['Car','Départ','Inscrits'],[['Car 1','Cocody, Angré','50 / 50'],['Car 2','Abobo Gare','48 / 50'],['Car 3','Yopougon','41 / 50']]),'Inscrire un fidèle')},
+ predic:{l:'Lien du direct et replays classés par série et prédicateur.',b:()=>panel('Dernières prédications',table(['Date','Titre','Série','Prédicateur','Vues'],[
+   ['26 oct.','Marcher par la foi','Les fondements','Pasteur Jean Koffi','1 240'],['19 oct.','La puissance de la prière','Les fondements','Pasteur Paul Bamba','986'],['12 oct.','Servir avec joie','Vie d\'ouvrier','Pasteur Jean Koffi','1 102']]),'Ajouter le direct')},
+ rdv:{l:'Rendez-vous avec les pasteurs, visites à domicile et à l\'hôpital. Les notes pastorales sont chiffrées.',b:()=>panel('Agenda pastoral',table(['Date','Fidèle','Motif','Pasteur','Type'],[
+   ['Lun. 3 nov. · 10 h','Ouattara Seydou','Visite malade','Pasteur assistant',pill('Hôpital','w')],['Mar. 4 nov. · 15 h','Couple N\'Dri','Préparation au mariage','Pasteur principal',pill('Bureau','n')],['Jeu. 6 nov. · 17 h','Famille Koné','Deuil','Pasteur principal',pill('Domicile','n')]]),'Nouveau rendez-vous')},
+ patri:{l:'Matériel de l\'église : état, affectation, prêts et entretien.',b:()=>panel('Inventaire',table(['Article','Quantité','Affecté à','État'],[
+   ['Console de mixage 32 voies','1','Sono et régie',pill('Bon','g')],['Micros sans fil','8','Sono et régie',pill('2 en panne','w')],['Chaises plastiques','1 200','Temple principal',pill('Bon','g')],['Car Toyota Coaster','1','Transport',pill('Vidange due','w')]]),'Ajouter un article')},
+ ceremonies:{l:'Registres officiels de l\'église.',b:()=>panel('Prochaines cérémonies',table(['Date','Cérémonie','Personnes','Officiant'],[
+   ['Dim. 7 déc.','Sainte-Cène','Toute l\'église','Pasteur principal'],['Sam. 13 déc.','Baptêmes','9 candidats','Pasteur assistant'],['Dim. 21 déc.','Présentation d\'enfants','3 familles','Pasteur principal'],['Dim. 28 déc.','Consécration de diacres','4 personnes','Conseil']]),'Ajouter au registre')},
+ social:{l:'Aide aux fidèles et actions caritatives.',b:()=>panel('Demandes d\'aide',table(['Fidèle','Motif','Signalé par','Décision'],[
+   ['Famille Koné','Deuil','Berger Angré',pill('Accordée','g')],['Ouattara Seydou','Maladie','Berger Riviera 2',pill('À étudier','w')],['Aka Rebecca','Naissance','Secrétariat',pill('Accordée','g')]]),'Nouvelle demande')},
+ orga:{l:'Qui dirige quoi, et comment le joindre.',b:()=>panel('Annuaire des responsables',table(['Fonction','Nom','Téléphone / WhatsApp'],[
+   ['Pasteur principal','Pasteur Jean Koffi','+225 07 07 12 34 56'],['Directeur des programmes','Pasteur Paul Bamba','+225 05 05 44 33 22'],['Accueil et protocole','Aya Kouassi','+225 05 45 22 18 90'],['Médias, sono, régie','Ismaël Traoré','+225 07 58 10 20 30'],['Trésorier','M. Diallo','+225 01 40 50 60 70']]))},
+ finances:{l:'Budget par département, dépenses et états financiers.',b:()=>kpis([['Budget annuel','62 000 000 F'],['Réalisé à fin octobre','49 %'],['Dépenses à valider','2','validation requise','w']])
+   +panel('Demandes de dépense',table(['Département','Objet','Montant','Statut'],[
+   ['Médias, sono, régie','Câbles et micros','185 000 F',pill('À valider','w')],['Entretien','Produits du trimestre','96 500 F',pill('Payée','g')],['Œuvres sociales','Aide famille Koné','150 000 F',pill('Payée','g')]]),'Nouvelle dépense')},
+ reunions:{l:'Historique, décisions et suivi des tâches confiées par le conseil.',b:()=>panel('Réunions récentes',table(['Date','Instance','Objet','Décisions','Tâches'],[
+   ['28 oct.','Conseil','Préparation convention de décembre','3','5 '+pill('2 en retard','w')],
+   ['21 oct.','Pasteurs','Programme de fin d\'année','2','3 '+pill('À jour','g')],
+   ['14 oct.','Conseil','Budget trimestriel','4','6 '+pill('À jour','g')]]),'Nouvelle réunion')
+   +panel('Tâches du conseil',table(['Tâche','Responsable','Échéance','Statut'],[
+   ['Réserver la salle de la convention','K. Yao','10 nov.',pill('En cours','w')],
+   ['Former 12 nouveaux ouvriers d\'accueil','A. Kouassi','15 nov.',pill('À faire','n')],
+   ['Rapport financier T3','M. Diallo','31 oct.',pill('En retard','b')],
+   ['Lancer le GC de Yopougon','P. Bamba','25 oct.',pill('Terminé','g')]]),'Ajouter une tâche')},
+ prog:{l:'Planning de toutes les activités de l\'église, avec historique.',b:()=>panel('Programme des prochaines semaines',table(['Date','Activité','Lieu','Responsable'],[
+   ['Dim. 2 nov. · 8 h','Culte d\'adoration','Temple principal','Pasteur principal'],
+   ['Mar. 4 nov. · 18 h 30','Étude biblique','Salle B','Dpt. Enseignement'],
+   ['Ven. 7 nov. · 22 h','Veillée de prière','Temple principal','Intercession'],
+   ['Sam. 8 nov. · 9 h','Formation classe 2','Salle A','Formateurs'],
+   ['12–14 déc.','Convention annuelle','Palais de la culture','Siège']]),'Programmer une activité')},
+ sup:{l:'Reporting des départements, KPI et objectifs.',b:()=>panel('Objectifs et résultats',`<div class="body"><ul class="plain">${[
+   ['Nouveaux fidèles intégrés en cellule',78,'78 / 100'],['Fidèles en formation',64,'822 / 1 280'],['Rapports de cellule remis',91,'41 / 45'],['Objectif de collecte annuelle',58,'29 M / 50 M F']].map(x=>`<li><span>${x[0]}</span><span class="bar"><i style="width:${x[1]}%"></i></span><span class="mono">${x[2]}</span></li>`).join('')}</ul></div>`)
+   +panel('Rapports départementaux du mois',table(['Département','Responsable','Rapport'],[
+   ['Protocole et sécurité','Serge N\'Guessan',pill('Validé','g')],['Médias, sono, régie','Ismaël Traoré',pill('À valider','w')],['Groupe de louange','Grâce D.',pill('Non remis','b')]]))},
+ accueil:{l:'Accueil, parking, placement et comptage pendant le culte. Le comptage fonctionne sans réseau.',b:()=>kpis([['Hommes','318'],['Femmes','447'],['Enfants','129'],['Nouveaux','18'],['Parking','142 / 180']])
+   +panel('Visiteurs enregistrés ce dimanche',table(['Nom','Téléphone','Venu par','Placé en'],[
+   ['Marie-Claire A.','07 11 22 33 44','Invitation d\'un ami','Zone B'],['Ibrahim K.','05 66 77 88 99','Réseaux sociaux','Zone A'],['Famille Ouattara (4)','01 23 45 67 89','Passage','Zone C']]),'Enregistrer un visiteur')},
+ integ:{l:'Suivi des nouveaux : appels, qualification, affectation en GC, cellule et classe.',b:()=>panel('Nouveaux fidèles à intégrer',table(['Nom','Arrivé le','Appel','GC','Cellule','Classe'],[
+   ['Marie-Claire A.','2 nov.',pill('À appeler','b'),'—','—','—'],
+   ['Ibrahim K.','2 nov.',pill('Appelé','g'),'GC 4','Angré 8e','Classe 1'],
+   ['Rachel D.','26 oct.',pill('Appelé','g'),'GC 7','Riviera 2','Classe 1'],
+   ['Kevin T.','26 oct.',pill('Relance','w'),'—','—','—']]),'Programmer les appels')},
+ cellules:{l:'Cellules de maison par quartier et rapports hebdomadaires.',b:r=>panel(r==='cellule'?'Ma cellule – rapport de la semaine':'Cellules de l\'église',r==='cellule'?
+   `<div class="body">${kpis([['Membres','14'],['Présents jeudi','11'],['Nouveaux','2'],['Offrande','12 500 F']])}<p class="note">Rapport à remettre avant dimanche 18 h.</p></div>`:
+   table(['Cellule','Responsable','Jour','Membres','Dernier rapport'],[
+   ['Angré 8e tranche','Fabrice O.','Jeudi','14',pill('Remis','g')],['Riviera 2','Estelle K.','Mercredi','11',pill('En retard','w')],['Cocody Faya','Daniel A.','Mardi','17',pill('Remis','g')],['II Plateaux Vallon','Nadia S.','Vendredi','9',pill('Remis','g')]]),r==='cellule'?'Saisir le rapport':'Créer une cellule')},
+ gc:{l:'Les 12 groupes de communion de l\'église.',b:()=>panel('Groupes de communion',table(['GC','Responsable','Membres','Activité du mois'],
+   Array.from({length:6},(_,i)=>[`GC ${i+1}`,['Paul B.','Awa C.','Hervé Z.','Linda M.','Joseph K.','Ruth A.'][i],[84,76,91,68,102,73][i],['Visite aux malades','Évangélisation','Sortie familiale','Prière','Action sociale','Formation'][i]])),'Voir les 12 GC')},
+ form:{l:'Parcours de formation en 5 classes, de l\'accueil au leadership.',b:()=>`<section class="panel"><h2>Progression des fidèles</h2><div class="body"><div class="steps">${[['Classe 1','412'],['Classe 2','236'],['Classe 3','104'],['Classe 4','46'],['Classe 5','24']].map(x=>`<div class="step"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('')}</div><p class="note">La classe 4 forme les leaders et bergers. Noms exacts des classes à confirmer.</p></div></section>`
+   +panel('Sessions en cours',table(['Classe','Début','Fin','Inscrits','Assiduité'],[['Classe 1','6 sept.','29 nov.','58','82 %'],['Classe 2','13 sept.','13 déc.','34','77 %'],['Classe 4','4 oct.','24 janv.','12','91 %']]),'Ouvrir une session')},
+ dep:{l:'Départements de service : membres, planning et rapports.',b:()=>panel('Départements de service',table(['Département','Responsable','Membres','Planning'],[
+   ['Protocole et sécurité','Serge N.','32',pill('Complet','g')],['Accueil','Aya K.','28',pill('Complet','g')],['Médias, sono, régie','Ismaël T.','15',pill('2 postes vides','w')],['Patrimoine et gestion','Bernard Y.','9',pill('Complet','g')],['Groupe de louange','Grâce D.','24',pill('Complet','g')],['Entretien','Rose E.','18',pill('3 postes vides','w')]]),'Planifier le service')},
+ dons:{l:'Dîmes et offrandes, Mobile Money et saisie au culte.',b:()=>kpis([['Dîmes du mois','2 940 000 F'],['Offrandes','1 345 000 F'],['Mobile Money','62 %'],['Écarts à valider','3','double validation','w']])
+   +panel('Derniers mouvements',table(['Date','Fonds','Canal','Montant','Statut'],[
+   ['2 nov.','Dîme','Orange Money','25 000 F',pill('Reçu envoyé','g')],['2 nov.','Offrande culte','Espèces','486 500 F',pill('À valider','w')],['1 nov.','Construction','Wave','50 000 F',pill('Reçu envoyé','g')],['31 oct.','Mission','Carte','100 000 F',pill('Reçu envoyé','g')]]),'Saisir une collecte')
+   +panel('Campagne : construction du temple',`<div class="body"><ul class="plain"><li><span>Collecté</span><span class="bar"><i style="width:38%"></i></span><span class="mono">95 M / 250 M F</span></li><li><span>Engagements de fidèles</span><span class="mono">312</span></li></ul></div>`,'Relancer par WhatsApp')
+   +'<p class="note">Les dons nominatifs ne sont visibles que du trésorier et du pasteur principal.</p>'},
+ com:{l:'SMS, WhatsApp, e-mail et notifications ciblés.',b:r=>panel('Nouveau message',`<div class="body" style="display:grid;gap:10px;max-width:560px">
+   <label class="lbl" for="cible">Destinataires</label><select id="cible"><option>${r==='cellule'?'Ma cellule (14)':'Tous les fidèles de l\'église (1 284)'}</option><option>Nouveaux fidèles de la semaine (18)</option><option>Responsables de cellule (45)</option></select>
+   <label class="lbl" for="canal">Canal</label><select id="canal"><option>WhatsApp</option><option>SMS</option><option>Notification application</option></select>
+   <p class="note">Exemple : « Rappel : veillée de prière vendredi 22 h au temple principal. »</p></div>`,'Programmer l\'envoi')},
+ app:{l:'Ce que voit un fidèle dans l\'application mobile.',b:()=>`<div class="grid2">${panel('Mon parcours',`<div class="body"><ul class="plain"><li>Cellule ${pill('Angré 8e tranche','g')}</li><li>Groupe de communion ${pill('GC 4','g')}</li><li>Formation ${pill('Classe 2 · 6/12 séances','w')}</li></ul></div>`)}
+   ${panel('Mes dons',table(['Date','Fonds','Montant'],[['2 nov.','Dîme','25 000 F'],['5 oct.','Dîme','25 000 F']]),'Donner')}
+   ${panel('Annonces',`<div class="body"><ul class="plain"><li>Convention annuelle du 12 au 14 décembre</li><li>Veillée de prière vendredi 22 h</li></ul></div>`)}</div>`},
+ param:{l:'Structure du ministère, utilisateurs, rôles et langues.',b:()=>panel('Utilisateurs et rôles',table(['Nom','Rôle','Périmètre','2FA'],[
+   ['Pasteur Jean Koffi','Pasteur principal','Église',pill('Active','g')],['M. Diallo','Trésorier','Église',pill('Active','g')],['Fabrice O.','Responsable de cellule','Angré 8e tranche',pill('Non requise','n')],['Aya Kouassi','Équipe accueil','Église',pill('Non requise','n')]]),'Inviter un utilisateur')
+   +panel('Journal d\'audit',table(['Heure','Utilisateur','Action'],[['10 h 42','M. Diallo','A validé la collecte du 26 oct.'],['09 h 15','Pasteur Jean Koffi','A consulté la liste des dons nominatifs'],['08 h 03','Aya Kouassi','A enregistré 6 visiteurs']]))}
+};
+
+function render(){
+  const r=roleSel.value, R=ROLES[r];
+  if(!R.menus.includes(current)) current=R.menus[0];
+  let html='',g='';
+  MENUS.forEach((m,i)=>{
+    if(!R.menus.includes(m.id))return;
+    if(m.g!==g){g=m.g;html+=`<div class="grp">${g}</div>`}
+    html+=`<button type="button" data-id="${m.id}" class="${m.id===current?'on':''}">${m.t}${m.n?'<span class="new">Nouveau</span>':''}</button>`;
+  });
+  document.getElementById('nav').innerHTML=html;
+  const m=MENUS.find(x=>x.id===current), v=VIEWS[current];
+  document.getElementById('main').innerHTML=`<div class="top"><div><div class="tag">Maquette · données d'exemple · <span class="mono">${m.r}</span></div><h1>${m.t}</h1><p class="lead">${v.l}</p></div><div class="scope">Périmètre : <b>${R.scope}</b></div></div>${v.b(r)}`;
+}
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b){current=b.dataset.id;render()}});
+roleSel.addEventListener('change',()=>{try{localStorage.setItem('ecc-role',roleSel.value)}catch(e){}render()});
+render();
+</script>

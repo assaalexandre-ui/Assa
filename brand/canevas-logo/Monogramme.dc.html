@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Logo EMCV – Monogramme</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;family=Sora:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2f86d6}a:hover{color:#1b2636}
+</style>
+</helmet>
+<div style="width: 720px; height: 720px; box-sizing: border-box; padding: 56px; background: #ffffff; font-family: 'Sora', ui-sans-serif, system-ui, sans-serif; color: #1b2636; display: flex; flex-direction: column; justify-content: space-between; align-items: center">
+<p style="margin: 0; align-self: flex-start; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5f6c7c">Concept 2 · Monogramme</p>
+<div style="width: 420px; height: 420px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 1fr 1.55fr; gap: 22px; font-family: 'Archivo Black', 'Arial Black', sans-serif; color: #ffffff">
+<div style="background: {{blue}}; border-radius: 36px 6px 6px 6px; display: flex; align-items: center; justify-content: center; font-size: 104px; line-height: 1">E</div>
+<div style="background: {{blue}}; border-radius: 6px 36px 6px 6px; display: flex; align-items: center; justify-content: center; font-size: 104px; line-height: 1">M</div>
+<div style="background: {{blue}}; border-radius: 6px 6px 6px 36px; display: flex; align-items: center; justify-content: center; font-size: 164px; line-height: 1">C</div>
+<div style="background: {{blue}}; border-radius: 6px 6px 36px 6px; display: flex; align-items: center; justify-content: center; font-size: 164px; line-height: 1">V</div>
+</div>
+<p style="margin: 0; font-size: 14px; color: #5f6c7c; text-align: center">L'espace blanc entre les quatre lettres dessine la croix.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"blue":{"editor":"color","default":"#2f86d6","options":["#2f86d6","#1b2636","#c48d1d"]},"$preview":{"width":720,"height":720}}'>
+class Component extends DCLogic {
+renderVals() {
+return { blue: this.props.blue ?? '#2f86d6' };
+}
+}
+</script>
+</body>
+</html>

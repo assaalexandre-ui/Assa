@@ -1,0 +1,694 @@
+<title>EMCV Gestion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout : navigation à gauche (en haut sur téléphone), espace de travail à droite, fenêtre de saisie en surimpression */
+:root{
+  --bg:#f5f9fd; --surface:#ffffff; --ink:#1b2636; --muted:#5f6c7c; --line:#e0e8f1;
+  --accent:#2f86d6; --accent-ink:#1d6fbb; --accent-soft:#e6f2fc; --gold:#c48d1d;
+  --good:#2f7d46; --good-soft:#e7f4ea; --warn:#a8650f; --warn-soft:#fbf0de; --bad:#b33a3a; --bad-soft:#fbe9e9;
+  --overlay:rgba(27,38,54,.38);
+  --f-body:"Sora",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10161f; --surface:#18212d; --ink:#e6edf5; --muted:#98a6b7; --line:#2a3646;
+  --accent:#5aa7ea; --accent-ink:#8cc2f2; --accent-soft:#1a2d42; --gold:#e3b04b;
+  --good:#64c283; --good-soft:#163323; --warn:#e5a54d; --warn-soft:#3a2c14; --bad:#ea7a7a; --bad-soft:#3b1d1d;
+  --overlay:rgba(0,0,0,.55); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10161f; --surface:#18212d; --ink:#e6edf5; --muted:#98a6b7; --line:#2a3646;
+  --accent:#5aa7ea; --accent-ink:#8cc2f2; --accent-soft:#1a2d42; --gold:#e3b04b;
+  --good:#64c283; --good-soft:#163323; --warn:#e5a54d; --warn-soft:#3a2c14; --bad:#ea7a7a; --bad-soft:#3b1d1d;
+  --overlay:rgba(0,0,0,.55); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100%}
+aside{background:var(--surface);border-right:1px solid var(--line);padding-block:22px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:18px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{display:flex;flex-direction:column;gap:6px}
+.brand svg{width:118px;height:auto;display:block}
+.brand span{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:500}
+nav button svg{width:18px;height:18px;flex:none;stroke:var(--muted)}
+nav button:hover{background:var(--bg)}
+nav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+nav button.on{background:var(--accent-soft);color:var(--accent-ink)}
+nav button.on svg{stroke:var(--accent-ink)}
+nav small{display:block;font-size:11px;color:var(--muted);font-weight:400;line-height:1.2}
+.side-foot{margin-top:auto;font-size:12px;color:var(--muted)}
+main{padding-block:26px 48px;padding-left:32px;padding-right:max(32px,env(safe-area-inset-right,0px));min-width:0;display:flex;flex-direction:column;gap:20px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+h1{font-size:26px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.lead{margin:4px 0 0;color:var(--muted);max-width:64ch}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:9px 14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:40px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:5px 10px;min-height:32px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,.link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.link{all:unset;cursor:pointer;color:var(--accent-ink);font-weight:600}
+.link:hover{text-decoration:underline}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi strong{display:block;font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:2px}
+.kpi em{font-style:normal;font-size:12px;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;min-width:0}
+.panel>header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
+.panel>header h2{font-size:15px;margin:0;font-weight:600}
+.panel .body{padding:14px 16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.card:hover{border-color:var(--accent)}
+.card:focus-visible{outline:2px solid var(--accent)}
+.card b{font-size:15px}
+.card .meta{font-size:12.5px;color:var(--muted)}
+.meter{height:6px;border-radius:3px;background:var(--bg);overflow:hidden;margin-top:4px}
+.meter i{display:block;height:100%;background:var(--accent)}
+.meter i.full{background:var(--warn)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:10px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--bg)}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.pill.g{background:var(--good-soft);color:var(--good)}
+.pill.w{background:var(--warn-soft);color:var(--warn)}
+.pill.b{background:var(--bad-soft);color:var(--bad)}
+.pill.n{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.pill.a{background:var(--accent-soft);color:var(--accent-ink)}
+.mono{font-family:var(--f-mono);font-size:12.5px}
+.muted{color:var(--muted)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);margin-bottom:4px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 12px;min-width:0;width:240px;max-width:100%}
+.group-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin:6px 0 -4px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.check{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0}
+.check input{width:18px;height:18px;accent-color:var(--bad)}
+.check label{flex:1;cursor:pointer}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-weight:500}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:500;z-index:60}
+.overlay{position:fixed;inset:0;background:var(--overlay);display:flex;align-items:flex-start;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto;z-index:50}
+.modal{background:var(--surface);border-radius:14px;width:100%;max-width:620px;box-shadow:0 20px 50px rgba(0,0,0,.18);margin-top:4vh}
+.modal.wide{max-width:860px}
+.modal>header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.modal>header h3{margin:0;font-size:17px}
+.modal .content{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.modal footer{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line)}
+.x{all:unset;cursor:pointer;width:36px;height:36px;display:grid;place-items:center;border-radius:8px;font-size:20px;color:var(--muted)}
+.x:hover{background:var(--bg)}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--bg);min-height:40px;width:100%}
+.field textarea{min-height:76px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus,.search:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.err{color:var(--bad);font-size:13px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:13.5px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+.log{display:flex;flex-direction:column;gap:8px}
+.log div{border-left:2px solid var(--accent);padding-left:10px}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding-block:14px;padding-right:max(16px,env(safe-area-inset-right,0px));padding-left:max(16px,env(safe-area-inset-left,0px));gap:12px}
+  .brand{flex-direction:row;align-items:center;gap:12px}
+  .brand svg{width:86px}
+  nav{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:2px}
+  nav button{white-space:nowrap;border:1px solid var(--line)}
+  nav small,.side-foot{display:none}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+  .form{grid-template-columns:1fr}
+  h1{font-size:22px}
+}
+@media (prefers-reduced-motion:no-preference){.card,.btn{transition:border-color .15s,background .15s}}
+</style>
+
+<div class="app">
+  <aside>
+    <div class="brand">
+      <svg viewBox="-6 -6 662 176" role="img" aria-label="EMCV">
+        <g fill="none" stroke="currentColor" stroke-width="28" stroke-linejoin="miter" stroke-miterlimit="2.5" style="color:var(--ink)">
+          <path d="M100 14 H14 V146 H100"/><path d="M14 80 H84"/><path d="M154 160 V14 L215 110 L276 14 V160"/>
+          <path d="M440.6 37.6 A66 66 0 1 0 440.6 122.4"/><path d="M510 14 L575 152 L640 14"/>
+        </g>
+        <g fill="none" stroke-width="11" style="stroke:var(--gold)"><path d="M452 54 V106"/><path d="M436 70 H468"/></g>
+      </svg>
+      <span>Gestion de l'église</span>
+    </div>
+    <nav id="nav" aria-label="Menus"></nav>
+    <div class="side-foot" id="status">Connexion aux données…</div>
+  </aside>
+  <main id="main" aria-live="polite"></main>
+</div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script>
+/* ---------- Menus ---------- */
+const ICON = {
+  accueil:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  cellules:'<path d="M4 20V10l8-6 8 6v10"/><path d="M9 20v-5h6v5"/>',
+  bergers:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 4v16"/><path d="M17 4c2.2 0 3.5 1.2 3.5 3S19.2 10 17 10"/>',
+  adnh:'<circle cx="10" cy="8" r="3.2"/><path d="M4 20c0-3.3 2.7-6 6-6 1.5 0 2.8.5 3.9 1.4"/><path d="M18 14v6M15 17h6"/>',
+  formations:'<path d="M3 8l9-4 9 4-9 4z"/><path d="M7 10v5c0 1.5 2.2 3 5 3s5-1.5 5-3v-5"/>',
+  departements:'<rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  gc:'<circle cx="12" cy="7" r="2.6"/><circle cx="5.5" cy="15" r="2.6"/><circle cx="18.5" cy="15" r="2.6"/><path d="M9.8 8.8l-2.6 3.8M14.2 8.8l2.6 3.8M8.3 15h7.4"/>'
+};
+const MENUS = [
+  {id:'accueil', t:'Accueil', s:'Vue d\'ensemble'},
+  {id:'cellules', t:'Cellules', s:'Groupes de prière et de suivi'},
+  {id:'bergers', t:'Bergers', s:'Suivi des brebis'},
+  {id:'adnh', t:'ADNH', s:'Amis des nouveaux'},
+  {id:'formations', t:'Formations', s:'Classes de formation'},
+  {id:'departements', t:'Départements', s:'Services de l\'église'},
+  {id:'gc', t:'GC', s:'Groupes de communion'}
+];
+const COLLS = ['fideles','cellules','bergers','nouveaux','sessions','departements','gc','classes','presences'];
+const S = {}; COLLS.forEach(c => S[c] = []);
+const loaded = new Set();
+let db = null, dbState = 'loading';
+let view = 'accueil';
+let query = '';
+try { const v = localStorage.getItem('emcv-view'); if (v && MENUS.some(m => m.id === v)) view = v; } catch (e) {}
+if (MENUS.some(m => '#' + m.id === location.hash)) view = location.hash.slice(1);
+
+/* ---------- Outils ---------- */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const byId = (c, id) => S[c].find(x => x.id === id);
+const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+const frDate = iso => { if (!iso) return '—'; const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('fr-FR', {day:'numeric', month:'short', year:'numeric'}); };
+const isoWeek = (iso) => { const [y, m, dd] = (iso || today()).split('-').map(Number); const d = new Date(Date.UTC(y, m - 1, dd)); const day = d.getUTCDay() || 7; d.setUTCDate(d.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1)); const w = Math.ceil(((d - y0) / 864e5 + 1) / 7); return d.getUTCFullYear() + '-W' + String(w).padStart(2, '0'); };
+const weekLabel = wk => 'semaine ' + Number(wk.split('-W')[1]);
+const phone = v => { const d = String(v || '').replace(/\D/g, ''); const n = d.startsWith('225') && d.length === 13 ? d.slice(3) : d; return n.length === 10 ? '+225 ' + n.replace(/(\d{2})(?=\d)/g, '$1 ').trim() : String(v || '').trim(); };
+const fullName = f => f ? [f.nom, f.prenoms].filter(Boolean).join(' ') : '—';
+const match = (...vals) => !query || vals.join(' ').toLowerCase().includes(query.toLowerCase());
+const sortBy = (arr, k) => [...arr].sort((a, b) => String(a[k] ?? '').localeCompare(String(b[k] ?? ''), 'fr', {numeric:true}));
+const pill = (t, c = 'n') => `<span class="pill ${c}">${esc(t)}</span>`;
+const gcLabel = g => g ? (g.nom || 'GC') + (g.tribu ? ' · ' + g.tribu : '') : '—';
+const classeLabel = n => { const c = S.classes.find(x => Number(x.numero) === Number(n)); return c ? 'Classe ' + c.numero + ' : ' + c.nom : (n ? 'Classe ' + n : '—'); };
+
+function toast(msg) {
+  const r = $('#toast-root'); r.innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`;
+  clearTimeout(toast.t); toast.t = setTimeout(() => r.innerHTML = '', 2600);
+}
+async function save(coll, id, data, merge) {
+  if (!db) { toast('Enregistrement impossible : données non disponibles'); throw new Error('no db'); }
+  try {
+    const ref = id ? db.collection(coll).doc(id) : db.collection(coll).doc();
+    const body = JSON.parse(JSON.stringify({...data, id: undefined, majLe: new Date().toISOString()}));
+    if (merge) await ref.update(body); else await ref.set(body);
+    return ref.id;
+  } catch (e) {
+    toast(e && e.code === 'quota_exceeded' ? 'Limite de stockage atteinte : supprimez des fiches anciennes.' : 'Enregistrement échoué, réessayez.');
+    throw e;
+  }
+}
+async function remove(coll, id) { try { await db.collection(coll).doc(id).delete(); } catch (e) { toast('Suppression échouée, réessayez.'); throw e; } }
+
+/* ---------- Fenêtre de saisie ---------- */
+function closeModal() { $('#modal-root').innerHTML = ''; }
+function modal({title, body, footer = '', wide = false}) {
+  $('#modal-root').innerHTML = `<div class="overlay" data-close><div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-labelledby="mt"><header><h3 id="mt">${esc(title)}</h3><button class="x" type="button" aria-label="Fermer" data-close-btn>×</button></header><div class="content">${body}</div>${footer ? `<footer>${footer}</footer>` : ''}</div></div>`;
+  const ov = $('#modal-root .overlay');
+  ov.addEventListener('mousedown', e => { if (e.target === ov) closeModal(); });
+  ov.querySelector('[data-close-btn]').onclick = closeModal;
+  const f = ov.querySelector('input,select,textarea,button:not(.x)'); if (f) f.focus();
+  return ov;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#modal-root').innerHTML) closeModal(); });
+
+function fieldHtml(f, v) {
+  const id = 'f-' + f.k, req = f.req ? ' required' : '', full = f.full || f.type === 'textarea' ? ' full' : '';
+  let input;
+  if (f.type === 'select') {
+    const opts = (typeof f.options === 'function' ? f.options() : f.options);
+    input = `<select id="${id}" name="${f.k}"${req}><option value="">${esc(f.placeholder || '— Choisir —')}</option>${opts.map(([val, lab]) => `<option value="${esc(val)}"${String(val) === String(v ?? '') ? ' selected' : ''}>${esc(lab)}</option>`).join('')}</select>`;
+  } else if (f.type === 'textarea') {
+    input = `<textarea id="${id}" name="${f.k}"${req}>${esc(v)}</textarea>`;
+  } else {
+    input = `<input id="${id}" name="${f.k}" type="${f.type || 'text'}" value="${esc(v)}"${req}${f.type === 'tel' ? ' inputmode="tel" placeholder="07 07 12 34 56"' : ''}${f.min != null ? ` min="${f.min}"` : ''}>`;
+  }
+  return `<div class="field${full}"><label for="${id}">${esc(f.label)}${f.req ? ' *' : ''}</label>${input}${f.hint ? `<span class="muted" style="font-size:12px">${esc(f.hint)}</span>` : ''}</div>`;
+}
+function openForm({title, fields, values = {}, submit = 'Enregistrer', onSubmit, onDelete, deleteLabel = 'Supprimer', extra = ''}) {
+  const ov = modal({
+    title,
+    body: `<form id="mform" class="form" novalidate>${fields.map(f => fieldHtml(f, values[f.k])).join('')}</form>${extra}<p class="err" id="merr" hidden></p>`,
+    footer: `<div>${onDelete ? `<button class="btn danger" type="button" id="mdel">${esc(deleteLabel)}</button>` : ''}</div><div class="actions"><button class="btn" type="button" data-cancel>Annuler</button><button class="btn primary" type="submit" form="mform" id="msub">${esc(submit)}</button></div>`
+  });
+  ov.querySelector('[data-cancel]').onclick = closeModal;
+  const form = ov.querySelector('#mform');
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const data = {}; fields.forEach(f => data[f.k] = (form.elements[f.k].value || '').trim());
+    const miss = fields.filter(f => f.req && !data[f.k]);
+    const err = ov.querySelector('#merr');
+    if (miss.length) { err.hidden = false; err.textContent = 'Champ obligatoire : ' + miss.map(f => f.label).join(', ') + '.'; form.elements[miss[0].k].focus(); return; }
+    fields.forEach(f => { if (f.type === 'tel' && data[f.k]) data[f.k] = phone(data[f.k]); });
+    const b = ov.querySelector('#msub'); b.disabled = true;
+    try { const r = await onSubmit(data); if (r !== false) closeModal(); } catch (x) { b.disabled = false; }
+  };
+  if (onDelete) {
+    const d = ov.querySelector('#mdel');
+    d.onclick = async () => {
+      if (d.dataset.armed) { d.disabled = true; try { await onDelete(); closeModal(); } catch (x) { d.disabled = false; } }
+      else { d.dataset.armed = '1'; d.textContent = 'Confirmer la suppression'; }
+    };
+  }
+  return ov;
+}
+
+/* ---------- Options partagées ---------- */
+const optCellules = () => sortBy(S.cellules, 'nom').map(c => [c.id, c.nom + (c.lieu ? ' · ' + c.lieu : '')]);
+const optBergers = () => sortBy(S.bergers, 'nom').map(b => [b.id, fullName(b)]);
+const optGc = () => sortBy(S.gc, 'ordre').map(g => [g.id, gcLabel(g)]);
+const optClasses = () => sortBy(S.classes, 'numero').map(c => [c.numero, 'Classe ' + c.numero + ' : ' + c.nom]);
+const optFideles = (filter = () => true) => sortBy(S.fideles.filter(filter), 'nom').map(f => [f.id, fullName(f) + (f.telephone ? ' · ' + f.telephone : '')]);
+
+/* ---------- Rendu ---------- */
+function renderNav() {
+  $('#nav').innerHTML = MENUS.map(m => `<button type="button" data-v="${m.id}" class="${m.id === view ? 'on' : ''}" ${m.id === view ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[m.id]}</svg><span>${m.t}<small>${m.s}</small></span></button>`).join('');
+}
+function go(v) { view = v; query = ''; try { localStorage.setItem('emcv-view', v); } catch (e) {} if (location.hash !== '#' + v) history.replaceState(null, '', '#' + v); renderNav(); render(); window.scrollTo(0, 0); }
+$('#nav').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (b) go(b.dataset.v); });
+window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (MENUS.some(m => m.id === v) && v !== view) go(v); });
+
+function header(title, lead, actions = '') {
+  return `<div class="head"><div><h1>${esc(title)}</h1><p class="lead">${lead}</p></div><div class="actions">${actions}</div></div>${dbState === 'off' ? '<div class="banner">Les données de l\'église ne peuvent pas être chargées dans cette vue. Ouvrez l\'application depuis claude.ai pour consulter et enregistrer.</div>' : ''}`;
+}
+function emptyState(title, text) { return `<div class="empty"><b>${esc(title)}</b>${text}</div>`; }
+function loading() { return loaded.size < COLLS.length && dbState === 'loading'; }
+const searchBox = ph => `<input class="search" type="search" id="q" placeholder="${esc(ph)}" value="${esc(query)}" aria-label="${esc(ph)}">`;
+
+function render() {
+  const el = $('#main');
+  const keepFocus = document.activeElement && document.activeElement.id === 'q';
+  const pos = keepFocus ? document.activeElement.selectionStart : null;
+  el.innerHTML = VIEWS[view]();
+  const q = $('#q');
+  if (q) { q.oninput = () => { query = q.value; render(); }; if (keepFocus) { q.focus(); q.setSelectionRange(pos, pos); } }
+  el.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); ACT[b.dataset.act](b.dataset.id, b); }));
+}
+
+/* ---------- Écrans ---------- */
+const VIEWS = {};
+
+VIEWS.accueil = () => {
+  const wk = isoWeek();
+  const mois = today().slice(0, 7);
+  const nouveauxMois = S.nouveaux.filter(n => (n.date || '').startsWith(mois)).length;
+  const aAppeler = S.nouveaux.filter(n => n.statut !== 'intégré' && !(n.appels || []).length);
+  const enCours = S.sessions.filter(s => s.dateDebut <= today() && (!s.dateFin || s.dateFin >= today()));
+  const absSemaine = S.presences.filter(p => p.type === 'berger' && p.periode === wk).reduce((a, p) => a + (p.absents || []).length, 0);
+  const kp = [
+    ['Fidèles enregistrés', S.fideles.length, ''],
+    ['Nouveaux ce mois', nouveauxMois, 'ADNH'],
+    ['Nouveaux à appeler', aAppeler.length, 'aucun appel noté'],
+    ['Absences relevées', absSemaine, 'par les bergers, ' + weekLabel(wk)],
+    ['Cellules', S.cellules.length, ''],
+    ['Formations en cours', enCours.length, '']
+  ];
+  const recents = sortBy(S.nouveaux, 'date').reverse().slice(0, 6);
+  return header('Accueil', 'Vue d\'ensemble de l\'EMCV : nouveaux à suivre, absences de la semaine et formations en cours.')
+    + `<div class="kpis">${kp.map(k => `<div class="kpi"><span>${k[0]}</span><strong>${loading() ? '…' : k[1]}</strong>${k[2] ? `<em>${esc(k[2])}</em>` : ''}</div>`).join('')}</div>`
+    + `<div class="grid2">
+      <section class="panel"><header><h2>Nouveaux à appeler</h2><button class="link" type="button" data-act="goto" data-id="adnh">Ouvrir ADNH</button></header>
+      ${aAppeler.length ? `<div class="tw"><table><thead><tr><th>Arrivé le</th><th>Nom</th><th>Contact</th></tr></thead><tbody>${sortBy(aAppeler, 'date').slice(0, 8).map(n => `<tr class="click" data-act="nouveau" data-id="${n.id}"><td>${frDate(n.date)}</td><td>${esc(n.nom)}</td><td class="mono">${esc(n.contact)}</td></tr>`).join('')}</tbody></table></div>` : emptyState('Aucun nouveau en attente d\'appel', 'Les nouveaux enregistrés dans ADNH apparaissent ici tant qu\'aucun appel n\'est noté.')}
+      </section>
+      <section class="panel"><header><h2>Formations en cours</h2><button class="link" type="button" data-act="goto" data-id="formations">Ouvrir Formations</button></header>
+      ${enCours.length ? `<div class="tw"><table><thead><tr><th>Classe</th><th>Début</th><th>Fin</th><th>Inscrits</th></tr></thead><tbody>${enCours.map(s => `<tr class="click" data-act="session" data-id="${s.id}"><td>${esc(classeLabel(s.classe))}</td><td>${frDate(s.dateDebut)}</td><td>${frDate(s.dateFin)}</td><td>${(s.inscrits || []).length}</td></tr>`).join('')}</tbody></table></div>` : emptyState('Aucune formation en cours', 'Créez une session dans Formations avec sa date de départ et sa date de fin.')}
+      </section>
+    </div>
+    <section class="panel"><header><h2>Derniers nouveaux venus</h2></header>
+    ${recents.length ? `<div class="tw"><table><thead><tr><th>Date</th><th>Nom</th><th>Appels</th><th>Intégration</th></tr></thead><tbody>${recents.map(n => `<tr class="click" data-act="nouveau" data-id="${n.id}"><td>${frDate(n.date)}</td><td>${esc(n.nom)}</td><td>${(n.appels || []).length}</td><td>${n.statut === 'intégré' ? pill('Intégré', 'g') : pill('En suivi', 'w')}</td></tr>`).join('')}</tbody></table></div>` : emptyState('Aucun nouveau enregistré', 'Utilisez le menu ADNH pour enregistrer les personnes venues.')}
+    </section>`;
+};
+
+VIEWS.cellules = () => {
+  const list = sortBy(S.cellules, 'nom').filter(c => match(c.nom, c.lieu, c.familleAccueil, c.infos, fullName(byId('bergers', c.bergerId))));
+  return header('Cellules', 'Groupes de prière et de suivi, administrés par les bergers : famille d\'accueil, nom, lieu et informations.', `<button class="btn primary" type="button" data-act="celluleNew">+ Nouvelle cellule</button>`)
+    + `<div class="toolbar">${searchBox('Rechercher une cellule')}</div>`
+    + `<section class="panel">${list.length ? `<div class="tw"><table><thead><tr><th>Cellule</th><th>Lieu</th><th>Famille d'accueil</th><th>Berger</th><th>Membres</th><th>Informations</th></tr></thead><tbody>${list.map(c => `<tr class="click" data-act="cellule" data-id="${c.id}"><td><b>${esc(c.nom)}</b></td><td>${esc(c.lieu || '—')}</td><td>${esc(c.familleAccueil || '—')}</td><td>${esc(fullName(byId('bergers', c.bergerId)))}</td><td>${S.fideles.filter(f => f.celluleId === c.id).length}</td><td class="muted">${esc(c.infos || '')}</td></tr>`).join('')}</tbody></table></div>` : emptyState(loading() ? 'Chargement…' : (query ? 'Aucune cellule trouvée' : 'Aucune cellule enregistrée'), query ? 'Essayez un autre nom ou lieu.' : 'Ajoutez la première cellule avec le bouton « Nouvelle cellule ».')}</section>`;
+};
+
+VIEWS.bergers = () => {
+  const wk = isoWeek();
+  const list = sortBy(S.bergers, 'nom').filter(b => match(fullName(b), b.contact));
+  return header('Bergers', 'Chaque berger est responsable du suivi de quinze (15) personnes : nom et prénoms, contacts de ses brebis et absences chaque semaine.', `<button class="btn primary" type="button" data-act="bergerNew">+ Nouveau berger</button>`)
+    + `<div class="toolbar">${searchBox('Rechercher un berger')}<span class="muted">Absences de la ${weekLabel(wk)}</span></div>`
+    + (list.length ? `<div class="cards">${list.map(b => {
+      const n = S.fideles.filter(f => f.bergerId === b.id).length;
+      const p = S.presences.find(x => x.id === `berger_${b.id}_${wk}`);
+      const abs = p ? (p.absents || []).length : 0;
+      return `<button class="card" type="button" data-act="berger" data-id="${b.id}"><b>${esc(fullName(b))}</b><span class="meta mono">${esc(b.contact || 'Sans contact')}</span><span class="meta">${n} / 15 brebis · ${p ? abs + ' absence' + (abs > 1 ? 's' : '') + ' cette semaine' : 'absences non relevées'}</span><span class="meter" aria-hidden="true"><i class="${n >= 15 ? 'full' : ''}" style="width:${Math.min(100, n / 15 * 100)}%"></i></span></button>`;
+    }).join('')}</div>` : `<section class="panel">${emptyState(loading() ? 'Chargement…' : (query ? 'Aucun berger trouvé' : 'Aucun berger enregistré'), query ? 'Essayez un autre nom.' : 'Ajoutez les bergers, puis rattachez-leur leurs brebis.')}</section>`);
+};
+
+VIEWS.adnh = () => {
+  const list = sortBy(S.nouveaux, 'date').reverse().filter(n => match(n.nom, n.contact));
+  const venus = S.nouveaux.length, appeles = S.nouveaux.filter(n => (n.appels || []).length).length, integres = S.nouveaux.filter(n => n.statut === 'intégré').length;
+  return header('ADNH · Amis des nouveaux', 'Département chargé de l\'accueil, du suivi et de l\'intégration des nouveaux : personnes venues, appels, intégration dans la tribu, le GC, la classe de formation et la cellule.', `<button class="btn primary" type="button" data-act="nouveauNew">+ Enregistrer un nouveau</button>`)
+    + `<div class="kpis"><div class="kpi"><span>Personnes venues</span><strong>${venus}</strong></div><div class="kpi"><span>Appelées</span><strong>${appeles}</strong></div><div class="kpi"><span>Intégrées</span><strong>${integres}</strong></div></div>`
+    + `<div class="toolbar">${searchBox('Rechercher un nouveau')}</div>`
+    + `<section class="panel">${list.length ? `<div class="tw"><table><thead><tr><th>Date</th><th>Nom</th><th>Contact</th><th>Appels</th><th>GC</th><th>Classe</th><th>Cellule</th><th>Statut</th></tr></thead><tbody>${list.map(n => `<tr class="click" data-act="nouveau" data-id="${n.id}"><td>${frDate(n.date)}</td><td><b>${esc(n.nom)}</b></td><td class="mono">${esc(n.contact || '—')}</td><td>${(n.appels || []).length || pill('À appeler', 'b')}</td><td>${esc(n.gcId ? gcLabel(byId('gc', n.gcId)) : '—')}</td><td>${esc(n.classe ? 'Classe ' + n.classe : '—')}</td><td>${esc(byId('cellules', n.celluleId)?.nom || '—')}</td><td>${n.statut === 'intégré' ? pill('Intégré', 'g') : pill('En suivi', 'w')}</td></tr>`).join('')}</tbody></table></div>` : emptyState(loading() ? 'Chargement…' : (query ? 'Aucun nouveau trouvé' : 'Aucun nouveau enregistré'), query ? 'Essayez un autre nom ou numéro.' : 'Enregistrez chaque personne venue avec la date, son nom et son contact.')}</section>`;
+};
+
+VIEWS.formations = () => {
+  const classes = sortBy(S.classes, 'numero');
+  const sess = sortBy(S.sessions, 'dateDebut').reverse();
+  const statut = s => s.dateDebut > today() ? pill('À venir', 'a') : (s.dateFin && s.dateFin < today() ? pill('Terminée', 'n') : pill('En cours', 'g'));
+  return header('Formations', 'Les cinq (5) classes de formation, leur date de départ et leur date de fin de formation.', `<button class="btn primary" type="button" data-act="sessionNew">+ Nouvelle session</button>`)
+    + `<div class="cards">${classes.map(c => { const n = S.fideles.filter(f => Number(f.classe) === Number(c.numero)).length; return `<button class="card" type="button" data-act="classe" data-id="${c.id}"><span class="meta">Classe ${esc(c.numero)}</span><b>${esc(c.nom)}</b><span class="meta">${n} fidèle${n > 1 ? 's' : ''} à cette étape</span></button>`; }).join('') || `<section class="panel">${emptyState(loading() ? 'Chargement…' : 'Aucune classe', 'Les classes de formation n\'ont pas encore été configurées.')}</section>`}</div>`
+    + `<section class="panel"><header><h2>Sessions</h2></header>${sess.length ? `<div class="tw"><table><thead><tr><th>Classe</th><th>Date de départ</th><th>Date de fin</th><th>Inscrits</th><th>Absences</th><th>Statut</th></tr></thead><tbody>${sess.map(s => `<tr class="click" data-act="session" data-id="${s.id}"><td><b>${esc(classeLabel(s.classe))}</b></td><td>${frDate(s.dateDebut)}</td><td>${frDate(s.dateFin)}</td><td>${(s.inscrits || []).length}</td><td>${(s.inscrits || []).reduce((a, i) => a + (Number(i.absences) || 0), 0)}</td><td>${statut(s)}</td></tr>`).join('')}</tbody></table></div>` : emptyState(loading() ? 'Chargement…' : 'Aucune session', 'Créez une session pour une classe avec sa date de départ et sa date de fin.')}</section>`;
+};
+
+VIEWS.departements = () => {
+  const list = sortBy(S.departements, 'ordre').filter(d => match(d.nom, d.responsable, (d.membres || []).join(' ')));
+  const grp = (g, title) => { const items = list.filter(d => (d.groupe || 'autre') === g); return items.length ? `<p class="group-title">${title}</p><div class="cards">${items.map(d => `<button class="card" type="button" data-act="dep" data-id="${d.id}"><b>${esc(d.nom)}</b><span class="meta">${d.responsable ? 'Responsable : ' + esc(d.responsable) : 'Responsable à désigner'}</span><span class="meta">${(d.membres || []).length} membre${(d.membres || []).length > 1 ? 's' : ''}</span></button>`).join('')}</div>` : ''; };
+  return header('Départements', 'Les différents services au sein de l\'église et les autres départements.', `<button class="btn primary" type="button" data-act="depNew">+ Nouveau département</button>`)
+    + `<div class="toolbar">${searchBox('Rechercher un département ou un membre')}</div>`
+    + (list.length ? grp('service', 'Services de l\'église') + grp('autre', 'Autres départements') : `<section class="panel">${emptyState(loading() ? 'Chargement…' : (query ? 'Aucun résultat' : 'Aucun département'), query ? 'Essayez un autre mot.' : 'Ajoutez les départements de l\'église.')}</section>`);
+};
+
+VIEWS.gc = () => {
+  const list = sortBy(S.gc, 'ordre').filter(g => match(g.nom, g.tribu, (g.responsables || []).join(' ')));
+  return header('GC · Groupes de communion', 'Douze (12) groupes de communion : nom de la tribu, cinq (5) responsables associés, contacts, présences, absences et passage de service.', `<button class="btn primary" type="button" data-act="gcNew">+ Nouveau GC</button>`)
+    + `<div class="toolbar">${searchBox('Rechercher un GC ou une tribu')}</div>`
+    + (list.length ? `<div class="cards">${list.map(g => {
+      const m = S.fideles.filter(f => f.gcId === g.id).length;
+      const resp = (g.responsables || []).filter(Boolean).length;
+      const last = sortBy(S.presences.filter(p => p.type === 'gc' && p.groupeId === g.id), 'periode').pop();
+      return `<button class="card" type="button" data-act="gcOpen" data-id="${g.id}"><b>${esc(g.nom || 'GC')}</b><span class="meta">${g.tribu ? 'Tribu : ' + esc(g.tribu) : 'Nom de la tribu à renseigner'}</span><span class="meta">${m} membre${m > 1 ? 's' : ''} · ${resp} / 5 responsables</span><span class="meta">${last ? 'Dernière présence : ' + frDate(last.periode) + ' (' + (last.absents || []).length + ' abs.)' : 'Aucune présence relevée'}</span></button>`;
+    }).join('')}</div>` : `<section class="panel">${emptyState(loading() ? 'Chargement…' : (query ? 'Aucun GC trouvé' : 'Aucun GC'), query ? 'Essayez un autre nom.' : 'Ajoutez les groupes de communion.')}</section>`);
+};
+
+/* ---------- Actions ---------- */
+const fideleFields = (withGroups = true) => [
+  {k:'nom', label:'Nom', req:true}, {k:'prenoms', label:'Prénoms'},
+  {k:'telephone', label:'Contact', type:'tel'},
+  ...(withGroups ? [
+    {k:'bergerId', label:'Berger', type:'select', options:optBergers},
+    {k:'celluleId', label:'Cellule', type:'select', options:optCellules},
+    {k:'gcId', label:'GC (tribu)', type:'select', options:optGc},
+    {k:'classe', label:'Classe de formation', type:'select', options:optClasses}
+  ] : [])
+];
+function editFidele(id, defaults = {}) {
+  const f = id ? byId('fideles', id) : null;
+  openForm({
+    title: f ? fullName(f) : 'Nouveau fidèle', fields: fideleFields(), values: f || defaults,
+    onSubmit: async d => {
+      if (d.bergerId && d.bergerId !== f?.bergerId && S.fideles.filter(x => x.bergerId === d.bergerId).length >= 15) toast('Ce berger suit déjà 15 personnes.');
+      await save('fideles', id, {...(f || {}), ...d, id: undefined});
+      toast(f ? 'Fiche mise à jour' : 'Fidèle ajouté');
+    },
+    onDelete: f ? async () => { await remove('fideles', id); toast('Fidèle supprimé'); } : null
+  });
+}
+
+const ACT = {
+  goto: id => go(id),
+
+  /* Cellules */
+  celluleNew: () => ACT.cellule(null),
+  cellule: id => {
+    const c = id ? byId('cellules', id) : null;
+    const membres = c ? S.fideles.filter(f => f.celluleId === c.id) : [];
+    openForm({
+      title: c ? c.nom : 'Nouvelle cellule',
+      fields: [
+        {k:'nom', label:'Nom de la cellule', req:true}, {k:'lieu', label:'Lieu'},
+        {k:'familleAccueil', label:'Nom de la famille d\'accueil'}, {k:'bergerId', label:'Berger', type:'select', options:optBergers},
+        {k:'infos', label:'Informations', type:'textarea'}
+      ],
+      values: c || {},
+      extra: c ? `<div><p class="group-title" style="margin-bottom:6px">Membres (${membres.length})</p>${membres.length ? `<div class="tags">${membres.map(m => pill(fullName(m), 'a')).join('')}</div>` : '<p class="muted" style="margin:0">Aucun membre rattaché. Rattachez les fidèles depuis Bergers, GC ou ADNH.</p>'}</div>` : '',
+      onSubmit: async d => { await save('cellules', id, d); toast(c ? 'Cellule mise à jour' : 'Cellule créée'); },
+      onDelete: c ? async () => { await remove('cellules', id); toast('Cellule supprimée'); } : null
+    });
+  },
+
+  /* Bergers */
+  bergerNew: () => openForm({
+    title: 'Nouveau berger',
+    fields: [{k:'nom', label:'Nom', req:true}, {k:'prenoms', label:'Prénoms'}, {k:'contact', label:'Contact', type:'tel'}],
+    onSubmit: async d => { await save('bergers', null, d); toast('Berger ajouté'); }
+  }),
+  berger: id => openBerger(id),
+
+  /* ADNH */
+  nouveauNew: () => openForm({
+    title: 'Enregistrer un nouveau',
+    fields: [{k:'date', label:'Date de venue', type:'date', req:true}, {k:'nom', label:'Nom et prénoms', req:true}, {k:'contact', label:'Contact', type:'tel', full:true}],
+    values: {date: today()},
+    onSubmit: async d => { await save('nouveaux', null, {...d, appels: [], statut: 'en suivi'}); toast('Nouveau enregistré'); }
+  }),
+  nouveau: id => openNouveau(id),
+
+  /* Formations */
+  sessionNew: () => openForm({
+    title: 'Nouvelle session de formation',
+    fields: [{k:'classe', label:'Classe', type:'select', options:optClasses, req:true, full:true}, {k:'dateDebut', label:'Date de départ', type:'date', req:true}, {k:'dateFin', label:'Date de fin de formation', type:'date', req:true}],
+    onSubmit: async d => { if (d.dateFin < d.dateDebut) { toast('La date de fin doit suivre la date de départ.'); return false; } await save('sessions', null, {...d, classe: Number(d.classe), inscrits: []}); toast('Session créée'); }
+  }),
+  session: id => openSession(id),
+  classe: id => {
+    const c = byId('classes', id);
+    openForm({
+      title: 'Classe ' + c.numero,
+      fields: [{k:'nom', label:'Nom de la classe', req:true, full:true}],
+      values: c,
+      onSubmit: async d => { await save('classes', id, d, true); toast('Classe mise à jour'); }
+    });
+  },
+
+  /* Départements */
+  depNew: () => ACT.dep(null),
+  dep: id => {
+    const d = id ? byId('departements', id) : null;
+    openForm({
+      title: d ? d.nom : 'Nouveau département',
+      fields: [
+        {k:'nom', label:'Nom', req:true, full:true},
+        {k:'groupe', label:'Catégorie', type:'select', options:[['service', 'Services de l\'église'], ['autre', 'Autres départements']], req:true},
+        {k:'responsable', label:'Responsable'}, {k:'contact', label:'Contact du responsable', type:'tel'},
+        {k:'membres', label:'Membres', type:'textarea', hint:'Un nom par ligne'}
+      ],
+      values: d ? {...d, membres: (d.membres || []).join('\n')} : {groupe: 'service'},
+      onSubmit: async v => { await save('departements', id, {...(d || {}), ...v, id: undefined, ordre: d?.ordre ?? 100 + S.departements.length, membres: v.membres.split('\n').map(s => s.trim()).filter(Boolean)}); toast(d ? 'Département mis à jour' : 'Département créé'); },
+      onDelete: d ? async () => { await remove('departements', id); toast('Département supprimé'); } : null
+    });
+  },
+
+  /* GC */
+  gcNew: () => openForm({
+    title: 'Nouveau groupe de communion',
+    fields: [{k:'nom', label:'Nom du GC', req:true}, {k:'tribu', label:'Nom de la tribu'}],
+    onSubmit: async d => { await save('gc', null, {...d, responsables: ['', '', '', '', ''], passages: [], ordre: S.gc.length + 1}); toast('GC créé'); }
+  }),
+  gcOpen: id => openGc(id)
+};
+
+/* ---------- Fiche berger ---------- */
+function openBerger(id, tab) {
+  const b = byId('bergers', id); if (!b) return;
+  const wk = isoWeek();
+  const brebis = sortBy(S.fideles.filter(f => f.bergerId === id), 'nom');
+  const pres = S.presences.find(p => p.id === `berger_${id}_${wk}`);
+  const abs = new Set(pres ? pres.absents || [] : []);
+  const free = optFideles(f => !f.bergerId);
+  const ov = modal({
+    title: fullName(b), wide: true,
+    body: `<dl class="kv"><dt>Contact</dt><dd class="mono">${esc(b.contact || '—')}</dd><dt>Brebis suivies</dt><dd>${brebis.length} / 15 ${brebis.length >= 15 ? pill('Complet', 'w') : ''}</dd></dl>
+      <div class="actions"><button class="btn sm" type="button" id="bAdd" ${brebis.length >= 15 ? 'disabled' : ''}>+ Nouvelle brebis</button>${free.length && brebis.length < 15 ? `<select class="search" id="bLink" aria-label="Rattacher un fidèle existant"><option value="">Rattacher un fidèle existant…</option>${free.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>` : ''}<button class="btn sm" type="button" id="bEdit">Modifier le berger</button></div>
+      <section class="panel"><header><h2>Brebis (fidèles)</h2></header>${brebis.length ? `<div class="tw"><table><thead><tr><th>Nom et prénoms</th><th>Contacts</th><th>Cellule</th><th></th></tr></thead><tbody>${brebis.map(f => `<tr><td>${esc(fullName(f))}</td><td class="mono">${esc(f.telephone || '—')}</td><td>${esc(byId('cellules', f.celluleId)?.nom || '—')}</td><td style="text-align:right"><button class="btn sm" type="button" data-edit="${f.id}">Modifier</button></td></tr>`).join('')}</tbody></table></div>` : emptyState('Aucune brebis', 'Ajoutez jusqu\'à quinze (15) personnes à suivre.')}</section>
+      <section class="panel"><header><h2>Absences · ${weekLabel(wk)}</h2>${pres ? pill('Relevé enregistré', 'g') : pill('Non relevé', 'w')}</header><div class="body">${brebis.length ? brebis.map(f => `<div class="check"><input type="checkbox" id="ab-${f.id}" data-abs="${f.id}" ${abs.has(f.id) ? 'checked' : ''}><label for="ab-${f.id}">${esc(fullName(f))}</label>${abs.has(f.id) ? pill('Absent', 'b') : ''}</div>`).join('') + `<div class="actions" style="margin-top:12px"><button class="btn primary sm" type="button" id="absSave">Enregistrer le relevé de la semaine</button></div>` : '<p class="muted" style="margin:0">Ajoutez des brebis pour relever leurs absences.</p>'}</div></section>`,
+    footer: `<button class="btn danger" type="button" id="bDel">Supprimer le berger</button><button class="btn" type="button" data-cancel>Fermer</button>`
+  });
+  ov.querySelector('[data-cancel]').onclick = closeModal;
+  const add = ov.querySelector('#bAdd'); if (add) add.onclick = () => editFidele(null, {bergerId: id});
+  ov.querySelector('#bEdit').onclick = () => openForm({
+    title: 'Modifier le berger', fields: [{k:'nom', label:'Nom', req:true}, {k:'prenoms', label:'Prénoms'}, {k:'contact', label:'Contact', type:'tel'}], values: b,
+    onSubmit: async d => { await save('bergers', id, d, true); toast('Berger mis à jour'); }
+  });
+  const link = ov.querySelector('#bLink'); if (link) link.onchange = async () => { if (!link.value) return; await save('fideles', link.value, {bergerId: id}, true); toast('Brebis rattachée'); openBerger(id); };
+  ov.querySelectorAll('[data-edit]').forEach(x => x.onclick = () => editFidele(x.dataset.edit));
+  const sv = ov.querySelector('#absSave'); if (sv) sv.onclick = async () => {
+    const absents = [...ov.querySelectorAll('[data-abs]:checked')].map(i => i.dataset.abs);
+    sv.disabled = true;
+    try { await save('presences', `berger_${id}_${wk}`, {type: 'berger', groupeId: id, periode: wk, absents}); toast('Relevé enregistré : ' + absents.length + ' absence' + (absents.length > 1 ? 's' : '')); openBerger(id); } catch (e) { sv.disabled = false; }
+  };
+  const del = ov.querySelector('#bDel'); del.onclick = async () => {
+    if (!del.dataset.armed) { del.dataset.armed = 1; del.textContent = 'Confirmer : les brebis restent enregistrées'; return; }
+    await remove('bergers', id); toast('Berger supprimé'); closeModal();
+  };
+}
+
+/* ---------- Fiche nouveau ---------- */
+function openNouveau(id) {
+  const n = byId('nouveaux', id); if (!n) return;
+  const appels = [...(n.appels || [])].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const done = n.statut === 'intégré';
+  const ov = modal({
+    title: n.nom, wide: true,
+    body: `<dl class="kv"><dt>Venu le</dt><dd>${frDate(n.date)}</dd><dt>Contact</dt><dd class="mono">${esc(n.contact || '—')}</dd><dt>Statut</dt><dd>${done ? pill('Intégré', 'g') : pill('En suivi', 'w')}</dd></dl>
+      <section class="panel"><header><h2>Appels (${appels.length})</h2></header><div class="body" style="display:flex;flex-direction:column;gap:12px">
+        <form id="callForm" class="form"><div class="field"><label for="c-date">Date de l'appel</label><input id="c-date" type="date" value="${today()}" required></div><div class="field"><label for="c-note">Compte rendu</label><input id="c-note" type="text" placeholder="Ex. joint, viendra dimanche"></div><div class="field full"><button class="btn sm" type="submit">+ Noter l'appel</button></div></form>
+        ${appels.length ? `<div class="log">${appels.map(a => `<div><b>${frDate(a.date)}</b><br><span class="muted">${esc(a.note || 'Appel effectué')}</span></div>`).join('')}</div>` : '<p class="muted" style="margin:0">Aucun appel noté pour le moment.</p>'}
+      </div></section>
+      <section class="panel"><header><h2>Intégration</h2></header><div class="body">
+        <form id="integForm" class="form">
+          ${fieldHtml({k:'gcId', label:'Tribu et GC', type:'select', options:optGc}, n.gcId)}
+          ${fieldHtml({k:'classe', label:'Classe de formation', type:'select', options:optClasses}, n.classe)}
+          ${fieldHtml({k:'celluleId', label:'Cellule', type:'select', options:optCellules}, n.celluleId)}
+        </form>
+        <p class="muted" style="margin:10px 0 0;font-size:12.5px">${done ? 'Cette personne est intégrée : sa fiche fidèle est à jour.' : 'La validation crée sa fiche fidèle avec le GC, la classe et la cellule choisis.'}</p>
+      </div></section>`,
+    footer: `<div class="actions"><button class="btn danger" type="button" id="nDel">Supprimer</button><button class="btn" type="button" id="nEdit">Modifier</button></div><div class="actions"><button class="btn" type="button" id="nSave">Enregistrer</button><button class="btn primary" type="button" id="nInteg">${done ? 'Mettre à jour l\'intégration' : 'Valider l\'intégration'}</button></div>`
+  });
+  const integVals = () => { const f = ov.querySelector('#integForm'); return {gcId: f.elements.gcId.value, classe: f.elements.classe.value ? Number(f.elements.classe.value) : '', celluleId: f.elements.celluleId.value}; };
+  ov.querySelector('#callForm').onsubmit = async e => {
+    e.preventDefault();
+    const date = ov.querySelector('#c-date').value || today(), note = ov.querySelector('#c-note').value.trim();
+    await save('nouveaux', id, {appels: [...(n.appels || []), {date, note}]}, true); toast('Appel noté'); openNouveau(id);
+  };
+  ov.querySelector('#nSave').onclick = async () => { await save('nouveaux', id, integVals(), true); toast('Intégration enregistrée'); };
+  ov.querySelector('#nInteg').onclick = async () => {
+    const v = integVals();
+    if (!v.gcId || !v.classe || !v.celluleId) { toast('Choisissez le GC, la classe et la cellule.'); return; }
+    const tribu = byId('gc', v.gcId)?.tribu || '';
+    const fid = await save('fideles', n.fideleId || null, {...(n.fideleId ? byId('fideles', n.fideleId) || {} : {}), id: undefined, nom: n.nom, prenoms: '', telephone: n.contact || '', gcId: v.gcId, classe: v.classe, celluleId: v.celluleId, tribu, origine: 'ADNH'});
+    await save('nouveaux', id, {...v, statut: 'intégré', fideleId: fid}, true);
+    toast('Intégration validée'); openNouveau(id);
+  };
+  ov.querySelector('#nEdit').onclick = () => openForm({
+    title: 'Modifier', fields: [{k:'date', label:'Date de venue', type:'date', req:true}, {k:'nom', label:'Nom et prénoms', req:true}, {k:'contact', label:'Contact', type:'tel', full:true}], values: n,
+    onSubmit: async d => { await save('nouveaux', id, d, true); toast('Fiche mise à jour'); }
+  });
+  const del = ov.querySelector('#nDel'); del.onclick = async () => {
+    if (!del.dataset.armed) { del.dataset.armed = 1; del.textContent = 'Confirmer la suppression'; return; }
+    await remove('nouveaux', id); toast('Fiche supprimée'); closeModal();
+  };
+}
+
+/* ---------- Fiche session ---------- */
+function openSession(id) {
+  const s = byId('sessions', id); if (!s) return;
+  const ins = s.inscrits || [];
+  const dispo = optFideles(f => !ins.some(i => i.fideleId === f.id));
+  const ov = modal({
+    title: classeLabel(s.classe), wide: true,
+    body: `<dl class="kv"><dt>Date de départ</dt><dd>${frDate(s.dateDebut)}</dd><dt>Date de fin</dt><dd>${frDate(s.dateFin)}</dd><dt>Inscrits</dt><dd>${ins.length}</dd></dl>
+      ${dispo.length ? `<div class="toolbar"><select class="search" id="sAdd" aria-label="Inscrire un fidèle"><option value="">Inscrire un fidèle…</option>${dispo.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select></div>` : ''}
+      <section class="panel"><header><h2>Inscrits et absences</h2></header>${ins.length ? `<div class="tw"><table><thead><tr><th>Fidèle</th><th>Contact</th><th>Absences</th><th></th></tr></thead><tbody>${ins.map((i, k) => { const f = byId('fideles', i.fideleId); return `<tr><td>${esc(fullName(f))}</td><td class="mono">${esc(f?.telephone || '—')}</td><td><div class="actions"><button class="btn sm" type="button" data-abs="${k}" data-d="-1" aria-label="Retirer une absence">−</button><span style="min-width:24px;text-align:center;align-self:center;font-weight:600">${Number(i.absences) || 0}</span><button class="btn sm" type="button" data-abs="${k}" data-d="1" aria-label="Ajouter une absence">+</button></div></td><td style="text-align:right"><button class="btn sm" type="button" data-rm="${k}">Retirer</button></td></tr>`; }).join('')}</tbody></table></div>` : emptyState('Aucun inscrit', 'Inscrivez les fidèles concernés par cette classe.')}</section>`,
+    footer: `<div class="actions"><button class="btn danger" type="button" id="sDel">Supprimer la session</button><button class="btn" type="button" id="sEdit">Modifier les dates</button></div><button class="btn" type="button" data-cancel>Fermer</button>`
+  });
+  ov.querySelector('[data-cancel]').onclick = closeModal;
+  const put = async list => { await save('sessions', id, {inscrits: list}, true); openSession(id); };
+  const add = ov.querySelector('#sAdd'); if (add) add.onchange = async () => { if (!add.value) return; await put([...ins, {fideleId: add.value, absences: 0}]); toast('Fidèle inscrit'); };
+  ov.querySelectorAll('[data-abs]').forEach(b => b.onclick = () => { const l = ins.map(x => ({...x})); const k = Number(b.dataset.abs); l[k].absences = Math.max(0, (Number(l[k].absences) || 0) + Number(b.dataset.d)); put(l); });
+  ov.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => put(ins.filter((_, k) => k !== Number(b.dataset.rm))));
+  ov.querySelector('#sEdit').onclick = () => openForm({
+    title: 'Modifier la session', fields: [{k:'classe', label:'Classe', type:'select', options:optClasses, req:true, full:true}, {k:'dateDebut', label:'Date de départ', type:'date', req:true}, {k:'dateFin', label:'Date de fin de formation', type:'date', req:true}], values: s,
+    onSubmit: async d => { if (d.dateFin < d.dateDebut) { toast('La date de fin doit suivre la date de départ.'); return false; } await save('sessions', id, {...d, classe: Number(d.classe)}, true); toast('Session mise à jour'); }
+  });
+  const del = ov.querySelector('#sDel'); del.onclick = async () => {
+    if (!del.dataset.armed) { del.dataset.armed = 1; del.textContent = 'Confirmer la suppression'; return; }
+    await remove('sessions', id); toast('Session supprimée'); closeModal();
+  };
+}
+
+/* ---------- Fiche GC ---------- */
+function openGc(id, date) {
+  const g = byId('gc', id); if (!g) return;
+  date = date || today();
+  const membres = sortBy(S.fideles.filter(f => f.gcId === id), 'nom');
+  const pres = S.presences.find(p => p.id === `gc_${id}_${date}`);
+  const abs = new Set(pres ? pres.absents || [] : []);
+  const resp = [...(g.responsables || []), '', '', '', '', ''].slice(0, 5);
+  const passages = [...(g.passages || [])].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const dispo = optFideles(f => !f.gcId);
+  const ov = modal({
+    title: g.nom || 'GC', wide: true,
+    body: `<form id="gcForm" class="form">
+        ${fieldHtml({k:'nom', label:'Nom du GC', req:true}, g.nom)}
+        ${fieldHtml({k:'tribu', label:'Nom de la tribu'}, g.tribu)}
+        ${resp.map((r, i) => fieldHtml({k:'r' + i, label:'Responsable associé ' + (i + 1)}, r)).join('')}
+        <div class="field"><label>&nbsp;</label><button class="btn primary" type="submit">Enregistrer le GC</button></div>
+      </form>
+      <section class="panel"><header><h2>Membres (${membres.length})</h2><div class="actions"><button class="btn sm" type="button" id="gAdd">+ Nouveau membre</button>${dispo.length ? `<select class="search" id="gLink" aria-label="Rattacher un fidèle existant"><option value="">Rattacher un fidèle…</option>${dispo.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>` : ''}</div></header>
+      ${membres.length ? `<div class="body"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><label for="gDate" class="muted" style="font-size:12.5px;font-weight:600">Présences du</label><input class="search" style="width:auto" type="date" id="gDate" value="${date}">${pres ? pill(`${membres.length - abs.size} présent${membres.length - abs.size > 1 ? 's' : ''} · ${abs.size} absent${abs.size > 1 ? 's' : ''}`, 'g') : pill('Non relevé', 'w')}</div>
+        ${membres.map(f => `<div class="check"><input type="checkbox" id="ga-${f.id}" data-abs="${f.id}" ${abs.has(f.id) ? 'checked' : ''}><label for="ga-${f.id}">${esc(fullName(f))} <span class="muted mono">${esc(f.telephone || '')}</span></label>${abs.has(f.id) ? pill('Absent', 'b') : ''}<button class="btn sm" type="button" data-edit="${f.id}">Modifier</button></div>`).join('')}
+        <p class="muted" style="font-size:12.5px;margin:8px 0">Cochez les absents, puis enregistrez.</p><button class="btn primary sm" type="button" id="gPres">Enregistrer les présences</button></div>` : emptyState('Aucun membre', 'Ajoutez les membres du GC ou rattachez des fidèles existants.')}
+      </section>
+      <section class="panel"><header><h2>Passage de service</h2></header><div class="body" style="display:flex;flex-direction:column;gap:12px">
+        <form id="psForm" class="form"><div class="field"><label for="ps-date">Date</label><input id="ps-date" type="date" value="${today()}" required></div><div class="field"><label for="ps-note">Service</label><input id="ps-note" type="text" placeholder="Ex. accueil du culte du dimanche"></div><div class="field full"><button class="btn sm" type="submit">+ Ajouter un passage</button></div></form>
+        ${passages.length ? `<div class="log">${passages.map(p => `<div><b>${frDate(p.date)}</b><br><span class="muted">${esc(p.note || 'Passage de service')}</span></div>`).join('')}</div>` : '<p class="muted" style="margin:0">Aucun passage de service planifié.</p>'}
+      </div></section>`,
+    footer: `<button class="btn danger" type="button" id="gDel">Supprimer le GC</button><button class="btn" type="button" data-cancel>Fermer</button>`
+  });
+  ov.querySelector('[data-cancel]').onclick = closeModal;
+  ov.querySelector('#gcForm').onsubmit = async e => {
+    e.preventDefault(); const f = e.target.elements;
+    if (!f.nom.value.trim()) { toast('Le nom du GC est obligatoire.'); return; }
+    await save('gc', id, {nom: f.nom.value.trim(), tribu: f.tribu.value.trim(), responsables: [0, 1, 2, 3, 4].map(i => f['r' + i].value.trim())}, true);
+    toast('GC enregistré');
+  };
+  ov.querySelector('#gAdd').onclick = () => editFidele(null, {gcId: id});
+  const link = ov.querySelector('#gLink'); if (link) link.onchange = async () => { if (!link.value) return; await save('fideles', link.value, {gcId: id, tribu: g.tribu || ''}, true); toast('Membre rattaché'); openGc(id, date); };
+  ov.querySelectorAll('[data-edit]').forEach(x => x.onclick = () => editFidele(x.dataset.edit));
+  const gd = ov.querySelector('#gDate'); if (gd) gd.onchange = () => openGc(id, gd.value || today());
+  const gp = ov.querySelector('#gPres'); if (gp) gp.onclick = async () => {
+    const absents = [...ov.querySelectorAll('[data-abs]:checked')].map(i => i.dataset.abs);
+    gp.disabled = true;
+    try { await save('presences', `gc_${id}_${date}`, {type: 'gc', groupeId: id, periode: date, absents, presents: membres.length - absents.length}); toast('Présences enregistrées'); openGc(id, date); } catch (e) { gp.disabled = false; }
+  };
+  ov.querySelector('#psForm').onsubmit = async e => {
+    e.preventDefault();
+    await save('gc', id, {passages: [...(g.passages || []), {date: ov.querySelector('#ps-date').value || today(), note: ov.querySelector('#ps-note').value.trim()}]}, true);
+    toast('Passage de service ajouté'); openGc(id, date);
+  };
+  const del = ov.querySelector('#gDel'); del.onclick = async () => {
+    if (!del.dataset.armed) { del.dataset.armed = 1; del.textContent = 'Confirmer : les membres restent enregistrés'; return; }
+    await remove('gc', id); toast('GC supprimé'); closeModal();
+  };
+}
+
+/* ---------- Données ---------- */
+function setStatus() {
+  const s = $('#status');
+  s.textContent = dbState === 'on' ? 'Données synchronisées' : dbState === 'off' ? 'Données non disponibles' : 'Connexion aux données…';
+}
+let rerender = null;
+function schedule() { clearTimeout(rerender); rerender = setTimeout(render, 30); }
+(async () => {
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+  if (!db) { dbState = 'off'; setStatus(); render(); return; }
+  dbState = 'on'; setStatus();
+  COLLS.forEach(c => {
+    const q = c === 'presences' ? db.collection(c).orderBy('periode', 'desc').limit(800) : db.collection(c);
+    q.onSnapshot(snap => {
+      S[c] = snap.docs.filter(d => d.exists).map(d => ({...d.data(), id: d.id}));
+      loaded.add(c); schedule();
+    }, err => { loaded.add(c); if (err && err.code === 'revoked') { dbState = 'off'; setStatus(); } schedule(); });
+  });
+})();
+
+renderNav();
+render();
+</script>

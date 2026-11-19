@@ -1,0 +1,170 @@
+[
+  {
+    "id": "gc01",
+    "nom": "GC 1",
+    "ordre": 1,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc02",
+    "nom": "GC 2",
+    "ordre": 2,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc03",
+    "nom": "GC 3",
+    "ordre": 3,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc04",
+    "nom": "GC 4",
+    "ordre": 4,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc05",
+    "nom": "GC 5",
+    "ordre": 5,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc06",
+    "nom": "GC 6",
+    "ordre": 6,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc07",
+    "nom": "GC 7",
+    "ordre": 7,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc08",
+    "nom": "GC 8",
+    "ordre": 8,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc09",
+    "nom": "GC 9",
+    "ordre": 9,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc10",
+    "nom": "GC 10",
+    "ordre": 10,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc11",
+    "nom": "GC 11",
+    "ordre": 11,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  },
+  {
+    "id": "gc12",
+    "nom": "GC 12",
+    "ordre": 12,
+    "passages": [],
+    "responsables": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "tribu": ""
+  }
+]

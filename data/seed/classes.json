@@ -1,0 +1,22 @@
+[
+  {
+    "id": "classe1",
+    "nom": "Membership",
+    "numero": 1
+  },
+  {
+    "id": "classe2",
+    "nom": "Discipleship",
+    "numero": 2
+  },
+  {
+    "id": "classe3",
+    "nom": "Être leader",
+    "numero": 3
+  },
+  {
+    "id": "classe4",
+    "nom": "Départ (bergers)",
+    "numero": 4
+  }
+]

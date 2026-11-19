@@ -1,20 +1,39 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# SaaS EMCV
 
-# Run and deploy your AI Studio app
+Logiciel de gestion de l'église **EMCV** (Église Missionnaire Christ Vivant), Abidjan.
 
-This contains everything you need to run your app locally.
+Fidèles, nouveaux (ADNH), cellules, bergers, groupes de communion, formations, départements, réunions, programmation, supervision, finances, projets, statistiques, objectifs, recommandations et rapports PDF, avec un accès par rôle.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1QT-IHFQHJpfDmhwHNP0s9SsGYwCHpTSu
+## Utiliser l'application
 
-## Run Locally
+- En ligne : https://claude.ai/artifact/ELRbehENjkRz9YHePCL1RX (privée ; partage depuis le menu Partager).
+- En local, pour regarder l'interface : ouvrir `app/index.html` dans un navigateur. Hors de claude.ai, les données ne se chargent pas (bandeau d'avertissement) ; l'interface et la navigation restent visibles.
 
-**Prerequisites:**  Node.js
+## Travailler sur le projet avec Claude Code
 
+```bash
+git clone <adresse du dépôt>
+cd emcv-saas
+claude
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Claude Code lit automatiquement `CLAUDE.md`, qui décrit l'architecture, les conventions, les rôles, la sécurité et les points ouverts.
+
+## Contenu
+
+| Dossier | Contenu |
+|---|---|
+| `app/` | L'application (une seule page HTML) |
+| `docs/` | Cahier de conception, historique des décisions, étude Côte d'Ivoire, Word des compétences |
+| `docs/sources/` | Notes manuscrites d'origine, Word original, anciennes versions |
+| `brand/` | Logo EMCV (SVG) et sources du canevas de logo |
+| `data/seed/` | Données de référence (classes, départements, GC, églises) |
+| `tests/` | Test de rendu de tous les écrans, captures d'écran |
+
+## Tests
+
+```bash
+npm install
+npm test           # rend chaque sous-menu pour chaque rôle
+npm run captures   # captures ordinateur et téléphone
+```

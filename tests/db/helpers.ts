@@ -57,6 +57,8 @@ const ROLE_DE: Record<(typeof COMPTES)[number], string> = {
 
 /** Crée un compte (auth.users + profil) par rôle de test et renvoie leurs identifiants. */
 export async function fixtures(db: Db): Promise<Comptes> {
+  // Les tests de droits partent de tables métier vides (les données fictives sont retirées dans la transaction).
+  await db.q('delete from appel; delete from nouveau; delete from absence; delete from releve_absence; delete from fidele; update profil set berger_id = null; delete from berger');
   const out = {} as Comptes;
   for (const k of COMPTES) {
     const { rows } = await db.q(

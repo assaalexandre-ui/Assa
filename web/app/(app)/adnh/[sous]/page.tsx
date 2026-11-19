@@ -133,7 +133,7 @@ function ficheNouveau(n: Nouveau, refs: Refs, w: boolean, ici: string, retour: s
   const bergers = refs.bergersInfo.map(b => [b.id, `${b.nom} (${b.brebis} / 15)`] as [string, string]);
   return (
     <Modal titre={n.nom} retour={retour} large pied={<>
-      {w ? <div className="actions"><DeleteButton action={() => supprimerNouveau(n.id, retour)} /><Link className="btn" href={`${ici}&mode=modifier`} scroll={false}>Modifier</Link></div> : <span />}
+      {w ? <div className="actions"><DeleteButton action={supprimerNouveau.bind(null, n.id, retour)} /><Link className="btn" href={`${ici}&mode=modifier`} scroll={false}>Modifier</Link></div> : <span />}
       <Link className="btn" href={retour} scroll={false}>Fermer</Link>
     </>}>
       <dl className="kv"><dt>Venu le</dt><dd>{frDate(n.date_venue)}</dd><dt>Contact</dt><dd className="mono">{n.contact || '—'}</dd>{n.commune && <><dt>Commune</dt><dd>{n.commune}</dd></>}<dt>Statut</dt><dd>{n.statut === 'intégré' ? <Pill c="g">Intégré</Pill> : <Pill c="w">En suivi</Pill>}</dd></dl>

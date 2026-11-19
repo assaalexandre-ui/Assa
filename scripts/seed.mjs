@@ -47,7 +47,7 @@ const fideles = repartition.map((b, i) => {
 const resultats = ['Joint', 'Pas de réponse', 'Rappeler plus tard'];
 const nouveaux = Array.from({ length: 10 }, (_, i) => {
   const [prenom] = choix(PRENOMS);
-  const date = `2026-${pad(8 + Math.floor(i / 3))}-${pad(2 + ((i * 5) % 26))}`;
+  const date = `2026-${pad(8 + Math.floor(i / 3))}-${pad(2 + ((i * 5) % 17))}`;
   return { id: uuid('30000000', i + 1), date_venue: date, nom: `${choix(NOMS)} ${prenom}`, contact: telephone(), commune: choix(COMMUNES), integre: i < 3 };
 });
 nouveaux.filter(n => n.integre).forEach((n, k) => {

@@ -8,7 +8,8 @@
     "test": "node tests/smoke.mjs",
     "captures": "node tests/captures.mjs",
     "test:db": "vitest run --config vitest.config.ts",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "test:e2e": "node tests/e2e/parcours.spec.mjs"
   },
   "devDependencies": {
     "@types/pg": "^8.23.1",

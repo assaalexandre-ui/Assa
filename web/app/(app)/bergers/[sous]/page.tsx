@@ -166,7 +166,7 @@ async function FenetreBerger({ s, id, mode, bergers, fideles, releve, wk, base }
   }
   return (
     <Modal titre={fullName(b)} retour={base} large pied={<>
-      {w && !estBerger ? <DeleteButton action={() => supprimerBerger(b.id)} label="Supprimer le berger" confirmation="Confirmer : les brebis restent enregistrées" /> : <span />}
+      {w && !estBerger ? <DeleteButton action={supprimerBerger.bind(null, b.id)} label="Supprimer le berger" confirmation="Confirmer : les brebis restent enregistrées" /> : <span />}
       <Link className="btn" href={base} scroll={false}>Fermer</Link>
     </>}>
       <dl className="kv"><dt>Contact</dt><dd className="mono">{b.contact || '—'}</dd><dt>Brebis suivies</dt><dd>{brebis.length} / {MAX} {plein && <Pill c="w">Complet</Pill>}</dd></dl>

@@ -2,7 +2,7 @@
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { enregistrerFiche, supprimerFiche } from '@/app/(app)/fiches/actions';
-import { ENTITES, type EntiteCle, type EntiteDef } from '@/lib/entites';
+import { ENTITES, type Dyn, type EntiteCle, type EntiteDef } from '@/lib/entites';
 import type { Resultat } from '@/lib/erreurs';
 import { Champ } from './Champ';
 import { DeleteButton } from './DeleteButton';
@@ -11,7 +11,7 @@ type Opt = [string, string];
 
 /** Formulaire générique d'une fiche (voir lib/entites.ts). ro = consultation seule. */
 export function FicheForm({ entite, id, valeurs, dyn, ro, suppression, retour, fixes }: {
-  entite: EntiteCle; id?: string | null; valeurs?: Record<string, string | number | null>; dyn?: Partial<Record<'bergers' | 'cellules' | 'assemblees', Opt[]>>;
+  entite: EntiteCle; id?: string | null; valeurs?: Record<string, string | number | boolean | null>; dyn?: Partial<Record<Dyn, Opt[]>>;
   ro: boolean; suppression?: boolean; retour: string; fixes?: Record<string, string>;
 }) {
   const [etat, action, enCours] = useActionState<Resultat, FormData>(enregistrerFiche, {});
@@ -26,7 +26,7 @@ export function FicheForm({ entite, id, valeurs, dyn, ro, suppression, retour, f
         {Object.entries(fixes ?? {}).map(([k, v]) => <input key={k} type="hidden" name={'_fixe_' + k} value={v} />)}
         {def.champs.map(c => c.type === 'select'
           ? <Champ key={c.k} k={c.k} label={c.label} type="select" options={c.dyn ? (dyn?.[c.dyn] ?? []) : (c.options ?? [])} req={c.req} full={c.full} ro={ro} v={valeurs?.[c.k]} />
-          : <Champ key={c.k} k={c.k} label={c.label} type={c.type ?? 'text'} req={c.req} full={c.full} ro={ro} v={valeurs?.[c.k]} />)}
+          : <Champ key={c.k} k={c.k} label={c.label} type={c.type ?? 'text'} req={c.req} full={c.full} ro={ro} v={valeurs?.[c.k]} hint={c.hint} />)}
       </form>
       {etat.erreur && <p className="err" role="alert">{etat.erreur}</p>}
       <div className="actions" style={{ justifyContent: 'space-between' }}>

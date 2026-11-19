@@ -33,7 +33,7 @@ export async function creerUtilisateur(_: EtatCompte, f: FormData): Promise<Etat
   }
   const { error: e2 } = await admin.from('profil').insert({
     id: data.user.id, eglise_id: s.profil.eglise_id, nom, email, role_code: role, fonction: txt(f, 'fonction'),
-    berger_id: role === 'berger' ? txt(f, 'berger_id') : null, gc_id: role === 'resp_gc' ? txt(f, 'gc_id') : null,
+    berger_id: role === 'berger' ? txt(f, 'berger_id') : null, gc_id: role === 'resp_gc' ? txt(f, 'gc_id') : null, departement_id: role === 'resp_dep' ? txt(f, 'departement_id') : null,
   });
   if (e2) { await admin.auth.admin.deleteUser(data.user.id); return { erreur: messageErreur(e2) }; }
   revalidatePath('/admin', 'layout');
@@ -45,7 +45,7 @@ export async function modifierUtilisateur(_: EtatCompte, f: FormData): Promise<E
   const role = txt(f, 'role_code');
   const supabase = await createClient();
   const { data, error } = await supabase.from('profil').update({
-    nom: txt(f, 'nom'), role_code: role, fonction: txt(f, 'fonction'), berger_id: role === 'berger' ? txt(f, 'berger_id') : null, gc_id: role === 'resp_gc' ? txt(f, 'gc_id') : null, actif: f.get('actif') === 'on',
+    nom: txt(f, 'nom'), role_code: role, fonction: txt(f, 'fonction'), berger_id: role === 'berger' ? txt(f, 'berger_id') : null, gc_id: role === 'resp_gc' ? txt(f, 'gc_id') : null, departement_id: role === 'resp_dep' ? txt(f, 'departement_id') : null, actif: f.get('actif') === 'on',
   }).eq('id', id).select('id');
   if (error) return { erreur: messageErreur(error) };
   if (!data?.length) return { erreur: "Vous n'avez pas le droit de modifier ce compte." };

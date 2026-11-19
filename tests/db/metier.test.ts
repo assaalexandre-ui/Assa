@@ -1,21 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tx, fixtures, n, type Db, type Comptes } from './helpers';
-
-type Monde = { u: Comptes; b1: string; b2: string; f1: string[]; f2: string[]; libres: string[] };
-
-/** Deux bergers reliés à berger1/berger2, 3 brebis pour B1, 2 pour B2, 2 fidèles sans berger. */
-async function monde(db: Db): Promise<Monde> {
-  const u = await fixtures(db);
-  const berger = async (nom: string) => (await db.q(`insert into berger (eglise_id, nom) values ('00000000-0000-0000-0000-000000000001', $1) returning id`, [nom])).rows[0].id as string;
-  const fidele = async (nom: string, b: string | null) => (await db.q(`insert into fidele (eglise_id, nom, berger_id) values ('00000000-0000-0000-0000-000000000001', $1, $2) returning id`, [nom, b])).rows[0].id as string;
-  const b1 = await berger('Berger Un'), b2 = await berger('Berger Deux');
-  await db.q('update profil set berger_id = $1 where id = $2', [b1, u.berger1]);
-  await db.q('update profil set berger_id = $1 where id = $2', [b2, u.berger2]);
-  const f1 = [await fidele('A1', b1), await fidele('A2', b1), await fidele('A3', b1)];
-  const f2 = [await fidele('B1', b2), await fidele('B2', b2)];
-  const libres = [await fidele('L1', null), await fidele('L2', null)];
-  return { u, b1, b2, f1, f2, libres };
-}
+import { tx, monde, n } from './helpers';
 
 describe('métier : fidèles, bergers, ADNH, relevés', () => {
   it('berger1 ne lit que ses 3 brebis', () => tx(async db => {

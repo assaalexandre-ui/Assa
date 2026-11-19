@@ -9,7 +9,8 @@
     "captures": "node tests/captures.mjs",
     "test:db": "vitest run --config vitest.config.ts",
     "db:reset": "supabase db reset",
-    "test:e2e": "node tests/e2e/parcours.spec.mjs"
+    "test:e2e": "node tests/e2e/parcours.spec.mjs",
+    "sql:installation": "node scripts/installation-sql.mjs"
   },
   "devDependencies": {
     "@types/pg": "^8.23.1",

@@ -21,6 +21,9 @@ Porteur du projet : Alexandre (DG de Carmixt Mobility, designer graphique). Il t
 
 ## Où est l'application en ligne
 
+- **Version de test Next.js** : https://emcv-test.vercel.app (Vercel, projet `emcv-test`, dossier `web`, serveur à Paris). Base Supabase `smbhlxhspfhdwgdtueee` (Europe). Chaque envoi sur `main` redéploie le site.
+- Après toute modification de `supabase/migrations/` ou `supabase/seed.sql`, lancer `npm run sql:installation` pour régénérer `supabase/installation-complete.sql` (installation par l'éditeur SQL de Supabase). Une nouvelle migration sur une base déjà en ligne se colle seule dans l'éditeur SQL.
+
 - Artefact claude.ai (privé, propriétaire Alexandre) : https://claude.ai/artifact/ELRbehENjkRz9YHePCL1RX
 - Les données saisies vivent dans la base de l'artefact (capacité `db`), **pas dans ce dépôt**.
 - Pour republier après modification de `app/index.html` : depuis une session Claude qui a l'outil Artifact, publier ce fichier avec `url` = l'adresse ci-dessus. Sans `capabilities`, la déclaration existante est conservée.
@@ -58,6 +61,7 @@ tests/captures.mjs              Captures d'écran ordinateur + téléphone (Play
 web/                            Version de test Next.js (voir web/README.md)
 supabase/migrations/            Schéma, fonctions et règles d'accès (RLS) de la version de test
 supabase/seed.sql               Données FICTIVES de test (généré par scripts/seed.mjs)
+supabase/installation-complete.sql  Migrations + données fictives en un fichier (npm run sql:installation)
 scripts/creer-admin.mjs         Crée le premier compte administrateur
 tests/db/                       Tests des droits contre la base locale (vitest + pg)
 tests/e2e/parcours.spec.mjs     Parcours complet : admin, création d'un berger, périmètre, API directe

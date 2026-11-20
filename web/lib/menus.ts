@@ -2,7 +2,7 @@
 
 export type Acces = 'r' | 'w';
 export type Droits = Partial<Record<MenuId, Acces>>;
-export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements';
+export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'pilotage' | 'stats' | 'objectifs' | 'projets';
 export type MenuDef = { id: MenuId; t: string; section: string; vert: boolean; subs: [string, string][]; icone: string };
 
 const VIE = "Structure de l'église";
@@ -26,8 +26,16 @@ export const MENUS: MenuDef[] = [
     icone: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>' },
   { id: 'agenda', t: 'Programmation', section: VIE, vert: true, subs: [['calendrier', 'Calendrier annuel'], ['avenir', 'À venir'], ['historique', 'Historique'], ['eglises', 'Églises']],
     icone: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>' },
+  { id: 'pilotage', t: 'Supervision', section: VIE, vert: true, subs: [['departements', 'Suivi des départements'], ['rapports', 'Rapports des départements']],
+    icone: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>' },
   { id: 'organigramme', t: 'Organigramme', section: VIE, vert: true, subs: [['annuaire', 'Annuaire des responsables'], ['structure', 'Structure']],
     icone: '<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>' },
+  { id: 'stats', t: 'Statistiques', section: 'Tableau de bord', vert: false, subs: [['croissance', 'Croissance et présence'], ['integration', 'Intégration et suivi'], ['formations', 'Formations']],
+    icone: '<path d="M4 20V13M9.5 20V8M15 20v-5M20.5 20V5"/><path d="M3 20.5h18"/>' },
+  { id: 'objectifs', t: 'Objectifs à atteindre', section: 'Tableau de bord', vert: false, subs: [['objectifs', 'Objectifs'], ['resultats', 'Résultats']],
+    icone: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>' },
+  { id: 'projets', t: 'Projets', section: 'Tableau de bord', vert: false, subs: [['projets', 'Projets'], ['actions', "Plan d'actions"], ['planning', 'Planning'], ['rappels', 'Rappels']],
+    icone: '<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M7.5 9h6M7.5 13h9M7.5 17h4"/>' },
   { id: 'fideles', t: 'Fidèles', section: 'Fidèles et pastorale', vert: false, subs: [['liste', 'Fichier des fidèles'], ['anniversaires', 'Anniversaires']],
     icone: '<circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5M14 14.6c3.4-.6 6.5 1.6 7 5.4"/>' },
   { id: 'priere', t: 'Requêtes de prière', section: 'Fidèles et pastorale', vert: false, subs: [['requetes', 'Requêtes'], ['temoignages', 'Témoignages']],
@@ -61,6 +69,10 @@ export const LEADS: Record<MenuId, string> = {
   priere: "Requêtes déposées par les fidèles et suivies par l'équipe d'intercession.",
   enfants: "Enfants de l'école du dimanche et pointage sécurisé avec code de récupération.",
   rdv: "Rendez-vous avec les pasteurs, visites à domicile et à l'hôpital.",
+  pilotage: 'Suivi opérationnel des départements et rapports des responsables.',
+  stats: "Les KPI de l'église, calculés automatiquement à partir des données saisies.",
+  objectifs: "Les objectifs à atteindre fixés par l'administrateur, leur but et le résultat obtenu.",
+  projets: "Planifier et suivre les projets : échéances, plan d'actions, budget, journal et rappels.",
   evenements: 'Inscriptions aux conventions, séminaires et retraites, avec paiement et transport.',
 };
 

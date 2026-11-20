@@ -54,7 +54,7 @@ try {
 
   etape('connexion administrateur');
   await connexion('admin@e2e.local', mdpAdmin);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Organigramme', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Administration']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Supervision', 'Organigramme', 'Statistiques', 'Objectifs à atteindre', 'Projets', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Administration']);
   await page.getByText('Version de test : données fictives').first().waitFor();
 
   etape("l'administrateur ouvre la fiche d'un berger et celle d'un nouveau (boutons de suppression)");
@@ -87,6 +87,27 @@ try {
   await page.click('.modal button[type=submit]');
   await page.waitForURL(BASE + '/priere/requetes');
   await page.getByText('Sujet confidentiel E2E').first().waitFor();
+
+  etape('lot 5 : statistiques calculées par la base et objectif automatique');
+  await page.goto(BASE + '/stats/croissance');
+  await page.getByRole('heading', { name: 'Nouveaux venus par mois' }).waitFor();
+  await page.goto(BASE + '/objectifs/resultats');
+  await page.getByText('Six cellules actives').first().waitFor();
+
+  etape("lot 5 : création d'un projet, ajout d'une action puis « Marquer fait »");
+  await page.goto(BASE + '/projets/projets?fiche=nouveau');
+  await page.fill('#f-nom', 'Projet E2E');
+  await page.fill('#f-responsable', 'Responsable E2E');
+  await page.fill('#f-date_debut', '2026-11-01'); await page.fill('#f-echeance', '2027-02-01');
+  await page.selectOption('#f-priorite', 'Haute'); await page.selectOption('#f-statut', 'En cours');
+  await page.click('.modal button[type=submit]');
+  await page.waitForURL(BASE + '/projets/projets');
+  await page.locator('.card', { hasText: 'Projet E2E' }).click();
+  await page.fill('#f-titre', 'Action E2E');
+  await page.click('.modal button:has-text("Ajouter l\'action")');
+  await page.locator('.modal tr', { hasText: 'Action E2E' }).waitFor({ timeout: 10000 });
+  await page.locator('.modal tr', { hasText: 'Action E2E' }).getByRole('button', { name: 'Marquer fait' }).click();
+  await page.locator('.modal tr', { hasText: 'Action E2E' }).getByRole('button', { name: 'Rouvrir' }).waitFor({ timeout: 10000 });
 
   etape('lot 3 : marquer une tâche du conseil comme faite');
   await page.goto(BASE + '/reunions/taches?f=nonfaites');
@@ -166,11 +187,17 @@ try {
   await page.click('aside .links button');
   await page.waitForURL(BASE + '/connexion');
   await connexion('respdep@e2e.local', mdpDep);
-  assert.deepEqual(await menus(), ['Accueil', 'Départements', 'Programmation', 'Organigramme']);
+  assert.deepEqual(await menus(), ['Accueil', 'Départements', 'Programmation', 'Supervision', 'Organigramme', 'Objectifs à atteindre', 'Projets']);
   await page.goto(BASE + '/departements/services');
   assert.equal(await page.locator('.card').count(), 1);
   await page.goto(BASE + '/departements/autres');
   assert.equal(await page.locator('.card').count(), 0);
+
+  etape('lot 5 : le responsable de département voit les objectifs généraux et ceux de son département, pas les autres');
+  await page.goto(BASE + '/objectifs/objectifs');
+  await page.getByText('Former 8 opérateurs caméra').first().waitFor();
+  assert.equal(await page.getByText('Deux nouveaux chants par mois').count(), 0);
+  assert.equal(await page.getByRole('link', { name: '+ Fixer un objectif' }).count(), 0);
 
   console.log('\nParcours complet : OK');
 } finally {

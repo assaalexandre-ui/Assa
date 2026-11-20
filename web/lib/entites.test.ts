@@ -28,4 +28,12 @@ describe('lireChamps', () => {
   it('refuse une session dont la fin précède le début', () => {
     expect(lireChamps(ENTITES.session_formation, fd({ classe: '1', date_debut: '2026-12-01', date_fin: '2026-11-01' }))).toEqual({ ok: false, erreur: 'La date de fin doit suivre la date de début.' });
   });
+  it('refuse un projet dont l’échéance précède le début', () => {
+    expect(lireChamps(ENTITES.projet, fd({ nom: 'Toiture', responsable: 'R', date_debut: '2026-12-01', echeance: '2026-11-01', priorite: 'Haute', statut: 'En cours' }))).toEqual({ ok: false, erreur: "L'échéance doit suivre la date de début." });
+  });
+  it('lit un objectif avec sa mesure automatique', () => {
+    const r = lireChamps(ENTITES.objectif, fd({ libelle: 'Nouveaux', mesure: 'nouveaux', cible: '40', date_debut: '2026-01-01', date_fin: '2026-12-31' }));
+    expect(r.ok && r.valeurs.mesure).toBe('nouveaux');
+    expect(r.ok && r.valeurs.cible).toBe(40);
+  });
 });

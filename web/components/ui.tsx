@@ -3,10 +3,19 @@ import Link from 'next/link';
 
 export const Pill = ({ children, c = 'n' }: { children: React.ReactNode; c?: 'g' | 'w' | 'b' | 'n' | 'a' }) => <span className={`pill ${c}`}>{children}</span>;
 
+/** Chiffres clés : un bandeau, chaque chiffre avec sa bille de verre et un pictogramme choisi d'après son libellé. */
 export function Kpis({ items }: { items: [string, React.ReactNode, string?][] }) {
   return (
     <div className="kpis">
-      {items.map(([l, v, e]) => <div className="kpi" key={l}><span>{l}</span><strong>{v}</strong>{e && <em>{e}</em>}</div>)}
+      {items.map(([l, v, e], i) => {
+        const [ic, ton] = iconeKpi(l, i);
+        return (
+          <div className="kpi" key={l}>
+            <Bille icone={ic} ton={ton} />
+            <div className="kt"><span>{l}</span><strong>{v}</strong>{e && <em>{e}</em>}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -37,7 +46,16 @@ export const ICONES = {
   ajout: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
   coeur: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
   service: '<path d="M4 14h16M6 14l1-6h10l1 6M9 8V5h6v3"/><path d="M5 14v5h14v-5"/>',
+  eglise: '<path d="M12 3v5M9.5 5.5h5"/><path d="M5 21V12l7-4 7 4v9"/><path d="M10 21v-4h4v4"/>',
+  cible: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+  sablier: '<path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9"/>',
+  maison: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
 } as const;
+
+/** Bille de verre aux couleurs du vitrail, pictogramme blanc en relief. */
+export function Bille({ icone, ton = 'saphir', grande }: { icone: keyof typeof ICONES; ton?: Ton; grande?: boolean }) {
+  return <span className={'pico' + (grande ? ' grande' : '')} style={{ ['--j' as string]: `var(--${ton})` }}><svg viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{ __html: ICONES[icone] }} /></span>;
+}
 
 const TONS: Ton[] = ['saphir', 'rubis', 'emeraude', 'ambre', 'amethyste', 'ciel'];
 // Icône et couleur choisies d'après le titre du bloc, pour que chaque bloc titré porte son pictogramme rond.
@@ -56,6 +74,26 @@ const AUTO: [RegExp, keyof typeof ICONES, Ton][] = [
   [/annonce/i, 'annonce', 'ambre'],
   [/venir|calend/i, 'calendrier', 'rubis'],
 ];
+const AUTO_KPI: [RegExp, keyof typeof ICONES, Ton][] = [
+  [/fidèle|membre|brebis|inscrit|participant/i, 'personnes', 'saphir'],
+  [/nouveau.*appel|appeler|jamais appel/i, 'telephone', 'rubis'],
+  [/nouveau|intégr/i, 'ajout', 'emeraude'],
+  [/culte|présen|comptage/i, 'eglise', 'emeraude'],
+  [/absen/i, 'barres', 'ambre'],
+  [/tâche|action|rappel|retard/i, 'taches', 'ciel'],
+  [/formation|classe|session/i, 'formation', 'ambre'],
+  [/encaiss|dépens|solde|payé|budget|montant|mobile|reste|donné|recette|valeur|ce mois|depuis janvier/i, 'argent', 'ambre'],
+  [/valider|attente|à payer/i, 'sablier', 'rubis'],
+  [/objectif|atteint|avancement/i, 'cible', 'amethyste'],
+  [/projet|lancer|terminé|en cours/i, 'journal', 'ciel'],
+  [/cellule|gc|groupe/i, 'rosace', 'emeraude'],
+  [/article|réparer|service|patrimoine/i, 'service', 'amethyste'],
+];
+function iconeKpi(l: string, i: number): [keyof typeof ICONES, Ton] {
+  const a = AUTO_KPI.find(([r]) => r.test(l));
+  return a ? [a[1], a[2]] : ['liste', TONS[i % TONS.length]];
+}
+
 function iconeAuto(titre: string): [keyof typeof ICONES, Ton] {
   const a = AUTO.find(([r]) => r.test(titre));
   if (a) return [a[1], a[2]];
@@ -69,7 +107,7 @@ export function Panel({ titre, droite, children, icone, ton }: { titre?: React.R
   ton = ton ?? 'saphir';
   return (
     <section className="panel">
-      {titre && <header>{icone && <span className="pico" style={{ ['--j' as string]: `var(--${ton})` }}><svg viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{ __html: ICONES[icone] }} /></span>}<h2>{titre}</h2>{droite}</header>}
+      {titre && <header>{icone && <Bille icone={icone} ton={ton} />}<h2>{titre}</h2>{droite}</header>}
       {children}
     </section>
   );

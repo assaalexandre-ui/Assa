@@ -3,9 +3,9 @@ import { phone } from './format';
 
 export type TypeChamp = 'text' | 'date' | 'time' | 'month' | 'tel' | 'number' | 'textarea' | 'select' | 'check';
 /** options : liste fixe, ou clé d'une liste dynamique fournie par la page (bergers, cellules, assemblées). */
-export type ChampDef = { k: string; label: string; type?: TypeChamp; req?: boolean; full?: boolean; options?: string[]; dyn?: Dyn; hint?: string };
+export type ChampDef = { k: string; label: string; type?: TypeChamp; req?: boolean; full?: boolean; options?: (string | [string, string])[]; dyn?: Dyn; hint?: string };
 export type Dyn = 'bergers' | 'cellules' | 'assemblees' | 'classes' | 'departements' | 'reunions' | 'evenements';
-export type EntiteDef = { table: string; menu: 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements'; nouveau: string; champs: ChampDef[] };
+export type EntiteDef = { table: string; menu: 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'objectifs' | 'projets'; nouveau: string; champs: ChampDef[] };
 
 export const COMMUNES = ['Abobo', 'Adjamé', 'Anyama', 'Attécoubé', 'Bingerville', 'Cocody', 'Koumassi', 'Marcory', 'Plateau', 'Port-Bouët', 'Songon', 'Treichville', 'Yopougon', 'Autre'];
 export const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -21,6 +21,17 @@ export const AGES = ['0–3 ans', '4–6 ans', '7–9 ans', '10–12 ans', '13 a
 export const TYPES_RDV = ['Bureau', 'Visite à domicile', "Visite à l'hôpital", 'Appel'];
 export const STATUTS_RDV = ['Prévu', 'Fait', 'Reporté', 'Annulé'];
 export const CANAUX = ['Espèces', 'Orange Money', 'MTN MoMo', 'Moov Money', 'Wave', 'Virement', 'Chèque'];
+// Mesures des objectifs : automatiques (calculées par la base) ou saisie manuelle. Reprises de l'artefact.
+export const MESURES: [string, string][] = [
+  ['manuel', 'Saisie manuelle'], ['fideles', 'Fidèles enregistrés (total)'], ['nouveaux', 'Nouveaux venus sur la période'],
+  ['appeles', 'Nouveaux appelés sur la période'], ['integres', 'Nouveaux intégrés sur la période'], ['presence', 'Présence moyenne aux cultes sur la période'],
+  ['suivis', 'Fidèles suivis par un berger'], ['formation', 'Fidèles en formation'], ['valides', 'Classes validées sur la période'],
+  ['cellules', 'Nombre de cellules'], ['rapports', 'Rapports de cellule remis sur la période'],
+];
+export const PRIORITES = ['Haute', 'Moyenne', 'Basse'];
+export const STATUTS_PROJET = ['À lancer', 'En cours', 'En pause', 'Terminé'];
+export const STATUTS_ACTION = ['À faire', 'En cours', 'Fait'];
+export const TYPES_JOURNAL = ['Note', 'Décision', 'Difficulté', 'Réunion'];
 export const POSTES = ['Entrée principale', 'Placement – nef', 'Placement – balcon', 'Parking', 'Accueil des nouveaux', 'Salle des enfants', 'Sécurité'];
 
 export const ENTITES = {
@@ -93,6 +104,18 @@ export const ENTITES = {
     { k: 'evenement_id', label: 'Événement', type: 'select', dyn: 'evenements', req: true, full: true }, { k: 'nom', label: 'Nom et prénoms', req: true },
     { k: 'contact', label: 'Contact', type: 'tel' }, { k: 'montant', label: 'Montant payé (FCFA)', type: 'number' }, { k: 'canal', label: 'Moyen de paiement', type: 'select', options: CANAUX },
     { k: 'car', label: 'Car / transport' }, { k: 'depart', label: 'Point de départ', type: 'select', options: COMMUNES }] },
+  objectif: { table: 'objectif', menu: 'objectifs', nouveau: 'Fixer un objectif', champs: [
+    { k: 'libelle', label: 'Objectif à atteindre', req: true, full: true }, { k: 'but', label: 'But (pourquoi cet objectif)', type: 'textarea' },
+    { k: 'mesure', label: 'Mesure du résultat', type: 'select', options: MESURES, req: true, full: true, hint: 'Choisissez une mesure automatique, ou « Saisie manuelle » pour mettre le résultat à jour vous-même.' },
+    { k: 'cible', label: 'Cible à atteindre', type: 'number', req: true }, { k: 'realise', label: 'Résultat (saisie manuelle uniquement)', type: 'number' },
+    { k: 'date_debut', label: 'Début de la période', type: 'date' }, { k: 'date_fin', label: 'Échéance', type: 'date', req: true },
+    { k: 'departement_id', label: 'Département concerné', type: 'select', dyn: 'departements' }, { k: 'responsable', label: 'Responsable du suivi' }] },
+  projet: { table: 'projet', menu: 'projets', nouveau: 'Nouveau projet', champs: [
+    { k: 'nom', label: 'Nom du projet', req: true, full: true }, { k: 'description', label: 'Description et objectif', type: 'textarea' },
+    { k: 'responsable', label: 'Responsable', req: true }, { k: 'departement_id', label: 'Département', type: 'select', dyn: 'departements' },
+    { k: 'date_debut', label: 'Date de début', type: 'date', req: true }, { k: 'echeance', label: 'Échéance', type: 'date', req: true },
+    { k: 'priorite', label: 'Priorité', type: 'select', options: PRIORITES, req: true }, { k: 'statut', label: 'Statut', type: 'select', options: STATUTS_PROJET, req: true },
+    { k: 'budget', label: 'Budget prévu (FCFA)', type: 'number' }] },
 } satisfies Record<string, EntiteDef>;
 
 export type EntiteCle = keyof typeof ENTITES;
@@ -114,5 +137,6 @@ export function lireChamps(def: EntiteDef, f: FormData): { ok: true; valeurs: Re
   if (manque.length) return { ok: false, erreur: 'Champ obligatoire : ' + manque.join(', ') + '.' };
   const debut = valeurs.date ?? valeurs.date_debut;
   if (valeurs.date_fin && debut && String(valeurs.date_fin) < String(debut)) return { ok: false, erreur: 'La date de fin doit suivre la date de début.' };
+  if (valeurs.echeance && valeurs.date_debut && String(valeurs.echeance) < String(valeurs.date_debut)) return { ok: false, erreur: "L'échéance doit suivre la date de début." };
   return { ok: true, valeurs };
 }

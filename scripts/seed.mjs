@@ -226,7 +226,39 @@ const CANAUX = ['Espèces', 'Orange Money', 'MTN MoMo', 'Wave'];
 lot4.push('insert into inscription_evenement (id, eglise_id, evenement_id, nom, contact, montant, canal, car, depart) values');
 lot4.push(Array.from({ length: 12 }, (_, i) => `  (${[uuid('74000000', i + 1), EGLISE, convention, nomPersonne(), telephone(), i % 4 === 3 ? 2000 : 5000, choix(CANAUX), `Car ${1 + (i % 2)}`, i % 2 ? 'Yopougon' : 'Cocody'].map(q).join(', ')})`).join(',\n') + ';', '');
 
-writeFileSync(out, [...lignes, ...lot2, ...lot3, ...lot4].join('\n'));
+const lot5 = ['-- Données FICTIVES du lot 5 (objectifs, projets).', ''];
+const objectifs = [
+  ['Accueillir 40 nouveaux venus en 2026', 'Faire grandir l\'église par l\'accueil.', 'nouveaux', 40, null, '2026-01-01', '2026-12-31', null],
+  ['Intégrer la moitié des nouveaux', 'Que chaque nouveau trouve sa place.', 'integres', 5, null, '2026-01-01', '2026-12-31', null],
+  ['Confier chaque fidèle à un berger', 'Aucun fidèle sans suivi.', 'suivis', 40, null, '2026-01-01', '2026-12-31', null],
+  ['Six cellules actives', 'Couvrir les communes d\'Abidjan.', 'cellules', 6, null, '2026-01-01', '2026-12-31', null],
+  ['Former 8 opérateurs caméra', 'Assurer la diffusion des cultes.', 'manuel', 8, 5, '2026-01-01', '2026-12-31', 'd04'],
+  ['Deux nouveaux chants par mois', 'Renouveler la louange.', 'manuel', 12, 12, '2026-06-01', '2026-11-30', 'd07'],
+  ['Présence moyenne de 350 au 1er semestre', 'Mesurer la fidélité aux cultes.', 'presence', 350, null, '2026-01-01', '2026-06-30', null],
+];
+lot5.push('insert into objectif (id, eglise_id, libelle, but, mesure, cible, realise, date_debut, date_fin, departement_id, responsable) values');
+lot5.push(objectifs.map((o, i) => `  (${[uuid('75000000', i + 1), EGLISE, ...o, `Responsable ${choix(NOMS)}`].map(q).join(', ')})`).join(',\n') + ';', '');
+const projets = [
+  ['Réfection de la toiture du temple', 'Remplacer les tôles abîmées avant la saison des pluies.', 'd06', '2026-10-01', '2027-03-31', 'Haute', 'En cours', 4500000],
+  ['Convention annuelle 2027', 'Organisation, hébergement et transport des participants.', null, '2026-09-15', '2027-01-17', 'Haute', 'En cours', 3000000],
+  ['Équipement de la régie vidéo', 'Deuxième caméra et ordinateur de diffusion.', 'd04', '2026-11-01', '2027-02-28', 'Moyenne', 'À lancer', 1800000],
+  ['Rentrée de l\'école du dimanche', 'Nouveaux supports et formation des moniteurs.', 'd08', '2026-08-01', '2026-10-15', 'Basse', 'Terminé', 350000],
+];
+lot5.push('insert into projet (id, eglise_id, nom, description, departement_id, date_debut, echeance, priorite, statut, budget, responsable) values');
+lot5.push(projets.map((p, i) => `  (${[uuid('76000000', i + 1), EGLISE, ...p, `Frère ${choix(NOMS)}`].map(q).join(', ')})`).join(',\n') + ';', '');
+const actionsProjet = [
+  [1, 'Obtenir trois devis', '2026-11-10', 'Fait'], [1, 'Choisir l\'entreprise', '2026-11-18', 'En cours'], [1, 'Collecte spéciale pour la toiture', '2026-11-23', 'À faire'], [1, 'Début des travaux', '2027-01-12', 'À faire'],
+  [2, 'Réserver l\'esplanade', '2026-10-01', 'Fait'], [2, 'Louer les cars', '2026-11-27', 'À faire'], [2, 'Ouvrir les inscriptions', '2026-11-05', 'Fait'], [2, 'Programme des orateurs', '2026-12-15', 'À faire'],
+  [3, 'Comparer les caméras', '2026-11-20', 'À faire'], [3, 'Présenter le budget au conseil', '2026-12-05', 'À faire'],
+  [4, 'Commander les supports', '2026-08-20', 'Fait'], [4, 'Former les moniteurs', '2026-09-26', 'Fait'],
+];
+lot5.push('insert into projet_action (id, eglise_id, projet_id, titre, echeance, statut, responsable) values');
+lot5.push(actionsProjet.map(([p, t, e, st], i) => `  (${[uuid('77000000', i + 1), EGLISE, uuid('76000000', p), t, e, st, nomPersonne()].map(q).join(', ')})`).join(',\n') + ';', '');
+const journal = [[1, '2026-10-05', 'Décision', 'Le conseil valide le lancement du projet.'], [1, '2026-11-12', 'Difficulté', 'Un devis dépasse le budget prévu de 15 %.'], [2, '2026-11-05', 'Note', 'Les inscriptions sont ouvertes.'], [4, '2026-10-15', 'Note', 'Projet terminé dans les temps.']];
+lot5.push('insert into projet_journal (id, eglise_id, projet_id, date, type, texte) values');
+lot5.push(journal.map(([p, d, t, x], i) => `  (${[uuid('78000000', i + 1), EGLISE, uuid('76000000', p), d, t, x].map(q).join(', ')})`).join(',\n') + ';', '');
+
+writeFileSync(out, [...lignes, ...lot2, ...lot3, ...lot4, ...lot5].join('\n'));
 // Fichier de mise à jour d'une base en ligne déjà installée avec le lot 1 : migration du lot 2 + ses données fictives.
 const dossier = fileURLToPath(new URL('../supabase/', import.meta.url));
 const migration = readFileSync(dossier + 'migrations/20261120000001_lot2.sql', 'utf8');
@@ -235,4 +267,6 @@ const migration3 = readFileSync(dossier + 'migrations/20261121000001_lot3.sql', 
 writeFileSync(dossier + 'mise-a-jour-lot3.sql', "-- Mise à jour d'une base déjà au lot 2 vers le lot 3. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration3 + '\n\n' + lot3.join('\n'));
 const migration4 = readFileSync(dossier + 'migrations/20261122000001_lot4.sql', 'utf8');
 writeFileSync(dossier + 'mise-a-jour-lot4.sql', "-- Mise à jour d'une base déjà au lot 3 vers le lot 4. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration4 + '\n\n' + lot4.join('\n'));
+const migration5 = readFileSync(dossier + 'migrations/20261123000001_lot5.sql', 'utf8');
+writeFileSync(dossier + 'mise-a-jour-lot5.sql', "-- Mise à jour d'une base déjà au lot 4 vers le lot 5. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration5 + '\n\n' + lot5.join('\n') + "\n\nnotify pgrst, 'reload schema';\n");
 console.log(`seed.sql écrit : ${bergers.length} bergers, ${fideles.length} fidèles, ${nouveaux.length} nouveaux, ${appels.length} appels, ${cellules.length} cellules, ${activites.length} activités.`);

@@ -303,3 +303,40 @@ insert into inscription_evenement (id, eglise_id, evenement_id, nom, contact, mo
   ('74000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001', '55000000-0000-0000-0000-000000000015', 'Zadi Grâce', '+225 07 00 00 01 10', 5000, 'Espèces', 'Car 2', 'Yopougon'),
   ('74000000-0000-0000-0000-000000000011', '00000000-0000-0000-0000-000000000001', '55000000-0000-0000-0000-000000000015', 'Touré Prisca', '+225 07 00 00 01 11', 5000, 'Wave', 'Car 1', 'Cocody'),
   ('74000000-0000-0000-0000-000000000012', '00000000-0000-0000-0000-000000000001', '55000000-0000-0000-0000-000000000015', 'Zadi Hervé', '+225 07 00 00 01 12', 2000, 'Espèces', 'Car 2', 'Yopougon');
+
+-- Données FICTIVES du lot 5 (objectifs, projets).
+
+insert into objectif (id, eglise_id, libelle, but, mesure, cible, realise, date_debut, date_fin, departement_id, responsable) values
+  ('75000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Accueillir 40 nouveaux venus en 2026', 'Faire grandir l''église par l''accueil.', 'nouveaux', 40, null, '2026-01-01', '2026-12-31', null, 'Responsable Aka'),
+  ('75000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Intégrer la moitié des nouveaux', 'Que chaque nouveau trouve sa place.', 'integres', 5, null, '2026-01-01', '2026-12-31', null, 'Responsable Gnagne'),
+  ('75000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'Confier chaque fidèle à un berger', 'Aucun fidèle sans suivi.', 'suivis', 40, null, '2026-01-01', '2026-12-31', null, 'Responsable Ehouman'),
+  ('75000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'Six cellules actives', 'Couvrir les communes d''Abidjan.', 'cellules', 6, null, '2026-01-01', '2026-12-31', null, 'Responsable Aka'),
+  ('75000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001', 'Former 8 opérateurs caméra', 'Assurer la diffusion des cultes.', 'manuel', 8, 5, '2026-01-01', '2026-12-31', 'd04', 'Responsable Aka'),
+  ('75000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001', 'Deux nouveaux chants par mois', 'Renouveler la louange.', 'manuel', 12, 12, '2026-06-01', '2026-11-30', 'd07', 'Responsable Gnagne'),
+  ('75000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'Présence moyenne de 350 au 1er semestre', 'Mesurer la fidélité aux cultes.', 'presence', 350, null, '2026-01-01', '2026-06-30', null, 'Responsable Ouattara');
+
+insert into projet (id, eglise_id, nom, description, departement_id, date_debut, echeance, priorite, statut, budget, responsable) values
+  ('76000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Réfection de la toiture du temple', 'Remplacer les tôles abîmées avant la saison des pluies.', 'd06', '2026-10-01', '2027-03-31', 'Haute', 'En cours', 4500000, 'Frère Brou'),
+  ('76000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Convention annuelle 2027', 'Organisation, hébergement et transport des participants.', null, '2026-09-15', '2027-01-17', 'Haute', 'En cours', 3000000, 'Frère Assi'),
+  ('76000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'Équipement de la régie vidéo', 'Deuxième caméra et ordinateur de diffusion.', 'd04', '2026-11-01', '2027-02-28', 'Moyenne', 'À lancer', 1800000, 'Frère Brou'),
+  ('76000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'Rentrée de l''école du dimanche', 'Nouveaux supports et formation des moniteurs.', 'd08', '2026-08-01', '2026-10-15', 'Basse', 'Terminé', 350000, 'Frère Bamba');
+
+insert into projet_action (id, eglise_id, projet_id, titre, echeance, statut, responsable) values
+  ('77000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000001', 'Obtenir trois devis', '2026-11-10', 'Fait', 'Ouattara Franck'),
+  ('77000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000001', 'Choisir l''entreprise', '2026-11-18', 'En cours', 'Brou Didier'),
+  ('77000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000001', 'Collecte spéciale pour la toiture', '2026-11-23', 'À faire', 'N''Guessan Jean'),
+  ('77000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000001', 'Début des travaux', '2027-01-12', 'À faire', 'Konan Ruth'),
+  ('77000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000002', 'Réserver l''esplanade', '2026-10-01', 'Fait', 'Traoré Ruth'),
+  ('77000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000002', 'Louer les cars', '2026-11-27', 'À faire', 'Traoré Serge'),
+  ('77000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000002', 'Ouvrir les inscriptions', '2026-11-05', 'Fait', 'Ehouman Patricia'),
+  ('77000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000002', 'Programme des orateurs', '2026-12-15', 'À faire', 'Brou Fabrice'),
+  ('77000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000003', 'Comparer les caméras', '2026-11-20', 'À faire', 'Ehouman Fabrice'),
+  ('77000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000003', 'Présenter le budget au conseil', '2026-12-05', 'À faire', 'Konan Christelle'),
+  ('77000000-0000-0000-0000-000000000011', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000004', 'Commander les supports', '2026-08-20', 'Fait', 'Aka Patricia'),
+  ('77000000-0000-0000-0000-000000000012', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000004', 'Former les moniteurs', '2026-09-26', 'Fait', 'Ouattara Patricia');
+
+insert into projet_journal (id, eglise_id, projet_id, date, type, texte) values
+  ('78000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000001', '2026-10-05', 'Décision', 'Le conseil valide le lancement du projet.'),
+  ('78000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000001', '2026-11-12', 'Difficulté', 'Un devis dépasse le budget prévu de 15 %.'),
+  ('78000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000002', '2026-11-05', 'Note', 'Les inscriptions sont ouvertes.'),
+  ('78000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', '76000000-0000-0000-0000-000000000004', '2026-10-15', 'Note', 'Projet terminé dans les temps.');

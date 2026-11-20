@@ -74,6 +74,11 @@ export async function fixtures(db: Db): Promise<Comptes> {
       delete from planning_service; delete from rapport_departement; delete from responsable;
     end if;
   end $$`);
+  await db.q(`do $$ begin
+    if to_regclass('public.objectif') is not null then
+      delete from objectif; delete from projet_journal; delete from projet_action; delete from projet;
+    end if;
+  end $$`);
   await db.q('delete from appel; delete from nouveau; delete from absence; delete from releve_absence; delete from fidele; update profil set berger_id = null; delete from berger');
   await db.q(`do $$ begin if to_regclass('public.cellule') is not null then delete from cellule; end if; end $$`);
   const out = {} as Comptes;

@@ -12,6 +12,7 @@ export async function PageHead({ id, sous }: { id: MenuId; sous?: string }) {
       <div className="head"><div>
         <div className="crumb">{m.section || 'EMCV'}</div>
         <h1>{m.t}</h1>
+        <span className="vitre" aria-hidden="true" />
         <p className="lead">{LEADS[id]}</p>
       </div></div>
       {subs.length > 1 && (

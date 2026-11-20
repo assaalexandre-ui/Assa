@@ -18,6 +18,7 @@ Porteur du projet : Alexandre (DG de Carmixt Mobility, designer graphique). Il t
 - **Langage humain et professionnel**, qui ne sonne pas « IA » : phrases simples, pas de formules creuses.
 - **Ne rien ajouter ni retirer** quand il fournit un contenu de référence (ex. le Word des compétences) : on reformule et on structure, on signale les trous, on n'invente pas.
 - Interface **claire mais pas trop blanche** : barre latérale bleu nuit, fond bleu-gris, couleurs bien présentes.
+- Design retenu le 20 nov. pour la version Next.js : **piste A « Vitrail »** (planche https://claude.ai/artifact/T9ys4Q2hxK4hUHjxiKmF1t). Barre latérale bleu nuit à grandes icônes empilées, regroupées par section avec sous-menus dépliables ; blocs titrés d'une icône ronde (`Panel icone=… ton=…`) ; filets dorés (`--lead`) ; couleurs de vitrail `--saphir`, `--rubis`, `--emeraude`, `--ambre`, `--amethyste`, `--ciel` ; titres en Bricolage Grotesque, texte en Sora ; graphiques `Rosace`, `Anneau`, `BarresEmpilees` dans `web/components/Graphiques.tsx`.
 
 ## Où est l'application en ligne
 

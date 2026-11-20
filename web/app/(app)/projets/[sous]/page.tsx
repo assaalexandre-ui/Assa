@@ -30,12 +30,16 @@ export default async function Projets({ params, searchParams }: { params: Promis
   const s = await requireMenu('projets');
   const w = s.droits.projets === 'w';
   const supabase = await createClient();
-  const [{ data: p }, { data: a }, { data: j }, { data: d }] = await Promise.all([
+  const [{ data: p }, { data: a }, { data: j }, { data: d }, { data: dp }, { data: dl }] = await Promise.all([
     supabase.from('projet').select('id, nom, description, responsable, departement_id, date_debut, echeance, priorite, statut, budget').order('echeance'),
     supabase.from('projet_action').select('id, projet_id, titre, responsable, echeance, statut, notes').order('echeance', { nullsFirst: false }),
     supabase.from('projet_journal').select('id, projet_id, date, type, texte').order('date', { ascending: false }),
     supabase.from('departement').select('id, nom').order('ordre'),
+    supabase.rpc('depenses_projets'),
+    s.droits.budget ? supabase.from('depense').select('id, projet_id, date, objet, statut, montant').not('projet_id', 'is', null).order('date', { ascending: false }) : Promise.resolve({ data: [] }),
   ]);
+  const depense = (id: string) => Number(((dp ?? []) as { projet_id: string; depense: number }[]).find(x => x.projet_id === id)?.depense ?? 0);
+  const depensesLiees = (dl ?? []) as { id: string; projet_id: string; date: string; objet: string; statut: string; montant: number }[];
   const projets = (p ?? []) as Projet[], actions = (a ?? []) as Action[], journal = (j ?? []) as Note[], deps = (d ?? []) as { id: string; nom: string }[];
   const auj = today();
   const base = `/projets/${sous}`;
@@ -70,7 +74,7 @@ export default async function Projets({ params, searchParams }: { params: Promis
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}><b>{x.nom}</b><Pill c={tonStatut(x.statut)}>{x.statut}</Pill></div>
               <span className="meta">{x.responsable} · priorité {x.priorite.toLowerCase()}</span>
               <span className="meta">Échéance : <Ech date={x.echeance} fait={fait} /></span>
-              <span className="meta">{la.filter(y => y.statut === 'Fait').length} / {la.length} actions · {pc} %{x.budget ? ' · budget ' + money(x.budget) : ''}</span>
+              <span className="meta">{la.filter(y => y.statut === 'Fait').length} / {la.length} actions · {pc} %{x.budget ? ` · ${money(depense(x.id))} / ${money(x.budget)}` : ''}</span>
               <span className="meter" aria-hidden="true"><i className={pc >= 100 ? 'full' : ''} style={{ width: `${pc}%` }} /></span>
             </Link>
           );
@@ -154,7 +158,8 @@ export default async function Projets({ params, searchParams }: { params: Promis
           <dt>Statut</dt><dd><Pill c={tonStatut(pr.statut)}>{pr.statut}</Pill> <Pill c={pr.priorite === 'Haute' ? 'b' : 'n'}>Priorité {pr.priorite.toLowerCase()}</Pill></dd>
           {pr.description && <><dt>Objectif</dt><dd style={{ whiteSpace: 'pre-line' }}>{pr.description}</dd></>}
         </dl>
-        <Kpis items={[['Avancement', pc + ' %', `${la.filter(x => x.statut === 'Fait').length} / ${la.length} actions`], ['Budget prévu', pr.budget ? money(pr.budget) : '—', 'les dépenses viendront avec les finances']]} />
+        <Kpis items={[['Avancement', pc + ' %', `${la.filter(x => x.statut === 'Fait').length} / ${la.length} actions`], ['Budget prévu', pr.budget ? money(pr.budget) : '—'],
+          ['Dépensé', money(depense(pr.id)), pr.budget ? Math.round(depense(pr.id) / Number(pr.budget) * 100) + ' % du budget' : 'dépenses validées ou payées'], ['Reste', pr.budget ? money(Number(pr.budget) - depense(pr.id)) : '—']]} />
         <Panel titre="Plan d'actions">
           {la.length ? (
             <div className="tw"><table><thead><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Statut</th><th /></tr></thead>
@@ -173,6 +178,10 @@ export default async function Projets({ params, searchParams }: { params: Promis
             <Champ k="responsable" label="Responsable" /><Champ k="echeance" label="Échéance" type="date" />
           </FormAction></div>}
         </Panel>
+        {s.droits.budget && <Panel titre="Dépenses rattachées">{depensesLiees.some(x => x.projet_id === pr.id) ? (
+          <div className="tw"><table><thead><tr><th>Date</th><th>Objet</th><th>Statut</th><th className="num">Montant</th></tr></thead>
+            <tbody>{depensesLiees.filter(x => x.projet_id === pr.id).map(x => <tr key={x.id}><td>{frDate(x.date)}</td><td>{x.objet}</td><td><Pill c="n">{x.statut}</Pill></td><td className="num">{money(x.montant)}</td></tr>)}</tbody></table></div>
+        ) : <div className="body muted">Rattachez des dépenses à ce projet depuis Budget et dépenses.</div>}</Panel>}
         <Panel titre="Journal de suivi">
           <div className="body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {w && <FormAction action={ajouterJournal} className="form" bouton="+ Ajouter au journal" boutonClasse="btn sm">

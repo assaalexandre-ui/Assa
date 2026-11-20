@@ -36,4 +36,10 @@ describe('lireChamps', () => {
     expect(r.ok && r.valeurs.mesure).toBe('nouveaux');
     expect(r.ok && r.valeurs.cible).toBe(40);
   });
+  it('refuse un encaissement à zéro et lit un fidèle facultatif', () => {
+    expect(lireChamps(ENTITES.don, fd({ date: '2026-11-15', fonds_id: 'f', montant: '0', canal: 'Wave' }))).toEqual({ ok: false, erreur: 'Montant : saisissez un montant supérieur à zéro.' });
+    const r = lireChamps(ENTITES.don, fd({ date: '2026-11-15', fonds_id: 'f', montant: '25 000', canal: 'Wave', fidele_id: '' }));
+    expect(r.ok && r.valeurs.montant).toBe(25000);
+    expect(r.ok && r.valeurs.fidele_id).toBeNull();
+  });
 });

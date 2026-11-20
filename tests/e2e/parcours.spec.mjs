@@ -54,7 +54,7 @@ try {
 
   etape('connexion administrateur');
   await connexion('admin@e2e.local', mdpAdmin);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Supervision', 'Organigramme', 'Statistiques', 'Objectifs à atteindre', 'Projets', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Administration']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Supervision', 'Organigramme', 'Statistiques', 'Objectifs à atteindre', 'Projets', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Dîmes et offrandes', 'Budget et dépenses', 'Communication', 'Patrimoine', 'Administration']);
   await page.getByText('Version de test : données fictives').first().waitFor();
 
   etape("l'administrateur ouvre la fiche d'un berger et celle d'un nouveau (boutons de suppression)");
@@ -109,6 +109,19 @@ try {
   await page.locator('.modal tr', { hasText: 'Action E2E' }).getByRole('button', { name: 'Marquer fait' }).click();
   await page.locator('.modal tr', { hasText: 'Action E2E' }).getByRole('button', { name: 'Rouvrir' }).waitFor({ timeout: 10000 });
 
+  etape('lot 6 : une dépense saisie par l’administrateur attend une autre personne ; il valide celle d’un autre');
+  await page.goto(BASE + '/budget/depenses?fiche=nouveau');
+  await page.fill('#f-objet', 'Dépense E2E'); await page.fill('#f-montant', '12000');
+  await page.selectOption('#f-statut', 'Demandée');
+  await page.click('.modal button[type=submit]');
+  await page.waitForURL(BASE + '/budget/depenses');
+  await page.locator('main tr', { hasText: 'Dépense E2E' }).getByText('À valider par une autre personne').waitFor();
+  const facture = page.locator('main tr', { hasText: 'Facture SODECI' });
+  await facture.getByRole('button', { name: 'Valider' }).click();
+  await facture.getByRole('button', { name: 'Marquer payée' }).waitFor({ timeout: 10000 });
+  await page.goto(BASE + '/stats/finances');
+  await page.getByRole('heading', { name: 'Encaissements par mois' }).waitFor();
+
   etape('lot 3 : marquer une tâche du conseil comme faite');
   await page.goto(BASE + '/reunions/taches?f=nonfaites');
   const avant = await page.locator('main table tbody tr').count();
@@ -135,7 +148,8 @@ try {
   await page.click('aside .links button');
   await page.waitForURL(BASE + '/connexion');
   await connexion('berger@e2e.local', mdpBerger);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'Programmation', 'Organigramme', 'Fidèles', 'Requêtes de prière']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'Programmation', 'Organigramme', 'Fidèles', 'Requêtes de prière', 'Communication']);
+  await page.getByText('Veillée de prière').first().waitFor();
 
   etape('lot 2 : le berger ne voit que ses 2 cellules');
   await page.goto(BASE + '/cellules/liste');
@@ -164,6 +178,8 @@ try {
   assert.equal(new Set(f.map(x => x.berger_id)).size, 1);
   const { data: pr } = await sb.from('priere').select('sujet');
   assert.ok(!pr.some(x => x.sujet === 'Sujet confidentiel E2E'), 'le berger ne lit pas la requête confidentielle');
+  const { data: dn } = await sb.from('don').select('id');
+  assert.equal(dn.length, 0, 'le berger ne lit aucun don');
   const { data: n } = await sb.from('nouveau').select('id');
   assert.equal(n.length, 0, 'aucun accès aux nouveaux');
   const { error } = await sb.from('profil').update({ role_code: 'admin' }).eq('email', 'berger@e2e.local');
@@ -187,7 +203,7 @@ try {
   await page.click('aside .links button');
   await page.waitForURL(BASE + '/connexion');
   await connexion('respdep@e2e.local', mdpDep);
-  assert.deepEqual(await menus(), ['Accueil', 'Départements', 'Programmation', 'Supervision', 'Organigramme', 'Objectifs à atteindre', 'Projets']);
+  assert.deepEqual(await menus(), ['Accueil', 'Départements', 'Programmation', 'Supervision', 'Organigramme', 'Objectifs à atteindre', 'Projets', 'Patrimoine']);
   await page.goto(BASE + '/departements/services');
   assert.equal(await page.locator('.card').count(), 1);
   await page.goto(BASE + '/departements/autres');

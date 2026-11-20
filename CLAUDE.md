@@ -9,7 +9,7 @@ Porteur du projet : Alexandre (DG de Carmixt Mobility, designer graphique). Il t
 
 - **v1 actuelle** : une seule église (EMCV, Abidjan). Le modèle doit rester extensible à plusieurs assemblées et pays (ministère international) sans réécriture.
 - **Forme actuelle** : une application web d'une seule page, `app/index.html` (~1 840 lignes, HTML + CSS + JavaScript sans framework), publiée comme artefact claude.ai.
-- **Version de test Next.js + Supabase** (« petit test », nov. 2026) : `web/` + `supabase/`. Lot 1 : Accueil, Fidèles, Bergers, ADNH, Administration. Lot 2 (20 nov.) : Cellules, GC, Programmation, Jour de culte. Lot 3 (21 nov.) : Formations, Départements, Réunions, Organigramme. Lot 4 (22 nov.) : Requêtes de prière (visibilité appliquée par la base), Enfants, Rendez-vous pastoraux, Événements. Lot 5 (23 nov.) : Supervision, Statistiques, Objectifs à atteindre, Projets (statistiques et mesures automatiques calculées par la base, chiffres agrégés sans noms ; « Statistiques › Finances » et les dépenses des projets arrivent avec le lot 6). Connexion email + mot de passe ; droits appliqués par la base ; données fictives. Conception : `docs/superpowers/specs/2026-11-19-nextjs-supabase-petit-test-design.md` ; mise en ligne : `docs/mise-en-ligne.md`.
+- **Version de test Next.js + Supabase** (« petit test », nov. 2026) : `web/` + `supabase/`. Lot 1 : Accueil, Fidèles, Bergers, ADNH, Administration. Lot 2 (20 nov.) : Cellules, GC, Programmation, Jour de culte. Lot 3 (21 nov.) : Formations, Départements, Réunions, Organigramme. Lot 4 (22 nov.) : Requêtes de prière (visibilité appliquée par la base), Enfants, Rendez-vous pastoraux, Événements. Lot 5 (23 nov.) : Supervision, Statistiques, Objectifs à atteindre, Projets (statistiques et mesures automatiques calculées par la base, chiffres agrégés sans noms ; « Statistiques › Finances » et les dépenses des projets arrivent avec le lot 6). Lot 6 (24 nov.) : Dîmes et offrandes, Budget et dépenses, Communication, Patrimoine ; règle des quatre yeux appliquée par la base (qui saisit un encaissement ou une dépense ne le valide pas) ; annonces publiées sur l'Accueil. Connexion email + mot de passe ; droits appliqués par la base ; données fictives. Conception : `docs/superpowers/specs/2026-11-19-nextjs-supabase-petit-test-design.md` ; mise en ligne : `docs/mise-en-ligne.md`.
 - **Cible de production** : Next.js (TypeScript) + Supabase (PostgreSQL avec RLS), connexion par téléphone +225 et code SMS. Voir `docs/cahier-de-conception.md`.
 
 ## Préférences du porteur de projet (à respecter)
@@ -167,6 +167,6 @@ Le PDF dépend de jsPDF chargé depuis cdnjs : sans réseau, la génération est
 
 ## Suite prévue
 
-1. Passage en production : étendre la version de test aux autres menus, par lots de 4 (lots 2 et 3 faits : cellules, GC, programmation, jour de culte, formations, départements, réunions, organigramme), connexion par SMS, PWA hors ligne.
+1. Passage en production : lots 1 à 6 faits (25 menus). Restent Évangélisation, Sacrements et cérémonies, Recommandations, Rapports (PDF), Paramètres de l'église et Dernières modifications ; puis connexion par SMS, PWA hors ligne.
 2. Paiements Mobile Money réels et envoi WhatsApp/SMS (aujourd'hui : messages à copier).
 3. Application mobile des fidèles (React Native / Expo).

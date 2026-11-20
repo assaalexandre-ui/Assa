@@ -199,11 +199,40 @@ const resp = [['Pasteur principal', 'Direction'], ['Pasteur adjoint', 'Pasteurs'
 lot3.push('insert into responsable (id, eglise_id, fonction, nom, contact, whatsapp, niveau, ordre) values');
 lot3.push(resp.map(([f, niv], i) => { const t = telephone(); return `  (${[uuid('66000000', i + 1), EGLISE, f, nomPersonne(), t, t, niv, i + 1].map(q).join(', ')})`; }).join(',\n') + ';', '');
 
-writeFileSync(out, [...lignes, ...lot2, ...lot3].join('\n'));
+// ===================== Lot 4 : prière, enfants, rendez-vous, événements =====================
+const lot4 = ['-- Données FICTIVES du lot 4 (requêtes de prière, enfants, rendez-vous pastoraux, événements).', ''];
+const prieres = [
+  ['2026-11-02', 'Publique', 'Pour la convention de janvier.', 'En prière', null], ['2026-11-05', 'Équipe d\'intercession', 'Pour un travail stable.', 'Reçue', null],
+  ['2026-11-08', 'Confidentielle', 'Situation familiale difficile.', 'En prière', null], ['2026-11-09', 'Publique', 'Pour la santé de ma mère.', 'Exaucée', 'Ma mère est sortie de l\'hôpital, gloire à Dieu.'],
+  ['2026-11-12', 'Équipe d\'intercession', 'Pour la réussite aux examens.', 'Reçue', null], ['2026-11-15', 'Confidentielle', 'Décision importante à prendre.', 'Reçue', null],
+  ['2026-10-20', 'Publique', 'Pour un logement.', 'Exaucée', 'Nous avons trouvé un logement à Cocody.'], ['2026-11-17', 'Publique', 'Pour les nouveaux de l\'église.', 'En prière', null],
+];
+lot4.push('insert into priere (id, eglise_id, date, demandeur, visibilite, sujet, statut, temoignage) values');
+lot4.push(prieres.map(([d, v, sujet, st, tem], i) => `  (${[uuid('70000000', i + 1), EGLISE, d, nomPersonne(), v, sujet, st, tem].map(q).join(', ')})`).join(',\n') + ';', '');
+const GROUPES = ['0–3 ans', '4–6 ans', '7–9 ans', '10–12 ans', '13 ans et plus'];
+const enfants = Array.from({ length: 10 }, (_, i) => ({ id: uuid('71000000', i + 1), nom: `${choix(NOMS)} ${choix(PRENOMS)[0]}`, groupe: GROUPES[i % 5], parent: nomPersonne(), contact: telephone(), code: Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(hasard() * 32)]).join('') }));
+lot4.push('insert into enfant (id, eglise_id, nom, groupe, parent, contact, code, notes) values');
+lot4.push(enfants.map(e => `  (${[e.id, EGLISE, e.nom, e.groupe, e.parent, e.contact, e.code, 'Fiche fictive de test'].map(q).join(', ')})`).join(',\n') + ';', '');
+lot4.push('insert into pointage_enfant (id, eglise_id, enfant_id, date, arrivee, sortie) values');
+lot4.push(enfants.slice(0, 7).map((e, i) => `  (${[uuid('72000000', i + 1), EGLISE, e.id, '2026-11-15'].map(q).join(', ')}, true, ${i < 5})`).join(',\n') + ';', '');
+const rdvs = [['2026-11-10', 'Bureau', 'Fait', 'Conseil conjugal'], ['2026-11-13', 'Visite à l\'hôpital', 'Fait', 'Visite après une opération'], ['2026-11-18', 'Visite à domicile', 'Reporté', 'Présentation d\'un nouveau-né'],
+  ['2026-11-26', 'Bureau', 'Prévu', 'Préparation au mariage'], ['2026-11-28', 'Appel', 'Prévu', 'Suivi d\'un nouveau'], ['2026-12-03', 'Visite à domicile', 'Prévu', 'Visite de soutien']];
+lot4.push('insert into rdv (id, eglise_id, date, heure, personne, contact, type, pasteur, motif, statut) values');
+lot4.push(rdvs.map(([d, t, st, motif], i) => `  (${[uuid('73000000', i + 1), EGLISE, d, '10:00', `Famille ${choix(NOMS)}`, telephone(), t, `Pasteur ${choix(NOMS)}`, motif, st].map(q).join(', ')})`).join(',\n') + ';', '');
+const convention = uuid('55000000', 15);
+lot4.push('insert into evenement (id, eglise_id, titre, type, assemblee_id, date, date_fin, heure, lieu, responsable, frais, description) values');
+lot4.push(`  (${[convention, EGLISE, 'Convention annuelle 2027', 'Convention', assemblees[0].id, '2027-01-15', '2027-01-17', '08:30', 'Esplanade du temple', `Pasteur ${choix(NOMS)}`, 5000, 'Activité fictive de test'].map(q).join(', ')});`, '');
+const CANAUX = ['Espèces', 'Orange Money', 'MTN MoMo', 'Wave'];
+lot4.push('insert into inscription_evenement (id, eglise_id, evenement_id, nom, contact, montant, canal, car, depart) values');
+lot4.push(Array.from({ length: 12 }, (_, i) => `  (${[uuid('74000000', i + 1), EGLISE, convention, nomPersonne(), telephone(), i % 4 === 3 ? 2000 : 5000, choix(CANAUX), `Car ${1 + (i % 2)}`, i % 2 ? 'Yopougon' : 'Cocody'].map(q).join(', ')})`).join(',\n') + ';', '');
+
+writeFileSync(out, [...lignes, ...lot2, ...lot3, ...lot4].join('\n'));
 // Fichier de mise à jour d'une base en ligne déjà installée avec le lot 1 : migration du lot 2 + ses données fictives.
 const dossier = fileURLToPath(new URL('../supabase/', import.meta.url));
 const migration = readFileSync(dossier + 'migrations/20261120000001_lot2.sql', 'utf8');
 writeFileSync(dossier + 'mise-a-jour-lot2.sql', "-- Mise à jour d'une base déjà installée (lot 1) vers le lot 2. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration + '\n\n' + lot2.join('\n'));
 const migration3 = readFileSync(dossier + 'migrations/20261121000001_lot3.sql', 'utf8');
 writeFileSync(dossier + 'mise-a-jour-lot3.sql', "-- Mise à jour d'une base déjà au lot 2 vers le lot 3. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration3 + '\n\n' + lot3.join('\n'));
+const migration4 = readFileSync(dossier + 'migrations/20261122000001_lot4.sql', 'utf8');
+writeFileSync(dossier + 'mise-a-jour-lot4.sql', "-- Mise à jour d'une base déjà au lot 3 vers le lot 4. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration4 + '\n\n' + lot4.join('\n'));
 console.log(`seed.sql écrit : ${bergers.length} bergers, ${fideles.length} fidèles, ${nouveaux.length} nouveaux, ${appels.length} appels, ${cellules.length} cellules, ${activites.length} activités.`);

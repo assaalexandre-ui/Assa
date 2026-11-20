@@ -9,7 +9,7 @@ Porteur du projet : Alexandre (DG de Carmixt Mobility, designer graphique). Il t
 
 - **v1 actuelle** : une seule église (EMCV, Abidjan). Le modèle doit rester extensible à plusieurs assemblées et pays (ministère international) sans réécriture.
 - **Forme actuelle** : une application web d'une seule page, `app/index.html` (~1 840 lignes, HTML + CSS + JavaScript sans framework), publiée comme artefact claude.ai.
-- **Version de test Next.js + Supabase** (« petit test », nov. 2026) : `web/` + `supabase/`. Lot 1 : Accueil, Fidèles, Bergers, ADNH, Administration. Lot 2 (20 nov.) : Cellules, GC, Programmation, Jour de culte. Lot 3 (21 nov.) : Formations, Départements, Réunions, Organigramme. Connexion email + mot de passe ; droits appliqués par la base ; données fictives. Conception : `docs/superpowers/specs/2026-11-19-nextjs-supabase-petit-test-design.md` ; mise en ligne : `docs/mise-en-ligne.md`.
+- **Version de test Next.js + Supabase** (« petit test », nov. 2026) : `web/` + `supabase/`. Lot 1 : Accueil, Fidèles, Bergers, ADNH, Administration. Lot 2 (20 nov.) : Cellules, GC, Programmation, Jour de culte. Lot 3 (21 nov.) : Formations, Départements, Réunions, Organigramme. Lot 4 (22 nov.) : Requêtes de prière (visibilité appliquée par la base), Enfants, Rendez-vous pastoraux, Événements. Connexion email + mot de passe ; droits appliqués par la base ; données fictives. Conception : `docs/superpowers/specs/2026-11-19-nextjs-supabase-petit-test-design.md` ; mise en ligne : `docs/mise-en-ligne.md`.
 - **Cible de production** : Next.js (TypeScript) + Supabase (PostgreSQL avec RLS), connexion par téléphone +225 et code SMS. Voir `docs/cahier-de-conception.md`.
 
 ## Préférences du porteur de projet (à respecter)

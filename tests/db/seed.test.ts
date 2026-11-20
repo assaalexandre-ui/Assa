@@ -33,7 +33,7 @@ describe('données fictives (supabase/seed.sql)', () => {
     expect(n(await db.q(`select count(*) from gc where tribu <> ''`))).toBe(12);
     expect(n(await db.q('select count(*) from gc_presence'))).toBe(3);
     expect(n(await db.q('select count(*) from assemblee'))).toBe(3);
-    expect(n(await db.q('select count(*) from evenement'))).toBe(14);
+    expect(n(await db.q(`select count(*) from evenement where date < '2027-01-01'`))).toBe(14);
     expect(n(await db.q('select count(*) from comptage'))).toBe(8);
     expect(n(await db.q('select count(*) from poste_accueil'))).toBe(4);
   }));
@@ -51,5 +51,14 @@ describe('données fictives (supabase/seed.sql)', () => {
     expect(n(await db.q('select count(*) from reunion'))).toBe(4);
     expect(n(await db.q('select count(*) from tache'))).toBe(6);
     expect(n(await db.q('select count(*) from responsable'))).toBe(8);
+  }));
+
+  it('contient les données fictives du lot 4', () => tx(async db => {
+    expect(n(await db.q('select count(*) from priere'))).toBe(8);
+    expect(n(await db.q(`select count(*) from priere where visibilite = 'Confidentielle'`))).toBe(2);
+    expect(n(await db.q('select count(*) from enfant'))).toBe(10);
+    expect(n(await db.q('select count(*) from pointage_enfant'))).toBe(7);
+    expect(n(await db.q('select count(*) from rdv'))).toBe(6);
+    expect(n(await db.q('select count(*) from inscription_evenement'))).toBe(12);
   }));
 });

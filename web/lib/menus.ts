@@ -2,7 +2,7 @@
 
 export type Acces = 'r' | 'w';
 export type Droits = Partial<Record<MenuId, Acces>>;
-export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme';
+export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements';
 export type MenuDef = { id: MenuId; t: string; section: string; vert: boolean; subs: [string, string][]; icone: string };
 
 const VIE = "Structure de l'église";
@@ -30,8 +30,16 @@ export const MENUS: MenuDef[] = [
     icone: '<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>' },
   { id: 'fideles', t: 'Fidèles', section: 'Fidèles et pastorale', vert: false, subs: [['liste', 'Fichier des fidèles'], ['anniversaires', 'Anniversaires']],
     icone: '<circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5M14 14.6c3.4-.6 6.5 1.6 7 5.4"/>' },
+  { id: 'priere', t: 'Requêtes de prière', section: 'Fidèles et pastorale', vert: false, subs: [['requetes', 'Requêtes'], ['temoignages', 'Témoignages']],
+    icone: '<path d="M12 3v18M7 8h10"/>' },
+  { id: 'enfants', t: 'Enfants', section: 'Fidèles et pastorale', vert: false, subs: [['inscrits', 'Enfants inscrits'], ['pointage', 'Pointage du dimanche']],
+    icone: '<circle cx="12" cy="6.5" r="2.8"/><path d="M8 21v-5l-2-4 6 1 6-1-2 4v5"/>' },
+  { id: 'rdv', t: 'Rendez-vous pastoraux', section: 'Fidèles et pastorale', vert: false, subs: [['avenir', 'À venir'], ['historique', 'Historique']],
+    icone: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/>' },
   { id: 'culte', t: 'Jour de culte', section: 'Cultes et activités', vert: false, subs: [['comptage', 'Comptage des présences'], ['accueil', 'Accueil et parking']],
     icone: '<path d="M12 3v5M9.5 5.5h5"/><path d="M5 21V12l7-4 7 4v9"/><path d="M10 21v-4h4v4"/>' },
+  { id: 'evenements', t: 'Événements', section: 'Cultes et activités', vert: false, subs: [['inscriptions', 'Inscriptions'], ['transport', 'Transport']],
+    icone: '<path d="M4 20l3-12 10 5z"/><path d="M14 4l1 2M19 6l-2 1M20 11h-2"/>' },
   { id: 'admin', t: 'Administration', section: 'Administration', vert: false, subs: [['utilisateurs', 'Utilisateurs'], ['roles', 'Rôles et accès']],
     icone: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>' },
 ];
@@ -50,6 +58,10 @@ export const LEADS: Record<MenuId, string> = {
   departements: "Les différents services au sein de l'église et les autres départements.",
   reunions: 'Historique des réunions, points et dimensions discutés, décisions, objets des réunions et tâches du conseil, faites ou pas.',
   organigramme: 'Qui dirige quoi, et comment le joindre.',
+  priere: "Requêtes déposées par les fidèles et suivies par l'équipe d'intercession.",
+  enfants: "Enfants de l'école du dimanche et pointage sécurisé avec code de récupération.",
+  rdv: "Rendez-vous avec les pasteurs, visites à domicile et à l'hôpital.",
+  evenements: 'Inscriptions aux conventions, séminaires et retraites, avec paiement et transport.',
 };
 
 export const menu = (id: string) => MENUS.find(m => m.id === id);

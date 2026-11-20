@@ -316,3 +316,25 @@ body:has(.gate){background-color:var(--side);background-image:repeating-linear-g
 .gate{border:0;border-top:4px solid var(--gold);box-shadow:0 24px 60px rgba(0,0,0,.35)}
 .gate h1::after{content:"";display:block;width:96px;height:3px;margin:10px auto 0;background:linear-gradient(90deg,var(--saphir) 0 25%,var(--rubis) 25% 50%,var(--emeraude) 50% 75%,var(--ambre) 75%)}
 .modal .kpi{padding-left:18px;flex-basis:160px} .modal .kpi::before{display:none} .modal .kpi strong{font-size:22px}
+/* Billes de verre (choix du 20 nov.) : pastille bombée et brillante aux couleurs du vitrail, pictogramme blanc en relief */
+.pico,nav.vitrail .bille{position:relative;display:grid;place-items:center;flex:none;border-radius:50%;color:#fff;
+  background:radial-gradient(circle at 34% 26%,rgba(255,255,255,.62) 0 14%,rgba(255,255,255,.18) 30%,transparent 46%),
+    radial-gradient(circle at 50% 118%,rgba(255,255,255,.28) 0 22%,transparent 46%),
+    radial-gradient(circle at 50% 50%,var(--j,var(--saphir)) 50%,color-mix(in srgb,var(--j,var(--saphir)) 72%,#000) 100%);
+  box-shadow:inset 0 -4px 7px rgba(0,0,0,.28),inset 0 2px 3px rgba(255,255,255,.45),0 4px 8px -2px color-mix(in srgb,var(--j,var(--saphir)) 55%,transparent),0 1px 2px rgba(0,0,0,.25)}
+.pico{width:38px;height:38px}
+.pico svg,nav.vitrail .bille svg{position:relative;width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1.5px 1px rgba(0,0,0,.38)) drop-shadow(0 -.5px 0 rgba(255,255,255,.35))}
+.pico.grande{width:46px;height:46px}.pico.grande svg{width:22px;height:22px}
+nav.vitrail .bille{width:44px;height:44px}
+nav.vitrail .bille svg{width:22px;height:22px;stroke-width:2}
+nav.vitrail .nb{color:var(--side-muted)}
+nav.vitrail .nb .bille{transition:transform .15s}
+nav.vitrail .nb:hover .bille{transform:translateY(-1px)}
+nav.vitrail .nb.on .bille{box-shadow:inset 0 -4px 7px rgba(0,0,0,.28),inset 0 2px 3px rgba(255,255,255,.45),0 0 0 2px var(--side-on),0 0 0 4px var(--gold)}
+.kpi{display:flex;align-items:center;gap:14px;padding:16px 18px}
+.kpi::before{content:none;display:none}
+.kpi .pico{width:46px;height:46px}.kpi .pico svg{width:22px;height:22px}
+.kpi .kt{min-width:0;display:flex;flex-direction:column}
+.kpi .kt span{font-size:12px;color:var(--muted)}
+.modal .kpi .pico{display:none}
+@media (prefers-reduced-motion:reduce){nav.vitrail .nb .bille{transition:none}}

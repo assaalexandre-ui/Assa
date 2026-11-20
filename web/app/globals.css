@@ -305,3 +305,14 @@ h1{font-size:30px;letter-spacing:-.015em}
 @media (max-width:1100px){.g12>.s7,.g12>.s5,.g12>.s4,.g12>.s6,.g12>.s8{grid-column:span 12}}
 @media (max-width:900px){aside{width:min(260px,86vw)} .kpi{flex-basis:50%;border-bottom:1px solid var(--lead)} h1{font-size:24px}}
 nav.vitrail .subs[hidden]{display:none}
+/* Fenêtres, cartes de liste et connexion aux couleurs « Vitrail » */
+.modal>header{border-bottom-color:var(--lead)}
+.modal>header h3{font-family:var(--f-disp);font-size:19px}
+.chart>header{flex-wrap:nowrap}
+.card b{font-family:var(--f-disp);font-size:15.5px;font-weight:600}
+th{background:var(--tint)}
+.empty b{font-family:var(--f-disp);font-size:16px}
+body:has(.gate){background-color:var(--side);background-image:repeating-linear-gradient(60deg,rgba(201,162,39,.08) 0 1px,transparent 1px 34px),repeating-linear-gradient(-60deg,rgba(201,162,39,.08) 0 1px,transparent 1px 34px)}
+.gate{border:0;border-top:4px solid var(--gold);box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.gate h1::after{content:"";display:block;width:96px;height:3px;margin:10px auto 0;background:linear-gradient(90deg,var(--saphir) 0 25%,var(--rubis) 25% 50%,var(--emeraude) 50% 75%,var(--ambre) 75%)}
+.modal .kpi{padding-left:18px;flex-basis:160px} .modal .kpi::before{display:none} .modal .kpi strong{font-size:22px}

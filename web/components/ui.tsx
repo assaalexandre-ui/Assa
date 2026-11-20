@@ -30,9 +30,43 @@ export const ICONES = {
   argent: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/>',
   formation: '<path d="M3 8l9-4 9 4-9 4z"/><path d="M7 10v5c0 1.5 2.2 3 5 3s5-1.5 5-3v-5"/>',
   berger: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 4v16M17 4c2.2 0 3.5 1.2 3.5 3S19.2 10 17 10"/>',
+  personnes: '<circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5M14 14.6c3.4-.6 6.5 1.6 7 5.4"/>',
+  cle: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
+  journal: '<path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6M9 18h3"/>',
+  liste: '<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
+  ajout: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  coeur: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+  service: '<path d="M4 14h16M6 14l1-6h10l1 6M9 8V5h6v3"/><path d="M5 14v5h14v-5"/>',
 } as const;
 
-export function Panel({ titre, droite, children, icone, ton = 'saphir' }: { titre?: React.ReactNode; droite?: React.ReactNode; children: React.ReactNode; icone?: keyof typeof ICONES; ton?: Ton }) {
+const TONS: Ton[] = ['saphir', 'rubis', 'emeraude', 'ambre', 'amethyste', 'ciel'];
+// Icône et couleur choisies d'après le titre du bloc, pour que chaque bloc titré porte son pictogramme rond.
+const AUTO: [RegExp, keyof typeof ICONES, Ton][] = [
+  [/absence|présence|relevé|par mois/i, 'barres', 'emeraude'],
+  [/anniversaire/i, 'coeur', 'rubis'],
+  [/appel|relancer/i, 'telephone', 'rubis'],
+  [/intégr/i, 'ajout', 'emeraude'],
+  [/session|classe|inscrit|formation/i, 'formation', 'ambre'],
+  [/brebis|berger/i, 'berger', 'ciel'],
+  [/membre|utilisateur|personne/i, 'personnes', 'saphir'],
+  [/rôle|accès/i, 'cle', 'amethyste'],
+  [/journal|plan d|tâche/i, 'journal', 'ciel'],
+  [/recette|dépense|budget|relevé de/i, 'argent', 'ambre'],
+  [/passage|service/i, 'service', 'amethyste'],
+  [/annonce/i, 'annonce', 'ambre'],
+  [/venir|calend/i, 'calendrier', 'rubis'],
+];
+function iconeAuto(titre: string): [keyof typeof ICONES, Ton] {
+  const a = AUTO.find(([r]) => r.test(titre));
+  if (a) return [a[1], a[2]];
+  let h = 0;
+  for (const c of titre) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return ['liste', TONS[h % TONS.length]];
+}
+
+export function Panel({ titre, droite, children, icone, ton }: { titre?: React.ReactNode; droite?: React.ReactNode; children: React.ReactNode; icone?: keyof typeof ICONES; ton?: Ton }) {
+  if (titre && !icone && typeof titre === 'string') [icone, ton] = [iconeAuto(titre)[0], ton ?? iconeAuto(titre)[1]];
+  ton = ton ?? 'saphir';
   return (
     <section className="panel">
       {titre && <header>{icone && <span className="pico" style={{ ['--j' as string]: `var(--${ton})` }}><svg viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{ __html: ICONES[icone] }} /></span>}<h2>{titre}</h2>{droite}</header>}

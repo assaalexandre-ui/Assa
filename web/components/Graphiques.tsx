@@ -8,8 +8,18 @@ const valeur = (v: number, f?: 'money' | 'pct') => (f === 'money' ? nombre(v) + 
 
 type Point = [string, number, string?];
 
-function Entete({ titre, sous }: { titre: string; sous?: string }) {
-  return <header><div><h2>{titre}</h2>{sous && <span className="muted" style={{ fontSize: 12.5 }}>{sous}</span>}</div></header>;
+const TONS_ENTETE = ['saphir', 'rubis', 'emeraude', 'ambre', 'amethyste', 'ciel'];
+/** En-tête d'un graphique : icône ronde (barres ou classement), titre, sous-titre. */
+function Entete({ titre, sous, classement }: { titre: string; sous?: string; classement?: boolean }) {
+  let h = 0;
+  for (const c of titre) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const trace = classement ? '<path d="M4 6h10M4 12h16M4 18h7"/>' : '<path d="M4 20V13M9.5 20V8M15 20v-5M20.5 20V5"/>';
+  return (
+    <header>
+      <span className="pico" style={{ ['--j' as string]: `var(--${TONS_ENTETE[h % 6]})` }}><svg viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{ __html: trace }} /></span>
+      <div style={{ flex: 1, minWidth: 0 }}><h2>{titre}</h2>{sous && <span className="muted" style={{ fontSize: 12.5 }}>{sous}</span>}</div>
+    </header>
+  );
 }
 
 /** Barres verticales : une période par barre ; la dernière et la plus haute portent leur valeur. */
@@ -63,7 +73,7 @@ export function BarresH({ titre, sous, data, f, tri = true }: { titre: string; s
   const max = f === 'pct' ? 100 : Math.max(1, ...rows.map(d => d[1]));
   return (
     <section className="panel chart">
-      <Entete titre={titre} sous={sous} />
+      <Entete titre={titre} sous={sous} classement />
       <div className="body">
         {rows.length ? (
           <div className="hb">{rows.map(d => (

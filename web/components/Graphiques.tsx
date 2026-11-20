@@ -76,3 +76,91 @@ export function BarresH({ titre, sous, data, f, tri = true }: { titre: string; s
     </section>
   );
 }
+
+const TONS = ['var(--saphir)', 'var(--rubis)', 'var(--emeraude)', 'var(--ambre)', 'var(--amethyste)', 'var(--ciel)'];
+
+/** Rosace : un pétale par groupe, sa longueur suit le pourcentage (comme une rosace de vitrail). Sans relevé : pétale en pointillé. */
+export function Rosace({ data, centre, legende }: { data: [string, number | null][]; centre: string; legende: string }) {
+  const n = Math.max(1, data.length), c = 150, r0 = 36;
+  const pt = (r: number, a: number) => `${(c + r * Math.cos(a)).toFixed(1)} ${(c + r * Math.sin(a)).toFixed(1)}`;
+  const petale = (i: number, pct: number) => {
+    const a1 = (-90 + (i * 360) / n + 1.5) * Math.PI / 180, a2 = (-90 + ((i + 1) * 360) / n - 1.5) * Math.PI / 180, r = r0 + Math.max(4, pct) * 1.05;
+    const grand = (a2 - a1) > Math.PI ? 1 : 0;
+    return `M${pt(r0, a1)}L${pt(r, a1)}A${r.toFixed(1)} ${r.toFixed(1)} 0 ${grand} 1 ${pt(r, a2)}L${pt(r0, a2)}A${r0} ${r0} 0 ${grand} 0 ${pt(r0, a1)}Z`;
+  };
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
+      <svg viewBox="-14 -14 328 328" role="img" aria-label={legende} style={{ flex: '1 1 220px', maxWidth: 290, height: 'auto' }}>
+        <circle cx={c} cy={c} r={140} fill="none" stroke="var(--lead)" />
+        <circle cx={c} cy={c} r={r0 + 52} fill="none" stroke="var(--lead)" strokeDasharray="3 4" />
+        {data.map(([l, p], i) => p == null
+          ? <path key={l} d={petale(i, 6)} fill="none" stroke="var(--line)" strokeDasharray="2 3"><title>{`${l} : pas de relevé`}</title></path>
+          : <path key={l} d={petale(i, p)} fill={TONS[i % 6]}><title>{`${l} : ${p} %`}</title></path>)}
+        <circle cx={c} cy={c} r={30} fill="var(--side)" />
+        <text x={c} y={c - 2} textAnchor="middle" fill="#fff" fontFamily="var(--f-disp)" fontSize="17" fontWeight="700">{centre}</text>
+        <text x={c} y={c + 13} textAnchor="middle" fill="var(--gold)" fontSize="8.5">moyenne</text>
+      </svg>
+      <ol style={{ flex: '1 1 170px', margin: 0, padding: 0, listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(128px, 1fr))', gap: '6px 14px', fontSize: 12.5 }}>
+        {data.map(([l, p], i) => (
+          <li key={l} style={{ display: 'flex', justifyContent: 'space-between', gap: 6, minWidth: 0 }}>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><i style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', marginRight: 6, background: p == null ? 'var(--line)' : TONS[i % 6] }} />{l}</span>
+            <b style={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{p == null ? '—' : p + ' %'}</b>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/** Anneau de répartition (statuts, catégories), total au centre et légende à droite. */
+export function Anneau({ parts, total, unite }: { parts: [string, number][]; total: number; unite: string }) {
+  const somme = Math.max(1, parts.reduce((t, p) => t + p[1], 0));
+  let acc = 0;
+  const arcs = parts.map(([, v], i) => { const a = acc; acc += (v / somme) * 100; return `${TONS[i % 6]} ${a}% ${acc}%`; }).join(', ');
+  return (
+    <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div role="img" aria-label={parts.map(p => `${p[0]} ${p[1]}`).join(', ')} style={{ width: 150, height: 150, borderRadius: '50%', background: `conic-gradient(${arcs || 'var(--line) 0 100%'})`, display: 'grid', placeItems: 'center', flex: 'none' }}>
+        <div style={{ width: 92, height: 92, borderRadius: '50%', background: 'var(--surface)', display: 'grid', placeItems: 'center', textAlign: 'center' }}>
+          <div><div className="disp" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{total}</div><div className="muted" style={{ fontSize: 11 }}>{unite}</div></div>
+        </div>
+      </div>
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 9, fontSize: 13, flex: '1 1 120px' }}>
+        {parts.map(([l, v], i) => (
+          <li key={l} style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><span><i style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: TONS[i % 6], marginRight: 8 }} />{l}</span><b style={{ fontVariantNumeric: 'tabular-nums' }}>{v}</b></li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Barres empilées par période (ex. hommes, femmes, enfants à chaque culte). */
+export function BarresEmpilees({ data, series }: { data: { l: string; court: string; parts: number[] }[]; series: string[] }) {
+  const max = Math.max(1, ...data.map(d => d.parts.reduce((t, v) => t + v, 0)));
+  const p = Math.pow(10, Math.floor(Math.log10(max))), m = max / p;
+  const haut = (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+  return (
+    <>
+      <div className="legende" style={{ marginBottom: 10 }}>{series.map((s, i) => <span key={s}><i style={{ background: TONS[i % 6] }} />{s}</span>)}</div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <div className="muted" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: 11.5, textAlign: 'right', height: 200, fontVariantNumeric: 'tabular-nums' }}>{nombre(haut)}<span>{nombre(haut / 2)}</span><span>0</span></div>
+        <div style={{ flex: 1, minWidth: 0, overflowX: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 200, minWidth: Math.max(260, data.length * 36), borderBottom: '1px solid var(--line)', backgroundImage: 'linear-gradient(var(--tint) 1px, transparent 1px)', backgroundSize: '100% 50%' }}>
+            {data.map(d => {
+              const t = d.parts.reduce((a, v) => a + v, 0);
+              return (
+                <div key={d.l} title={`${d.l} : ${nombre(t)} (${d.parts.map((v, i) => `${series[i]} ${v}`).join(', ')})`} style={{ flex: 1, height: `${(t / haut) * 100}%`, display: 'flex', flexDirection: 'column-reverse', borderRadius: '3px 3px 0 0', overflow: 'hidden', maxWidth: 46, margin: '0 auto' }}>
+                  {d.parts.map((v, i) => <span key={i} style={{ height: `${t ? (v / t) * 100 : 0}%`, background: TONS[i % 6] }} />)}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 6, minWidth: Math.max(260, data.length * 36) }}>{data.map(d => <span key={d.l} className="muted" style={{ flex: 1, textAlign: 'center', fontSize: 11 }}>{d.court}</span>)}</div>
+        </div>
+      </div>
+      <details style={{ marginTop: 8 }}><summary className="link">Voir le tableau</summary>
+        <div className="tw"><table><thead><tr><th>Date</th>{series.map(s => <th key={s} className="num">{s}</th>)}<th className="num">Total</th></tr></thead>
+          <tbody>{data.map(d => <tr key={d.l}><td>{d.l}</td>{d.parts.map((v, i) => <td key={i} className="num">{nombre(v)}</td>)}<td className="num">{nombre(d.parts.reduce((a, v) => a + v, 0))}</td></tr>)}</tbody></table></div>
+      </details>
+    </>
+  );
+}

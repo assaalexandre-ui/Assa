@@ -258,7 +258,53 @@ const journal = [[1, '2026-10-05', 'Décision', 'Le conseil valide le lancement 
 lot5.push('insert into projet_journal (id, eglise_id, projet_id, date, type, texte) values');
 lot5.push(journal.map(([p, d, t, x], i) => `  (${[uuid('78000000', i + 1), EGLISE, uuid('76000000', p), d, t, x].map(q).join(', ')})`).join(',\n') + ';', '');
 
-writeFileSync(out, [...lignes, ...lot2, ...lot3, ...lot4, ...lot5].join('\n'));
+const lot6 = ['-- Données FICTIVES du lot 6 (finances, communication, patrimoine).', ''];
+const fondsListe = [['Dîmes', 'Fonds permanent', null, null], ['Offrandes', 'Fonds permanent', null, null], ['Construction du temple', 'Campagne', 15000000, '2027-06-30'], ['Missions', 'Fonds permanent', null, null]];
+lot6.push('insert into fonds (id, eglise_id, nom, type, objectif, fin, description) values');
+lot6.push(fondsListe.map((f, i) => `  (${[uuid('80000000', i + 1), EGLISE, ...f, 'Fonds fictif de test'].map(q).join(', ')})`).join(',\n') + ';', '');
+const CANAUX_DON = ['Espèces', 'Espèces', 'Orange Money', 'MTN MoMo', 'Wave', 'Moov Money'];
+const dons = [];
+for (let k = 11; k >= 0; k--) {
+  const d0 = new Date(Date.UTC(2026, 10 - k, 1));
+  const ym = d0.toISOString().slice(0, 7);
+  const jours = ['03', '10', '17', '24'].filter(j => ym + '-' + j <= '2026-11-20');
+  for (const j of jours) {
+    dons.push([ym + '-' + j, 2, 150000 + Math.round(hasard() * 80) * 1000, 'Espèces', null]);
+    if (hasard() < 0.5) dons.push([ym + '-' + j, 3, 25000 + Math.round(hasard() * 50) * 1000, choix(CANAUX_DON), null]);
+  }
+  for (let t = 0; t < 4; t++) dons.push([ym + '-' + pad(5 + t * 5), 1, 10000 + Math.round(hasard() * 40) * 1000, choix(CANAUX_DON), choix(fideles).id]);
+  if (k % 3 === 0) dons.push([ym + '-15', 4, 50000, 'Virement', null]);
+}
+lot6.push('insert into don (id, eglise_id, date, fonds_id, montant, canal, fidele_id, reference, statut) values');
+lot6.push(dons.map(([d, f, m, c, fid], i) => `  (${[uuid('81000000', i + 1), EGLISE, d, uuid('80000000', f), m, c, fid, c === 'Espèces' ? null : 'TX' + pad(i + 1, 6), d < '2026-11-01' ? 'Validé' : 'Saisi'].map(q).join(', ')})`).join(',\n') + ';', '');
+const lignesBudget = [['Loyer et charges du temple', 'd06', 6000000], ['Électricité et eau', 'd06', 2400000], ['Sono et médias', 'd04', 1800000], ['École du dimanche', 'd08', 600000], ['Œuvres caritatives', 'd10', 1500000], ['Évangélisation et missions', null, 2000000], ['Entretien et hygiène', 'd03', 900000], ['Toiture du temple', 'd06', 4500000]];
+lot6.push('insert into ligne_budget (id, eglise_id, annee, poste, departement_id, montant) values');
+lot6.push(lignesBudget.map((l, i) => `  (${[uuid('82000000', i + 1), EGLISE, 2026, ...l].map(q).join(', ')})`).join(',\n') + ';', '');
+const depenses = [
+  ['2026-01-05', 'Loyer de janvier', 500000, 1, null, 'Payée'], ['2026-02-05', 'Loyer de février', 500000, 1, null, 'Payée'], ['2026-03-05', 'Loyer de mars', 500000, 1, null, 'Payée'],
+  ['2026-04-12', 'Facture CIE (électricité)', 210000, 2, null, 'Payée'], ['2026-05-20', 'Câbles et micros', 320000, 3, null, 'Payée'], ['2026-06-08', 'Supports de l\'école du dimanche', 180000, 4, null, 'Payée'],
+  ['2026-07-14', 'Dons alimentaires aux familles', 400000, 5, null, 'Payée'], ['2026-08-22', 'Croisade de Yopougon', 650000, 6, null, 'Payée'], ['2026-09-10', 'Produits d\'entretien', 95000, 7, null, 'Payée'],
+  ['2026-10-05', 'Loyer d\'octobre', 500000, 1, null, 'Payée'], ['2026-11-05', 'Loyer de novembre', 500000, 1, null, 'Validée'], ['2026-11-12', 'Acompte toiture (tôles)', 1200000, 8, 1, 'Validée'],
+  ['2026-11-16', 'Facture SODECI (eau)', 75000, 2, null, 'Demandée'], ['2026-11-18', 'Location de cars pour la convention', 900000, 6, 2, 'Demandée'], ['2026-11-19', 'Ordinateur de diffusion', 650000, 3, 3, 'Refusée'],
+];
+lot6.push('insert into depense (id, eglise_id, date, objet, montant, ligne_budget_id, projet_id, demandeur, beneficiaire, canal, statut) values');
+lot6.push(depenses.map(([d, o, m, l, p, st], i) => `  (${[uuid('83000000', i + 1), EGLISE, d, o, m, uuid('82000000', l), p ? uuid('76000000', p) : null, nomPersonne(), 'Prestataire fictif', choix(['Espèces', 'Virement', 'Orange Money']), st].map(q).join(', ')})`).join(',\n') + ';', '');
+const annonces = [['Veillée de prière', '2026-11-16', '2026-11-28', 'Veillée de prière vendredi 27 novembre à 22 h au temple. Venez nombreux.', true], ['Inscriptions à la convention 2027', '2026-11-05', '2027-01-10', 'Les inscriptions à la convention annuelle sont ouvertes auprès du secrétariat (5 000 F, transport compris).', true],
+  ['Collecte pour la toiture', '2026-11-12', null, 'Une collecte spéciale pour la réfection de la toiture aura lieu le dimanche 23 novembre.', true], ['Programme de Noël', '2026-11-19', null, 'Brouillon à compléter : horaires des cultes de Noël et du Nouvel An.', false]];
+lot6.push('insert into annonce (id, eglise_id, titre, date, jusquau, texte, publie) values');
+lot6.push(annonces.map((a, i) => `  (${[uuid('84000000', i + 1), EGLISE, ...a.slice(0, 4)].map(q).join(', ')}, ${a[4]})`).join(',\n') + ';', '');
+const articles = [['Console de mixage 24 pistes', 'Sono et instruments', 1, 'Régie', 'Bon', 1800000, '2024-03-10'], ['Micros sans fil', 'Sono et instruments', 6, 'Louange', 'Bon', 90000, '2025-01-15'], ['Clavier numérique', 'Sono et instruments', 1, 'Louange', 'À réparer', 650000, '2022-06-01'],
+  ['Chaises en plastique', 'Mobilier', 400, 'Nef', 'Bon', 6000, '2023-09-01'], ['Bancs en bois', 'Mobilier', 60, 'Nef', 'Bon', 45000, '2019-05-20'], ['Vidéoprojecteur', 'Informatique', 2, 'Médias', 'Bon', 420000, '2024-11-02'],
+  ['Ordinateur portable', 'Informatique', 1, 'Secrétariat', 'À réparer', 380000, '2021-02-14'], ['Minicar 22 places', 'Véhicule', 1, 'Transport', 'Bon', 14000000, '2020-08-30'], ['Groupe électrogène', 'Autre', 1, 'Temple', 'Hors service', 2500000, '2018-04-11'], ['Climatiseurs', 'Bâtiment', 4, 'Salle des enfants', 'Bon', 350000, '2023-03-03']];
+lot6.push('insert into article (id, eglise_id, article, categorie, quantite, affectation, etat, valeur, date_achat, notes) values');
+lot6.push(articles.map((a, i) => `  (${[uuid('85000000', i + 1), EGLISE, ...a, 'Article fictif de test'].map(q).join(', ')})`).join(',\n') + ';', '');
+const entretiens = [['2026-06-10', 8, 'Vidange et révision', 'Garage fictif', 85000, '2026-12-10'], ['2026-09-02', 9, 'Diagnostic de panne', 'Électricien fictif', 25000, '2026-10-15'], ['2026-10-20', 10, 'Nettoyage des filtres', 'Froid fictif', 40000, '2027-01-20'], ['2026-11-03', 1, 'Mise à jour et réglages', 'Technicien fictif', 30000, null], ['2026-11-14', 3, 'Remplacement de touches', 'Technicien fictif', 60000, '2026-11-25']];
+lot6.push('insert into entretien (id, eglise_id, date, article_id, intervention, prestataire, cout, prochaine) values');
+lot6.push(entretiens.map(([d, a, it, pr, c, nx], i) => `  (${[uuid('86000000', i + 1), EGLISE, d, uuid('85000000', a), it, pr, c, nx].map(q).join(', ')})`).join(',\n') + ';', '');
+lot6.push('insert into objectif (id, eglise_id, libelle, but, mesure, cible, date_debut, date_fin, responsable) values');
+lot6.push(`  (${[uuid('75000000', 8), EGLISE, 'Collecter 15 millions pour le temple en 2026', 'Financer les travaux sans emprunt.', 'dons', 15000000, '2026-01-01', '2026-12-31', 'Trésorier'].map(q).join(', ')});`, '');
+
+writeFileSync(out, [...lignes, ...lot2, ...lot3, ...lot4, ...lot5, ...lot6].join('\n'));
 // Fichier de mise à jour d'une base en ligne déjà installée avec le lot 1 : migration du lot 2 + ses données fictives.
 const dossier = fileURLToPath(new URL('../supabase/', import.meta.url));
 const migration = readFileSync(dossier + 'migrations/20261120000001_lot2.sql', 'utf8');
@@ -269,4 +315,6 @@ const migration4 = readFileSync(dossier + 'migrations/20261122000001_lot4.sql', 
 writeFileSync(dossier + 'mise-a-jour-lot4.sql', "-- Mise à jour d'une base déjà au lot 3 vers le lot 4. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration4 + '\n\n' + lot4.join('\n'));
 const migration5 = readFileSync(dossier + 'migrations/20261123000001_lot5.sql', 'utf8');
 writeFileSync(dossier + 'mise-a-jour-lot5.sql', "-- Mise à jour d'une base déjà au lot 4 vers le lot 5. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration5 + '\n\n' + lot5.join('\n') + "\n\nnotify pgrst, 'reload schema';\n");
+const migration6 = readFileSync(dossier + 'migrations/20261124000001_lot6.sql', 'utf8');
+writeFileSync(dossier + 'mise-a-jour-lot6.sql', "-- Mise à jour d'une base déjà au lot 5 vers le lot 6. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration6 + '\n\n' + lot6.join('\n') + "\n\nnotify pgrst, 'reload schema';\n");
 console.log(`seed.sql écrit : ${bergers.length} bergers, ${fideles.length} fidèles, ${nouveaux.length} nouveaux, ${appels.length} appels, ${cellules.length} cellules, ${activites.length} activités.`);

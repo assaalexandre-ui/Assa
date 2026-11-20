@@ -4,7 +4,7 @@ import { BarresH, BarresV } from '@/components/Graphiques';
 import { Empty, Kpis, Panel } from '@/components/ui';
 import { requireMenu } from '@/lib/session';
 import { createClient } from '@/lib/supabase/server';
-import { frDate, frMonth, weekLabel } from '@/lib/format';
+import { frDate, frMonth, money, weekLabel } from '@/lib/format';
 
 type Paire = [string, number];
 type Stats = {
@@ -20,9 +20,11 @@ const parMois = (l: Paire[]) => l.map(([m, v]) => [frMonth(m), Number(v), moisCo
 
 export default async function Statistiques({ params }: { params: Promise<{ sous: string }> }) {
   const { sous } = await params;
-  if (!['croissance', 'integration', 'formations'].includes(sous)) notFound();
-  await requireMenu('stats');
+  if (!['croissance', 'integration', 'formations', 'finances'].includes(sous)) notFound();
+  const session = await requireMenu('stats');
+  if (sous === 'finances' && !session.droits.dons) notFound();
   const supabase = await createClient();
+  if (sous === 'finances') return <Finances />;
   const { data, error } = await supabase.rpc('statistiques');
   const s = data as Stats | null;
 
@@ -80,4 +82,30 @@ export default async function Statistiques({ params }: { params: Promise<{ sous:
     );
   }
   return (<><PageHead id="stats" sous={sous} />{corps}</>);
+}
+
+type StatsFinances = { encaisse: number; depense: number; mobileMoney: number; encaissementsParMois: Paire[]; depensesParMois: Paire[]; parFonds: Paire[]; parCanal: Paire[] };
+
+async function Finances() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('statistiques_finances');
+  const f = data as StatsFinances | null;
+  const annee = new Date().getFullYear();
+  return (
+    <>
+      <PageHead id="stats" sous="finances" />
+      {error || !f ? <Panel><Empty titre="Statistiques indisponibles" texte="Le calcul n'a pas abouti. Réessayez dans un instant." /></Panel> : (
+        <>
+          <Kpis items={[['Encaissé ' + annee, money(f.encaisse)], ['Dépensé ' + annee, money(f.depense)], ['Solde ' + annee, money(f.encaisse - f.depense)],
+            ['Mobile Money', f.encaisse ? Math.round(f.mobileMoney / f.encaisse * 100) + ' %' : '—', 'part des encaissements']]} />
+          <div className="charts">
+            <BarresV titre="Encaissements par mois" sous="dîmes, offrandes et campagnes, en FCFA" data={parMois(f.encaissementsParMois)} f="money" />
+            <BarresV titre="Dépenses par mois" sous="dépenses validées ou payées, en FCFA" data={parMois(f.depensesParMois)} f="money" />
+            <BarresH titre="Encaissements par fonds" sous={String(annee)} data={f.parFonds.map(([k, v]) => [k, Number(v)])} f="money" />
+            <BarresH titre="Encaissements par moyen de paiement" sous={String(annee)} data={f.parCanal.map(([k, v]) => [k, Number(v)])} f="money" />
+          </div>
+        </>
+      )}
+    </>
+  );
 }

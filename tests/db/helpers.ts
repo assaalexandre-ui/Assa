@@ -76,6 +76,9 @@ export async function fixtures(db: Db): Promise<Comptes> {
   end $$`);
   await db.q(`do $$ begin
     if to_regclass('public.objectif') is not null then
+      if to_regclass('public.don') is not null then
+        delete from don; delete from fonds; delete from depense; delete from ligne_budget; delete from annonce; delete from entretien; delete from article;
+      end if;
       delete from objectif; delete from projet_journal; delete from projet_action; delete from projet;
     end if;
   end $$`);

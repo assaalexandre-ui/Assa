@@ -2,8 +2,10 @@
 
 export type Acces = 'r' | 'w';
 export type Droits = Partial<Record<MenuId, Acces>>;
-export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'pilotage' | 'stats' | 'objectifs' | 'projets';
-export type MenuDef = { id: MenuId; t: string; section: string; vert: boolean; subs: [string, string][]; icone: string };
+export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'pilotage' | 'stats' | 'objectifs' | 'projets' | 'dons' | 'budget' | 'communication' | 'patrimoine';
+/** Sous-menu : [id, libellé, condition] ; condition = 'w' (réservé à qui modifie le menu) ou un menu requis en lecture. */
+export type SousMenu = [string, string, ('w' | MenuId)?];
+export type MenuDef = { id: MenuId; t: string; section: string; vert: boolean; subs: SousMenu[]; icone: string };
 
 const VIE = "Structure de l'église";
 
@@ -30,7 +32,7 @@ export const MENUS: MenuDef[] = [
     icone: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>' },
   { id: 'organigramme', t: 'Organigramme', section: VIE, vert: true, subs: [['annuaire', 'Annuaire des responsables'], ['structure', 'Structure']],
     icone: '<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>' },
-  { id: 'stats', t: 'Statistiques', section: 'Tableau de bord', vert: false, subs: [['croissance', 'Croissance et présence'], ['integration', 'Intégration et suivi'], ['formations', 'Formations']],
+  { id: 'stats', t: 'Statistiques', section: 'Tableau de bord', vert: false, subs: [['croissance', 'Croissance et présence'], ['integration', 'Intégration et suivi'], ['formations', 'Formations'], ['finances', 'Finances', 'dons']],
     icone: '<path d="M4 20V13M9.5 20V8M15 20v-5M20.5 20V5"/><path d="M3 20.5h18"/>' },
   { id: 'objectifs', t: 'Objectifs à atteindre', section: 'Tableau de bord', vert: false, subs: [['objectifs', 'Objectifs'], ['resultats', 'Résultats']],
     icone: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>' },
@@ -48,6 +50,14 @@ export const MENUS: MenuDef[] = [
     icone: '<path d="M12 3v5M9.5 5.5h5"/><path d="M5 21V12l7-4 7 4v9"/><path d="M10 21v-4h4v4"/>' },
   { id: 'evenements', t: 'Événements', section: 'Cultes et activités', vert: false, subs: [['inscriptions', 'Inscriptions'], ['transport', 'Transport']],
     icone: '<path d="M4 20l3-12 10 5z"/><path d="M14 4l1 2M19 6l-2 1M20 11h-2"/>' },
+  { id: 'dons', t: 'Dîmes et offrandes', section: 'Finances et ressources', vert: false, subs: [['encaissements', 'Encaissements'], ['fonds', 'Fonds et campagnes'], ['releve', 'Relevé par fidèle']],
+    icone: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14.5" r="1.5"/>' },
+  { id: 'budget', t: 'Budget et dépenses', section: 'Finances et ressources', vert: false, subs: [['budget', 'Budget'], ['depenses', 'Dépenses'], ['etats', 'États financiers']],
+    icone: '<path d="M5 21V4h14v17l-3.5-2-3.5 2-3.5-2z"/><path d="M9 9h6M9 13h6"/>' },
+  { id: 'communication', t: 'Communication', section: 'Finances et ressources', vert: false, subs: [['annonces', 'Annonces'], ['message', 'Préparer un message', 'w']],
+    icone: '<path d="M4 5h16v11H8l-4 4z"/>' },
+  { id: 'patrimoine', t: 'Patrimoine', section: 'Finances et ressources', vert: false, subs: [['inventaire', 'Inventaire'], ['entretien', 'Entretien']],
+    icone: '<path d="M3 8l9-5 9 5v11H3z"/><path d="M8 19v-6h8v6"/>' },
   { id: 'admin', t: 'Administration', section: 'Administration', vert: false, subs: [['utilisateurs', 'Utilisateurs'], ['roles', 'Rôles et accès']],
     icone: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>' },
 ];
@@ -73,6 +83,10 @@ export const LEADS: Record<MenuId, string> = {
   stats: "Les KPI de l'église, calculés automatiquement à partir des données saisies.",
   objectifs: "Les objectifs à atteindre fixés par l'administrateur, leur but et le résultat obtenu.",
   projets: "Planifier et suivre les projets : échéances, plan d'actions, budget, journal et rappels.",
+  dons: 'Dîmes, offrandes et campagnes, par fonds et par moyen de paiement.',
+  budget: 'Budget annuel, dépenses et états financiers.',
+  communication: 'Annonces pour les fidèles et messages à envoyer par WhatsApp ou SMS.',
+  patrimoine: "Matériel de l'église et son entretien.",
   evenements: 'Inscriptions aux conventions, séminaires et retraites, avec paiement et transport.',
 };
 
@@ -80,4 +94,9 @@ export const menu = (id: string) => MENUS.find(m => m.id === id);
 
 export function visibleMenus(droits: Droits): MenuDef[] {
   return MENUS.filter(m => !!droits[m.id]);
+}
+
+/** Sous-menus accessibles : les réservés à l'écriture et ceux qui exigent un autre menu sont masqués sinon. */
+export function sousMenus(m: MenuDef, droits: Droits): SousMenu[] {
+  return m.subs.filter(([, , c]) => !c || (c === 'w' ? droits[m.id] === 'w' : !!droits[c]));
 }

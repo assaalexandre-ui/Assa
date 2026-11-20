@@ -4,8 +4,8 @@ import { phone } from './format';
 export type TypeChamp = 'text' | 'date' | 'time' | 'month' | 'tel' | 'number' | 'textarea' | 'select' | 'check';
 /** options : liste fixe, ou clé d'une liste dynamique fournie par la page (bergers, cellules, assemblées). */
 export type ChampDef = { k: string; label: string; type?: TypeChamp; req?: boolean; full?: boolean; options?: (string | [string, string])[]; dyn?: Dyn; hint?: string };
-export type Dyn = 'bergers' | 'cellules' | 'assemblees' | 'classes' | 'departements' | 'reunions' | 'evenements';
-export type EntiteDef = { table: string; menu: 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'objectifs' | 'projets'; nouveau: string; champs: ChampDef[] };
+export type Dyn = 'bergers' | 'cellules' | 'assemblees' | 'classes' | 'departements' | 'reunions' | 'evenements' | 'fonds' | 'fideles' | 'lignes' | 'projets' | 'articles';
+export type EntiteDef = { table: string; menu: 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'objectifs' | 'projets' | 'dons' | 'budget' | 'communication' | 'patrimoine'; nouveau: string; champs: ChampDef[] };
 
 export const COMMUNES = ['Abobo', 'Adjamé', 'Anyama', 'Attécoubé', 'Bingerville', 'Cocody', 'Koumassi', 'Marcory', 'Plateau', 'Port-Bouët', 'Songon', 'Treichville', 'Yopougon', 'Autre'];
 export const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -28,6 +28,11 @@ export const MESURES: [string, string][] = [
   ['suivis', 'Fidèles suivis par un berger'], ['formation', 'Fidèles en formation'], ['valides', 'Classes validées sur la période'],
   ['cellules', 'Nombre de cellules'], ['rapports', 'Rapports de cellule remis sur la période'],
 ];
+export const MOBILE_MONEY = ['Orange Money', 'MTN MoMo', 'Moov Money', 'Wave'];
+export const STATUTS_DON = ['Saisi', 'Validé'];
+export const STATUTS_DEPENSE = ['Demandée', 'Validée', 'Payée', 'Refusée'];
+export const CATEGORIES_ARTICLE = ['Sono et instruments', 'Mobilier', 'Informatique', 'Véhicule', 'Bâtiment', 'Autre'];
+export const ETATS_ARTICLE = ['Bon', 'À réparer', 'Hors service'];
 export const PRIORITES = ['Haute', 'Moyenne', 'Basse'];
 export const STATUTS_PROJET = ['À lancer', 'En cours', 'En pause', 'Terminé'];
 export const STATUTS_ACTION = ['À faire', 'En cours', 'Fait'];
@@ -116,6 +121,34 @@ export const ENTITES = {
     { k: 'date_debut', label: 'Date de début', type: 'date', req: true }, { k: 'echeance', label: 'Échéance', type: 'date', req: true },
     { k: 'priorite', label: 'Priorité', type: 'select', options: PRIORITES, req: true }, { k: 'statut', label: 'Statut', type: 'select', options: STATUTS_PROJET, req: true },
     { k: 'budget', label: 'Budget prévu (FCFA)', type: 'number' }] },
+  fonds: { table: 'fonds', menu: 'dons', nouveau: 'Nouveau fonds', champs: [
+    { k: 'nom', label: 'Nom', req: true }, { k: 'type', label: 'Type', type: 'select', options: ['Fonds permanent', 'Campagne'], req: true },
+    { k: 'objectif', label: 'Objectif (FCFA)', type: 'number' }, { k: 'fin', label: 'Date de fin de campagne', type: 'date' }, { k: 'description', label: 'Description', type: 'textarea' }] },
+  don: { table: 'don', menu: 'dons', nouveau: 'Saisir un encaissement', champs: [
+    { k: 'date', label: 'Date', type: 'date', req: true }, { k: 'fonds_id', label: 'Fonds', type: 'select', dyn: 'fonds', req: true },
+    { k: 'montant', label: 'Montant (FCFA)', type: 'number', req: true }, { k: 'canal', label: 'Moyen', type: 'select', options: CANAUX, req: true },
+    { k: 'fidele_id', label: 'Fidèle (laisser vide pour une collecte)', type: 'select', dyn: 'fideles', full: true }, { k: 'reference', label: 'Référence de la transaction' },
+    { k: 'statut', label: 'Statut', type: 'select', options: STATUTS_DON, hint: 'La validation est faite par une autre personne que celle qui a saisi.' }, { k: 'notes', label: 'Notes', type: 'textarea' }] },
+  ligne_budget: { table: 'ligne_budget', menu: 'budget', nouveau: 'Nouvelle ligne de budget', champs: [
+    { k: 'annee', label: 'Année', type: 'number', req: true }, { k: 'poste', label: 'Poste', req: true },
+    { k: 'departement_id', label: 'Département', type: 'select', dyn: 'departements' }, { k: 'montant', label: 'Montant prévu (FCFA)', type: 'number', req: true }] },
+  depense: { table: 'depense', menu: 'budget', nouveau: 'Nouvelle dépense', champs: [
+    { k: 'date', label: 'Date', type: 'date', req: true }, { k: 'objet', label: 'Objet', req: true }, { k: 'montant', label: 'Montant (FCFA)', type: 'number', req: true },
+    { k: 'ligne_budget_id', label: 'Ligne de budget', type: 'select', dyn: 'lignes' }, { k: 'projet_id', label: 'Projet', type: 'select', dyn: 'projets' },
+    { k: 'demandeur', label: 'Demandeur' }, { k: 'beneficiaire', label: 'Bénéficiaire' }, { k: 'canal', label: 'Moyen de paiement', type: 'select', options: CANAUX },
+    { k: 'statut', label: 'Statut', type: 'select', options: STATUTS_DEPENSE, req: true, hint: 'Une autre personne que celle qui a saisi la dépense la valide ou la refuse.' },
+    { k: 'notes', label: 'Justificatif et notes', type: 'textarea' }] },
+  annonce: { table: 'annonce', menu: 'communication', nouveau: 'Nouvelle annonce', champs: [
+    { k: 'titre', label: 'Titre', req: true, full: true }, { k: 'date', label: 'Date de publication', type: 'date', req: true }, { k: 'jusquau', label: "Visible jusqu'au", type: 'date' },
+    { k: 'texte', label: 'Texte', type: 'textarea', req: true }, { k: 'publie', label: 'Visible par tous les fidèles', type: 'check' }] },
+  article: { table: 'article', menu: 'patrimoine', nouveau: 'Nouvel article', champs: [
+    { k: 'article', label: 'Article', req: true, full: true }, { k: 'categorie', label: 'Catégorie', type: 'select', options: CATEGORIES_ARTICLE },
+    { k: 'quantite', label: 'Quantité', type: 'number' }, { k: 'affectation', label: 'Affecté à' }, { k: 'etat', label: 'État', type: 'select', options: ETATS_ARTICLE },
+    { k: 'valeur', label: 'Valeur estimée (FCFA)', type: 'number' }, { k: 'date_achat', label: "Date d'acquisition", type: 'date' }, { k: 'notes', label: 'Notes', type: 'textarea' }] },
+  entretien: { table: 'entretien', menu: 'patrimoine', nouveau: 'Nouvelle intervention', champs: [
+    { k: 'date', label: 'Date', type: 'date', req: true }, { k: 'article_id', label: 'Article', type: 'select', dyn: 'articles', req: true },
+    { k: 'intervention', label: 'Intervention', req: true, full: true }, { k: 'prestataire', label: 'Prestataire' }, { k: 'cout', label: 'Coût (FCFA)', type: 'number' },
+    { k: 'prochaine', label: 'Prochaine échéance', type: 'date' }] },
 } satisfies Record<string, EntiteDef>;
 
 export type EntiteCle = keyof typeof ENTITES;
@@ -137,6 +170,8 @@ export function lireChamps(def: EntiteDef, f: FormData): { ok: true; valeurs: Re
   if (manque.length) return { ok: false, erreur: 'Champ obligatoire : ' + manque.join(', ') + '.' };
   const debut = valeurs.date ?? valeurs.date_debut;
   if (valeurs.date_fin && debut && String(valeurs.date_fin) < String(debut)) return { ok: false, erreur: 'La date de fin doit suivre la date de début.' };
+  if (valeurs.jusquau && valeurs.date && String(valeurs.jusquau) < String(valeurs.date)) return { ok: false, erreur: 'La date de fin de visibilité doit suivre la date de publication.' };
+  if (def.champs.some(c => c.k === 'montant' && c.req) && valeurs.montant === 0 && (def.table === 'don' || def.table === 'depense')) return { ok: false, erreur: 'Montant : saisissez un montant supérieur à zéro.' };
   if (valeurs.echeance && valeurs.date_debut && String(valeurs.echeance) < String(valeurs.date_debut)) return { ok: false, erreur: "L'échéance doit suivre la date de début." };
   return { ok: true, valeurs };
 }

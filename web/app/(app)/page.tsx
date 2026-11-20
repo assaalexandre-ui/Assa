@@ -47,12 +47,23 @@ export default async function Accueil() {
     const { data } = await supabase.from('evenement').select('id, titre, date, heure, lieu, date_fin').or(`date.gte.${today()},date_fin.gte.${today()}`).order('date').limit(6);
     activites = data ?? [];
   }
+  // Annonces publiées et en cours : visibles par tout compte actif (règle appliquée par la base).
+  const { data: an } = await supabase.from('annonce').select('id, titre, date, texte').eq('publie', true).lte('date', today())
+    .or(`jusquau.is.null,jusquau.gte.${today()}`).order('date', { ascending: false }).limit(4);
+  const annonces = (an ?? []) as { id: string; titre: string; date: string; texte: string }[];
   const metier = d.fideles || d.adnh || d.bergers || d.admin || d.cellules || d.gc || d.culte || d.formations || d.departements || d.reunions;
   return (
     <>
       <PageHead id="accueil" />
       {!metier && <div className="banner info">Bienvenue, {s.profil.nom.split(' ')[0]}. Votre accès : {s.roleLibelle}. Pour un accès de responsable, adressez-vous à l&apos;administration de l&apos;église.</div>}
       {k.length > 0 && <Kpis items={k} />}
+      {annonces.length > 0 && (
+        <Panel titre="Annonces" droite={d.communication ? <Link className="link" href="/communication/annonces">Toutes les annonces</Link> : undefined}>
+          <div className="body log">{annonces.map(x => (
+            <div key={x.id}><b>{x.titre}</b> <span className="muted">· {frDate(x.date)}</span><br /><span style={{ whiteSpace: 'pre-line' }}>{x.texte}</span></div>
+          ))}</div>
+        </Panel>
+      )}
       {(d.adnh || d.agenda || d.reunions) && (
         <div className="grid2">
           {d.agenda && (

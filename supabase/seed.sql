@@ -532,3 +532,35 @@ insert into entretien (id, eglise_id, date, article_id, intervention, prestatair
 
 insert into objectif (id, eglise_id, libelle, but, mesure, cible, date_debut, date_fin, responsable) values
   ('75000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', 'Collecter 15 millions pour le temple en 2026', 'Financer les travaux sans emprunt.', 'dons', 15000000, '2026-01-01', '2026-12-31', 'Trésorier');
+
+-- Données FICTIVES du lot 7 (évangélisation, cérémonies, paramètres de l'église).
+
+insert into sortie (id, eglise_id, date, lieu, commune, equipe, participants, rencontres, contacts, bilan) values
+  ('87000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '2026-09-12', 'Marché de Treichville', 'Treichville', 'Équipe A', 12, 45, 'Koffi Fabrice – 07 00 00 01 13
+Kouadio Ange – 07 00 00 01 14
+Diomandé Esther – 07 00 00 01 15', 'Sortie fictive de test'),
+  ('87000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', '2026-10-03', 'Gare de Yopougon', 'Yopougon', 'Équipe B', 9, 38, 'Assi Ismaël – 07 00 00 01 16
+Aka Ismaël – 07 00 00 01 17', 'Sortie fictive de test'),
+  ('87000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', '2026-10-24', 'Quartier Angré', 'Cocody', 'Équipe A', 14, 52, 'N''Guessan Patricia – 07 00 00 01 18
+Bamba Ruth – 07 00 00 01 19
+Ehouman Mariam – 07 00 00 01 20
+Koffi Fabrice – 07 00 00 01 21', 'Sortie fictive de test'),
+  ('87000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', '2026-11-07', 'Abobo-Gare', 'Abobo', 'Équipe C', 8, 30, 'Aka Franck – 07 00 00 01 22
+Aka Serge – 07 00 00 01 23', 'Sortie fictive de test'),
+  ('87000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001', '2026-11-21', 'Marché de Koumassi', 'Koumassi', 'Équipe B', 11, 41, 'Kouadio Fabrice – 07 00 00 01 24
+Assi Ruth – 07 00 00 01 25
+Coulibaly Arnaud – 07 00 00 01 26', 'Sortie fictive de test');
+
+insert into ceremonie (id, eglise_id, type, date, personnes, officiant, lieu, notes) values
+  ('88000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Baptême', '2026-08-30', 'Touré Franck, Bamba Serge, Kouadio Franck, Aka Prisca, Kouadio Ismaël, Traoré Jean', 'Pasteur Aka', 'Temple principal', 'Fiche fictive de test'),
+  ('88000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'Baptême', '2026-11-15', 'Konan Esther, Assi Aïcha, Kouassi Yannick, Yao Mariam', 'Pasteur Gnagne', 'Temple principal', 'Fiche fictive de test'),
+  ('88000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'Sainte-Cène', '2026-10-04', 'Assemblée réunie', 'Pasteur Konan', 'Temple principal', 'Fiche fictive de test'),
+  ('88000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'Sainte-Cène', '2026-11-01', 'Assemblée réunie', 'Pasteur Traoré', 'Temple principal', 'Fiche fictive de test'),
+  ('88000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001', 'Mariage', '2026-09-19', 'Brou Aïcha et Touré Hervé', 'Pasteur Brou', 'Temple principal', 'Fiche fictive de test'),
+  ('88000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001', 'Présentation d''enfant', '2026-10-11', 'Assi Fabrice', 'Pasteur Zadi', 'Temple principal', 'Fiche fictive de test'),
+  ('88000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'Consécration', '2026-10-25', 'Assi Marie, Assi Mariam', 'Pasteur Koné', 'Temple principal', 'Fiche fictive de test'),
+  ('88000000-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001', 'Obsèques', '2026-11-08', 'Brou Aïcha', 'Pasteur Traoré', 'Temple principal', 'Fiche fictive de test');
+
+update eglise set nom_complet = 'Église Missionnaire Christ Vivant', pasteur = 'Pasteur principal (fictif)', telephone = '+225 07 00 00 00 99', adresse = 'Adresse du temple (fictive)', commune = 'Cocody', email = 'contact@exemple.org', horaires = 'Dimanche : 1er culte 7 h 30, 2e culte 10 h
+Mercredi : étude biblique 18 h 30
+Vendredi : veillée 22 h' where id = '00000000-0000-0000-0000-000000000001';

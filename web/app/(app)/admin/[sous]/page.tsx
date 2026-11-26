@@ -9,13 +9,15 @@ import { requireMenu } from '@/lib/session';
 import { createClient } from '@/lib/supabase/server';
 import { chargerRefs } from '@/lib/ref';
 import { MENUS } from '@/lib/menus';
-import { creerUtilisateur, modifierUtilisateur, reinitialiserMotDePasse } from '../actions';
+import { FormAction } from '@/components/FormAction';
+import { COMMUNES } from '@/lib/entites';
+import { creerUtilisateur, enregistrerEglise, modifierUtilisateur, reinitialiserMotDePasse } from '../actions';
 
 type Compte = { id: string; nom: string; email: string | null; role_code: string; fonction: string | null; berger_id: string | null; gc_id: string | null; departement_id: string | null; actif: boolean };
 
 export default async function Admin({ params, searchParams }: { params: Promise<{ sous: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
   const { sous } = await params;
-  if (!['utilisateurs', 'roles'].includes(sous)) notFound();
+  if (!['utilisateurs', 'roles', 'eglise', 'journal'].includes(sous)) notFound();
   const sp = await searchParams;
   const s = await requireMenu('admin');
   const supabase = await createClient();
@@ -25,6 +27,48 @@ export default async function Admin({ params, searchParams }: { params: Promise<
   ]);
   const optRoles = (roles ?? []).map(r => [r.code, r.libelle] as [string, string]);
   const libRole = (c: string) => optRoles.find(r => r[0] === c)?.[1] ?? c;
+
+  if (sous === 'eglise') {
+    const { data: e } = await supabase.from('eglise').select('id, nom, nom_complet, pasteur, telephone, adresse, commune, email, horaires').single();
+    const ro = s.droits.admin !== 'w';
+    return (
+      <>
+        <PageHead id="admin" sous={sous} />
+        <Panel titre="Informations de l'église">
+          <div className="body">
+            <FormAction action={enregistrerEglise} className="form" bouton="Enregistrer" boutonClasse="btn primary">
+              <input type="hidden" name="id" value={e?.id ?? ''} />
+              <Champ k="nom_complet" label="Nom complet de l'église" full v={e?.nom_complet} ro={ro} />
+              <Champ k="pasteur" label="Pasteur principal" v={e?.pasteur} ro={ro} />
+              <Champ k="telephone" label="Téléphone" type="tel" v={e?.telephone} ro={ro} />
+              <Champ k="adresse" label="Adresse du temple" full v={e?.adresse} ro={ro} />
+              <Champ k="commune" label="Commune" type="select" options={COMMUNES} v={e?.commune} ro={ro} />
+              <Champ k="email" label="Email" type="email" v={e?.email} ro={ro} />
+              <Champ k="horaires" label="Horaires des cultes" type="textarea" full v={e?.horaires} ro={ro} />
+            </FormAction>
+          </div>
+        </Panel>
+        <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>Ces informations apparaîtront en tête des rapports. Seul l&apos;administrateur peut les modifier.</p>
+      </>
+    );
+  }
+
+  if (sous === 'journal') {
+    const { data: j, error } = await supabase.rpc('dernieres_modifications', { p_limite: 60 });
+    const lignes = (j ?? []) as { quand: string; fiche: string; menu: string; par: string }[];
+    return (
+      <>
+        <PageHead id="admin" sous={sous} />
+        <p className="lead" style={{ margin: 0 }}>Les 60 dernières fiches créées ou modifiées, avec la personne qui l&apos;a fait.</p>
+        <Panel>{error ? <div className="body err">Le journal n&apos;a pas pu être chargé.</div> : lignes.length ? (
+          <div className="tw"><table><thead><tr><th>Date</th><th>Fiche</th><th>Menu</th><th>Par</th></tr></thead>
+            <tbody>{lignes.map((x, i) => (
+              <tr key={i}><td className="mono">{new Date(x.quand).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Africa/Abidjan' })}</td><td>{x.fiche}</td><td><Pill c="n">{x.menu}</Pill></td><td>{x.par}</td></tr>
+            ))}</tbody></table></div>
+        ) : <div className="empty"><b>Aucune modification</b>Les dernières fiches créées ou modifiées apparaîtront ici.</div>}</Panel>
+      </>
+    );
+  }
 
   if (sous === 'roles') {
     const menus = MENUS.filter(m => m.id !== 'accueil');

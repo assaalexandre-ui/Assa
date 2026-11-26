@@ -2,7 +2,7 @@
 
 export type Acces = 'r' | 'w';
 export type Droits = Partial<Record<MenuId, Acces>>;
-export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'pilotage' | 'stats' | 'objectifs' | 'projets' | 'dons' | 'budget' | 'communication' | 'patrimoine';
+export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'pilotage' | 'stats' | 'objectifs' | 'projets' | 'dons' | 'budget' | 'communication' | 'patrimoine' | 'evangelisation' | 'ceremonies';
 /** Sous-menu : [id, libellé, condition] ; condition = 'w' (réservé à qui modifie le menu) ou un menu requis en lecture. */
 export type SousMenu = [string, string, ('w' | MenuId)?];
 export type MenuDef = { id: MenuId; t: string; section: string; vert: boolean; subs: SousMenu[]; icone: string };
@@ -50,6 +50,10 @@ export const MENUS: MenuDef[] = [
     icone: '<path d="M12 3v5M9.5 5.5h5"/><path d="M5 21V12l7-4 7 4v9"/><path d="M10 21v-4h4v4"/>' },
   { id: 'evenements', t: 'Événements', section: 'Cultes et activités', vert: false, subs: [['inscriptions', 'Inscriptions'], ['transport', 'Transport']],
     icone: '<path d="M4 20l3-12 10 5z"/><path d="M14 4l1 2M19 6l-2 1M20 11h-2"/>' },
+  { id: 'evangelisation', t: 'Évangélisation', section: 'Cultes et activités', vert: false, subs: [['sorties', 'Sorties'], ['contacts', 'Contacts recueillis']],
+    icone: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.7 5.4 3.7 8.5s-1.2 5.9-3.7 8.5c-2.5-2.6-3.7-5.4-3.7-8.5s1.2-5.9 3.7-8.5z"/>' },
+  { id: 'ceremonies', t: 'Sacrements et cérémonies', section: 'Cultes et activités', vert: false, subs: [['baptemes', 'Baptêmes'], ['saintecene', 'Sainte-Cène'], ['mariages', 'Mariages et présentations'], ['consecrations', 'Consécrations'], ['obseques', 'Obsèques']],
+    icone: '<path d="M7 21h10M9 21v-4h6v4M8 17h8l-1-6H9z"/><path d="M12 3v5M10 5h4"/>' },
   { id: 'dons', t: 'Dîmes et offrandes', section: 'Finances et ressources', vert: false, subs: [['encaissements', 'Encaissements'], ['fonds', 'Fonds et campagnes'], ['releve', 'Relevé par fidèle']],
     icone: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14.5" r="1.5"/>' },
   { id: 'budget', t: 'Budget et dépenses', section: 'Finances et ressources', vert: false, subs: [['budget', 'Budget'], ['depenses', 'Dépenses'], ['etats', 'États financiers']],
@@ -58,7 +62,7 @@ export const MENUS: MenuDef[] = [
     icone: '<path d="M4 5h16v11H8l-4 4z"/>' },
   { id: 'patrimoine', t: 'Patrimoine', section: 'Finances et ressources', vert: false, subs: [['inventaire', 'Inventaire'], ['entretien', 'Entretien']],
     icone: '<path d="M3 8l9-5 9 5v11H3z"/><path d="M8 19v-6h8v6"/>' },
-  { id: 'admin', t: 'Administration', section: 'Administration', vert: false, subs: [['utilisateurs', 'Utilisateurs'], ['roles', 'Rôles et accès']],
+  { id: 'admin', t: 'Administration', section: 'Administration', vert: false, subs: [['utilisateurs', 'Utilisateurs'], ['roles', 'Rôles et accès'], ['eglise', "Paramètres de l'église"], ['journal', 'Dernières modifications']],
     icone: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>' },
 ];
 
@@ -83,6 +87,8 @@ export const LEADS: Record<MenuId, string> = {
   stats: "Les KPI de l'église, calculés automatiquement à partir des données saisies.",
   objectifs: "Les objectifs à atteindre fixés par l'administrateur, leur but et le résultat obtenu.",
   projets: "Planifier et suivre les projets : échéances, plan d'actions, budget, journal et rappels.",
+  evangelisation: "Sorties d'évangélisation, personnes rencontrées et contacts à transmettre à l'ADNH.",
+  ceremonies: 'Registre des baptêmes, Sainte-Cène, mariages, présentations, consécrations et obsèques.',
   dons: 'Dîmes, offrandes et campagnes, par fonds et par moyen de paiement.',
   budget: 'Budget annuel, dépenses et états financiers.',
   communication: 'Annonces pour les fidèles et messages à envoyer par WhatsApp ou SMS.',

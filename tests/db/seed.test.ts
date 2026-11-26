@@ -78,4 +78,10 @@ describe('données fictives (supabase/seed.sql)', () => {
     expect(n(await db.q('select count(*) from article'))).toBe(10);
     expect(n(await db.q('select count(*) from entretien'))).toBe(5);
   }));
+
+  it('contient les données fictives du lot 7', () => tx(async db => {
+    expect(n(await db.q('select count(*) from sortie'))).toBe(5);
+    expect(n(await db.q('select count(*) from ceremonie'))).toBe(8);
+    expect((await db.q('select nom_complet from eglise')).rows[0].nom_complet).toBe('Église Missionnaire Christ Vivant');
+  }));
 });

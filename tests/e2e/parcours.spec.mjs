@@ -41,7 +41,7 @@ try {
     await page.fill('#password', mdp);
     await Promise.all([page.waitForURL(BASE + '/'), page.click('button[type=submit]')]);
   };
-  const menus = () => page.$$eval('aside nav a', as => as.map(a => a.textContent.trim()));
+  const menus = () => page.$$eval('aside nav a.nb', as => as.map(a => a.textContent.trim()));
 
   etape('sans session, renvoi vers la connexion');
   await page.goto(BASE + '/fideles/liste');

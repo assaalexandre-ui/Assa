@@ -106,9 +106,9 @@ export function Rosace({ data, centre, legende }: { data: [string, number | null
         {data.map(([l, p], i) => p == null
           ? <path key={l} d={petale(i, 6)} fill="none" stroke="var(--line)" strokeDasharray="2 3"><title>{`${l} : pas de relevé`}</title></path>
           : <path key={l} d={petale(i, p)} fill={TONS[i % 6]}><title>{`${l} : ${p} %`}</title></path>)}
-        <circle cx={c} cy={c} r={30} fill="var(--side)" />
-        <text x={c} y={c - 2} textAnchor="middle" fill="#fff" fontFamily="var(--f-disp)" fontSize="17" fontWeight="700">{centre}</text>
-        <text x={c} y={c + 13} textAnchor="middle" fill="var(--gold)" fontSize="8.5">moyenne</text>
+        <circle cx={c} cy={c} r={30} fill="var(--ink)" />
+        <text x={c} y={c - 2} textAnchor="middle" fill="var(--bg)" fontFamily="var(--f-disp)" fontSize="17" fontWeight="700">{centre}</text>
+        <text x={c} y={c + 13} textAnchor="middle" fill="var(--bg)" fontSize="8.5">moyenne</text>
       </svg>
       <ol style={{ flex: '1 1 170px', margin: 0, padding: 0, listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(128px, 1fr))', gap: '6px 14px', fontSize: 12.5 }}>
         {data.map(([l, p], i) => (
@@ -130,7 +130,7 @@ export function Anneau({ parts, total, unite }: { parts: [string, number][]; tot
   return (
     <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
       <div role="img" aria-label={parts.map(p => `${p[0]} ${p[1]}`).join(', ')} style={{ width: 150, height: 150, borderRadius: '50%', background: `conic-gradient(${arcs || 'var(--line) 0 100%'})`, display: 'grid', placeItems: 'center', flex: 'none' }}>
-        <div style={{ width: 92, height: 92, borderRadius: '50%', background: 'var(--surface)', display: 'grid', placeItems: 'center', textAlign: 'center' }}>
+        <div style={{ width: 92, height: 92, borderRadius: '50%', background: 'var(--bg)', display: 'grid', placeItems: 'center', textAlign: 'center' }}>
           <div><div className="disp" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{total}</div><div className="muted" style={{ fontSize: 11 }}>{unite}</div></div>
         </div>
       </div>

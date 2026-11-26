@@ -18,7 +18,7 @@ Porteur du projet : Alexandre (DG de Carmixt Mobility, designer graphique). Il t
 - **Langage humain et professionnel**, qui ne sonne pas « IA » : phrases simples, pas de formules creuses.
 - **Ne rien ajouter ni retirer** quand il fournit un contenu de référence (ex. le Word des compétences) : on reformule et on structure, on signale les trous, on n'invente pas.
 - Interface **claire mais pas trop blanche** : barre latérale bleu nuit, fond bleu-gris, couleurs bien présentes.
-- Design retenu le 20 nov. pour la version Next.js : **piste A « Vitrail »** (planche https://claude.ai/artifact/T9ys4Q2hxK4hUHjxiKmF1t). Barre latérale bleu nuit à grandes icônes empilées, regroupées par section avec sous-menus dépliables ; icônes en « billes de verre » (pastille bombée de couleur, pictogramme blanc en relief : composant `Bille`, classe `.pico`) dans la barre, les blocs titrés (`Panel icone=… ton=…`, sinon choisie d'après le titre) et les chiffres clés (`Kpis`, d'après le libellé) ; filets dorés (`--lead`) ; couleurs de vitrail `--saphir`, `--rubis`, `--emeraude`, `--ambre`, `--amethyste`, `--ciel` ; titres en Bricolage Grotesque, texte en Sora ; graphiques `Rosace`, `Anneau`, `BarresEmpilees` dans `web/components/Graphiques.tsx`.
+- Design en place depuis le 26 nov. : **style Synthex** (piste C de la planche https://claude.ai/artifact/T9ys4Q2hxK4hUHjxiKmF1t), le style seulement, pas les écrans de la maquette Dribbble. Fond dégradé vert d'eau, cartes et barre latérale translucides à grands arrondis (28 px), boutons et onglets en pilule (sombres quand actifs), police Urbanist (chiffres JetBrains Mono). **Les 29 menus ne sont plus groupés** : liste à plat dans `web/components/Sidebar.tsx` (`aside nav a.nb`), flèche pour déplier les sous-menus. Le bloc « Synthex » est à la fin de `web/app/globals.css` ; il surcharge l'ancien style « Vitrail » (20 nov.), dont les composants restent en place (`Bille` masquée, `Panel`, `Kpis`, graphiques `Rosace`, `Anneau`, `BarresEmpilees` dans `web/components/Graphiques.tsx`).
 
 ## Où est l'application en ligne
 
@@ -168,6 +168,6 @@ Le PDF dépend de jsPDF chargé depuis cdnjs : sans réseau, la génération est
 
 ## Suite prévue
 
-1. Passage en production : lots 1 à 8 faits (les 29 menus). Analyse rédigée par Claude dans Recommandations : plus tard (clé API à prévoir). Ensuite : refonte de l'interface avec navigation en haut (choix du 25 nov., couleurs Vitrail conservées), connexion par SMS, PWA hors ligne.
+1. Passage en production : lots 1 à 8 faits (les 29 menus). Analyse rédigée par Claude dans Recommandations : plus tard (clé API à prévoir). Interface : style Synthex appliqué le 26 nov. Ensuite : connexion par SMS, PWA hors ligne.
 2. Paiements Mobile Money réels et envoi WhatsApp/SMS (aujourd'hui : messages à copier).
 3. Application mobile des fidèles (React Native / Expo).

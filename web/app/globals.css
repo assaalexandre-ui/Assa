@@ -338,3 +338,96 @@ nav.vitrail .nb.on .bille{box-shadow:inset 0 -4px 7px rgba(0,0,0,.28),inset 0 2p
 .kpi .kt span{font-size:12px;color:var(--muted)}
 .modal .kpi .pico{display:none}
 @media (prefers-reduced-motion:reduce){nav.vitrail .nb .bille{transition:none}}
+
+/* ===== Style « Synthex » (choisi le 27 nov.) : fond vert-gris clair, cartes très arrondies et translucides, police fine Urbanist,
+   boutons ronds et en pilules, menu en liste sans regroupement. Remplace l'aspect Vitrail ; les jetons de couleur des graphiques restent. ===== */
+:root{
+  --bg:#e4efeb; --surface:rgba(255,255,255,.62); --tint:rgba(255,255,255,.5); --ink:#081018; --muted:#5f7478; --line:rgba(115,137,141,.22); --lead:rgba(115,137,141,.22);
+  --side:rgba(255,255,255,.5); --side-on:#ffffff; --side-ink:#081018; --side-muted:#5f7478;
+  --accent:#081018; --accent-ink:#081018; --accent-soft:rgba(255,255,255,.85); --gold:#495c64;
+  --third:#081018; --third-ink:#081018; --third-soft:rgba(255,255,255,.85);
+  --overlay:rgba(8,16,24,.32);
+  --fond:linear-gradient(160deg,#c9dcd8 0%,#dceae5 38%,#eef5f2 100%);
+  --f-body:"Urbanist",ui-sans-serif,system-ui,sans-serif; --f-disp:"Urbanist",ui-sans-serif,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1418; --surface:rgba(31,45,50,.72); --tint:rgba(255,255,255,.04); --ink:#e7f0ed; --muted:#9fb4b4; --line:rgba(165,194,189,.16); --lead:rgba(165,194,189,.16);
+  --side:rgba(31,45,50,.6); --side-on:rgba(255,255,255,.1); --side-ink:#e7f0ed; --side-muted:#9fb4b4;
+  --accent:#d5e9e2; --accent-ink:#d5e9e2; --accent-soft:rgba(255,255,255,.08); --gold:#a5c2bd; --third:#d5e9e2; --third-ink:#d5e9e2; --third-soft:rgba(255,255,255,.08);
+  --fond:linear-gradient(160deg,#0f1c20 0%,#0b1418 60%,#081018 100%); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1418; --surface:rgba(31,45,50,.72); --tint:rgba(255,255,255,.04); --ink:#e7f0ed; --muted:#9fb4b4; --line:rgba(165,194,189,.16); --lead:rgba(165,194,189,.16);
+  --side:rgba(31,45,50,.6); --side-on:rgba(255,255,255,.1); --side-ink:#e7f0ed; --side-muted:#9fb4b4;
+  --accent:#d5e9e2; --accent-ink:#d5e9e2; --accent-soft:rgba(255,255,255,.08); --gold:#a5c2bd; --third:#d5e9e2; --third-ink:#d5e9e2; --third-soft:rgba(255,255,255,.08);
+  --fond:linear-gradient(160deg,#0f1c20 0%,#0b1418 60%,#081018 100%); color-scheme:dark}
+body{background:var(--fond) fixed,var(--bg);font-size:15px}
+.app{grid-template-columns:288px minmax(0,1fr);padding:16px 0 0 16px}
+aside{background:var(--side);background-image:none;backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.6);border-radius:28px;padding:20px 14px;gap:14px;height:calc(100vh - 32px);top:16px;box-shadow:0 18px 40px -26px rgba(8,16,24,.35)}
+aside .brand{align-items:flex-start;text-align:left;padding:4px 8px}
+aside .brand span{color:var(--side-muted)}
+nav.liste{display:flex;flex-direction:column;gap:1px;overflow-y:auto;min-height:0;flex:1;padding:0}
+nav.liste .tete{display:flex;align-items:center;border-radius:14px}
+nav.liste .tete:hover{background:rgba(255,255,255,.45)}
+nav.liste .ligne.on>.tete{background:var(--side-on)}
+nav.liste .fleche{all:unset;box-sizing:border-box;width:30px;height:38px;display:grid;place-items:center;flex:none;cursor:pointer;color:var(--side-muted)}
+nav.liste .fleche svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+nav.liste a.nb{all:unset;box-sizing:border-box;cursor:pointer;flex:1;padding:9px 10px 9px 0;font-size:15px;color:var(--side-muted)}
+nav.liste .ligne.on a.nb,nav.liste a.nb:hover{color:var(--side-ink)}
+nav.liste .ligne.on a.nb{font-weight:600}
+nav.liste .subs{display:flex;flex-direction:column;padding:2px 0 6px}
+nav.liste .subs a{all:unset;box-sizing:border-box;cursor:pointer;padding:6px 12px 6px 30px;font-size:14px;color:var(--side-muted);border-radius:10px}
+nav.liste .subs a:hover,nav.liste .subs a.on{color:var(--side-ink)}
+nav.liste .subs a.on{font-weight:600}
+nav.liste a:focus-visible,nav.liste .fleche:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+aside .me{flex-direction:row;text-align:left;border:0;padding:12px 6px 0;border-top:1px solid var(--line);margin:0}
+aside .me .avatar{width:44px;height:44px;font-size:14px;background:#495c64;color:#fff;box-shadow:none}
+aside .me div{text-align:left}
+aside .me span{color:var(--side-muted)}
+aside .me .links{justify-content:flex-start}
+aside .me .links a,aside .me .links button{color:var(--side-muted)}
+main{padding-top:18px}
+h1,.panel>header h2,.kpi strong,.disp,.card b,.modal>header h3,.empty b{font-family:var(--f-disp)}
+h1{font-size:34px;font-weight:300;letter-spacing:-.02em}
+.vitre{display:none}
+.crumb{color:var(--muted)}
+.testbar{background:rgba(255,255,255,.55);color:#7a5208;border:1px solid rgba(201,162,39,.35);border-radius:999px;padding:8px 18px}
+.panel,.card,.kpis,.modal,.gate,.report{background:var(--surface);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.65);border-radius:28px;box-shadow:0 18px 40px -28px rgba(8,16,24,.3)}
+.panel{overflow:hidden}
+.panel>header{background:transparent;border-bottom:0;padding:20px 24px 8px;border-radius:28px 28px 0 0}
+.panel>header h2{font-size:20px;font-weight:500}
+.panel .body{padding:12px 24px 22px}
+.pico,.kpi .pico{display:none}
+.kpis{gap:0}
+.kpi{border-right:1px solid var(--line);padding:20px 24px}
+.kpi .kt span{font-size:14px}
+.kpi strong{font-size:clamp(26px,5vw,38px);font-weight:300;letter-spacing:-.02em}
+.card{padding:20px 22px}
+.card:hover{border-color:#fff;background:rgba(255,255,255,.8)}
+.btn{border-radius:999px;border-color:transparent;background:rgba(255,255,255,.7);padding:8px 18px}
+.btn:hover{background:#fff;border-color:transparent}
+.btn.primary{background:var(--accent);color:var(--bg)}
+.btn.primary:hover{background:#273238}
+a.btn.primary{color:#fff}
+.btn.danger{color:#9c1f33}
+.tabs{border-bottom:0;gap:8px;padding:2px 0}
+.tabs a{padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.55);border-bottom:0;margin:0;color:var(--muted);font-weight:500}
+.tabs a:hover{color:var(--ink);background:rgba(255,255,255,.85)}
+.tabs a.on{background:var(--accent);color:var(--bg);border-bottom:0}
+.tabs.vie a.on{background:var(--accent);color:var(--bg)}
+th{background:transparent;color:var(--muted)}
+td{border-bottom-color:var(--line)}
+tr.click:hover td{background:rgba(255,255,255,.5)}
+.search,.sel,.field input,.field select,.field textarea{border-radius:999px;border-color:transparent;background:rgba(255,255,255,.75)}
+.field textarea{border-radius:18px}
+.meter{background:rgba(115,137,141,.18)}
+.log div{border-left-color:var(--muted)}
+.x{border-radius:50%}
+.modal>header{border-bottom-color:var(--line)}
+.modal footer{border-top-color:var(--line)}
+.overlay{backdrop-filter:blur(4px)}
+body:has(.gate){background:var(--fond) fixed,var(--bg)}
+.gate{border-top:0}
+.gate h1::after{display:none}
+.chart .bar path{fill:var(--accent)}
+@media (max-width:900px){.app{padding:0;grid-template-columns:1fr} aside{top:0;border-radius:0 28px 28px 0;height:100%;background:#eef5f2;backdrop-filter:none} .kpi{border-right:0}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) aside{border-color:rgba(255,255,255,.06)} :root:not([data-theme="light"]) .panel,:root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .kpis,:root:not([data-theme="light"]) .modal{border-color:rgba(255,255,255,.06)}}

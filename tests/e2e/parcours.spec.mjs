@@ -54,7 +54,7 @@ try {
 
   etape('connexion administrateur');
   await connexion('admin@e2e.local', mdpAdmin);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Supervision', 'Organigramme', 'Statistiques', 'Objectifs à atteindre', 'Projets', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Évangélisation', 'Sacrements et cérémonies', 'Dîmes et offrandes', 'Budget et dépenses', 'Communication', 'Patrimoine', 'Administration']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Supervision', 'Organigramme', 'Statistiques', 'Objectifs à atteindre', 'Projets', 'Recommandations', 'Rapports', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Évangélisation', 'Sacrements et cérémonies', 'Dîmes et offrandes', 'Budget et dépenses', 'Communication', 'Patrimoine', 'Administration']);
   await page.getByText('Version de test : données fictives').first().waitFor();
 
   etape("l'administrateur ouvre la fiche d'un berger et celle d'un nouveau (boutons de suppression)");
@@ -135,6 +135,14 @@ try {
   await page.click('main form button[type=submit]');
   await page.goto(BASE + '/admin/journal');
   await page.locator('main tbody tr', { hasText: "Paramètres de l'église" }).first().waitFor();
+
+  etape('lot 8 : recommandations calculées et rapport complet téléchargé en PDF');
+  await page.goto(BASE + '/reco/problemes');
+  await page.locator('.reco-item').first().waitFor();
+  await page.goto(BASE + '/rapports/generer?voir=1&type=complet&periode=annee');
+  await page.getByRole('heading', { name: 'Finances' }).waitFor();
+  const [pdf] = await Promise.all([page.waitForEvent('download', { timeout: 20000 }), page.getByRole('button', { name: 'Télécharger en PDF' }).click()]);
+  assert.match(pdf.suggestedFilename(), /^Rapport EMCV .*\.pdf$/);
 
   etape('lot 3 : marquer une tâche du conseil comme faite');
   await page.goto(BASE + '/reunions/taches?f=nonfaites');

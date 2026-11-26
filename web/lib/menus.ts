@@ -2,7 +2,7 @@
 
 export type Acces = 'r' | 'w';
 export type Droits = Partial<Record<MenuId, Acces>>;
-export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'pilotage' | 'stats' | 'objectifs' | 'projets' | 'dons' | 'budget' | 'communication' | 'patrimoine' | 'evangelisation' | 'ceremonies';
+export type MenuId = 'accueil' | 'bergers' | 'adnh' | 'fideles' | 'admin' | 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'pilotage' | 'stats' | 'objectifs' | 'projets' | 'dons' | 'budget' | 'communication' | 'patrimoine' | 'evangelisation' | 'ceremonies' | 'reco' | 'rapports';
 /** Sous-menu : [id, libellé, condition] ; condition = 'w' (réservé à qui modifie le menu) ou un menu requis en lecture. */
 export type SousMenu = [string, string, ('w' | MenuId)?];
 export type MenuDef = { id: MenuId; t: string; section: string; vert: boolean; subs: SousMenu[]; icone: string };
@@ -38,6 +38,10 @@ export const MENUS: MenuDef[] = [
     icone: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>' },
   { id: 'projets', t: 'Projets', section: 'Tableau de bord', vert: false, subs: [['projets', 'Projets'], ['actions', "Plan d'actions"], ['planning', 'Planning'], ['rappels', 'Rappels']],
     icone: '<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M7.5 9h6M7.5 13h9M7.5 17h4"/>' },
+  { id: 'reco', t: 'Recommandations', section: 'Tableau de bord', vert: false, subs: [['performance', 'Amélioration de la performance'], ['problemes', 'Résoudre les problèmes'], ['objectifs', 'Atteindre les objectifs'], ['alternatives', "Propositions d'alternatives"]],
+    icone: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.9V16h5v-.2c0-.8.4-1.5 1-1.9A6 6 0 0 0 12 3z"/>' },
+  { id: 'rapports', t: 'Rapports', section: 'Tableau de bord', vert: false, subs: [['generer', 'Rapport complet ou partiel']],
+    icone: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>' },
   { id: 'fideles', t: 'Fidèles', section: 'Fidèles et pastorale', vert: false, subs: [['liste', 'Fichier des fidèles'], ['anniversaires', 'Anniversaires']],
     icone: '<circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5M14 14.6c3.4-.6 6.5 1.6 7 5.4"/>' },
   { id: 'priere', t: 'Requêtes de prière', section: 'Fidèles et pastorale', vert: false, subs: [['requetes', 'Requêtes'], ['temoignages', 'Témoignages']],
@@ -89,6 +93,8 @@ export const LEADS: Record<MenuId, string> = {
   projets: "Planifier et suivre les projets : échéances, plan d'actions, budget, journal et rappels.",
   evangelisation: "Sorties d'évangélisation, personnes rencontrées et contacts à transmettre à l'ADNH.",
   ceremonies: 'Registre des baptêmes, Sainte-Cène, mariages, présentations, consécrations et obsèques.',
+  reco: "Conseils calculés à partir des données de l'église : performance, problèmes, objectifs et alternatives.",
+  rapports: "Rapport complet ou partiel de l'église sur une période, à lire à l'écran ou à télécharger en PDF.",
   dons: 'Dîmes, offrandes et campagnes, par fonds et par moyen de paiement.',
   budget: 'Budget annuel, dépenses et états financiers.',
   communication: 'Annonces pour les fidèles et messages à envoyer par WhatsApp ou SMS.',

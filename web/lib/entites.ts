@@ -5,7 +5,7 @@ export type TypeChamp = 'text' | 'date' | 'time' | 'month' | 'tel' | 'number' | 
 /** options : liste fixe, ou clé d'une liste dynamique fournie par la page (bergers, cellules, assemblées). */
 export type ChampDef = { k: string; label: string; type?: TypeChamp; req?: boolean; full?: boolean; options?: (string | [string, string])[]; dyn?: Dyn; hint?: string };
 export type Dyn = 'bergers' | 'cellules' | 'assemblees' | 'classes' | 'departements' | 'reunions' | 'evenements' | 'fonds' | 'fideles' | 'lignes' | 'projets' | 'articles';
-export type EntiteDef = { table: string; menu: 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'objectifs' | 'projets' | 'dons' | 'budget' | 'communication' | 'patrimoine'; nouveau: string; champs: ChampDef[] };
+export type EntiteDef = { table: string; menu: 'cellules' | 'gc' | 'agenda' | 'culte' | 'formations' | 'departements' | 'reunions' | 'organigramme' | 'priere' | 'enfants' | 'rdv' | 'evenements' | 'objectifs' | 'projets' | 'dons' | 'budget' | 'communication' | 'patrimoine' | 'evangelisation' | 'ceremonies'; nouveau: string; champs: ChampDef[] };
 
 export const COMMUNES = ['Abobo', 'Adjamé', 'Anyama', 'Attécoubé', 'Bingerville', 'Cocody', 'Koumassi', 'Marcory', 'Plateau', 'Port-Bouët', 'Songon', 'Treichville', 'Yopougon', 'Autre'];
 export const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -33,6 +33,7 @@ export const STATUTS_DON = ['Saisi', 'Validé'];
 export const STATUTS_DEPENSE = ['Demandée', 'Validée', 'Payée', 'Refusée'];
 export const CATEGORIES_ARTICLE = ['Sono et instruments', 'Mobilier', 'Informatique', 'Véhicule', 'Bâtiment', 'Autre'];
 export const ETATS_ARTICLE = ['Bon', 'À réparer', 'Hors service'];
+export const TYPES_CEREMONIE = ['Baptême', 'Sainte-Cène', 'Mariage', "Présentation d'enfant", 'Consécration', 'Obsèques'];
 export const PRIORITES = ['Haute', 'Moyenne', 'Basse'];
 export const STATUTS_PROJET = ['À lancer', 'En cours', 'En pause', 'Terminé'];
 export const STATUTS_ACTION = ['À faire', 'En cours', 'Fait'];
@@ -149,6 +150,14 @@ export const ENTITES = {
     { k: 'date', label: 'Date', type: 'date', req: true }, { k: 'article_id', label: 'Article', type: 'select', dyn: 'articles', req: true },
     { k: 'intervention', label: 'Intervention', req: true, full: true }, { k: 'prestataire', label: 'Prestataire' }, { k: 'cout', label: 'Coût (FCFA)', type: 'number' },
     { k: 'prochaine', label: 'Prochaine échéance', type: 'date' }] },
+  sortie: { table: 'sortie', menu: 'evangelisation', nouveau: "Nouvelle sortie d'évangélisation", champs: [
+    { k: 'date', label: 'Date', type: 'date', req: true }, { k: 'lieu', label: 'Lieu', req: true }, { k: 'commune', label: 'Commune', type: 'select', options: COMMUNES },
+    { k: 'equipe', label: 'Équipe' }, { k: 'participants', label: 'Participants', type: 'number' }, { k: 'rencontres', label: 'Personnes rencontrées', type: 'number' },
+    { k: 'contacts', label: 'Contacts recueillis', type: 'textarea', hint: 'Une personne par ligne : nom – téléphone' }, { k: 'bilan', label: 'Bilan', type: 'textarea' }] },
+  ceremonie: { table: 'ceremonie', menu: 'ceremonies', nouveau: 'Ajouter au registre', champs: [
+    { k: 'type', label: 'Type', type: 'select', options: TYPES_CEREMONIE, req: true }, { k: 'date', label: 'Date', type: 'date', req: true },
+    { k: 'personnes', label: 'Personne(s) concernée(s)', req: true, full: true }, { k: 'officiant', label: 'Officiant' }, { k: 'lieu', label: 'Lieu' },
+    { k: 'notes', label: 'Notes', type: 'textarea' }] },
 } satisfies Record<string, EntiteDef>;
 
 export type EntiteCle = keyof typeof ENTITES;

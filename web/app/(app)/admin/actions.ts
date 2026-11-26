@@ -4,7 +4,8 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { messageCreationCompte, messageErreur } from '@/lib/erreurs';
+import { messageCreationCompte, messageErreur, type Resultat } from '@/lib/erreurs';
+import { phone } from '@/lib/format';
 import { motDePasseProvisoire } from '@/lib/motdepasse';
 
 export type EtatCompte = { erreur?: string; motDePasse?: string; email?: string };
@@ -68,4 +69,21 @@ export async function reinitialiserMotDePasse(_: EtatCompte, f: FormData): Promi
     return { erreur: messageCreationCompte(error, true).replace('Création du compte impossible', 'Réinitialisation impossible') };
   }
   return { motDePasse, email: p.email ?? undefined };
+}
+
+/** Informations de l'église (nom complet, pasteur, contacts, horaires). Seul l'administrateur peut les modifier (règle de la base). */
+export async function enregistrerEglise(_: Resultat, f: FormData): Promise<Resultat> {
+  const t = (k: string) => String(f.get(k) ?? '').trim() || null;
+  const tel = t('telephone');
+  const email = t('email');
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { erreur: "L'email n'est pas valide." };
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('eglise').update({
+    nom_complet: t('nom_complet'), pasteur: t('pasteur'), telephone: tel ? phone(tel) : null, adresse: t('adresse'),
+    commune: t('commune'), email, horaires: t('horaires'),
+  }).eq('id', String(f.get('id'))).select('id');
+  if (error) return { erreur: messageErreur(error) };
+  if (!data?.length) return { erreur: "Vous n'avez pas le droit de modifier les informations de l'église." };
+  revalidatePath('/', 'layout');
+  return { ok: true };
 }

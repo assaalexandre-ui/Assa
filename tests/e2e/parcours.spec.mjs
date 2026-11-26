@@ -54,7 +54,7 @@ try {
 
   etape('connexion administrateur');
   await connexion('admin@e2e.local', mdpAdmin);
-  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Supervision', 'Organigramme', 'Statistiques', 'Objectifs à atteindre', 'Projets', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Dîmes et offrandes', 'Budget et dépenses', 'Communication', 'Patrimoine', 'Administration']);
+  assert.deepEqual(await menus(), ['Accueil', 'Cellules', 'Bergers', 'ADNH', 'Formations', 'Départements', 'GC', 'Réunions', 'Programmation', 'Supervision', 'Organigramme', 'Statistiques', 'Objectifs à atteindre', 'Projets', 'Fidèles', 'Requêtes de prière', 'Enfants', 'Rendez-vous pastoraux', 'Jour de culte', 'Événements', 'Évangélisation', 'Sacrements et cérémonies', 'Dîmes et offrandes', 'Budget et dépenses', 'Communication', 'Patrimoine', 'Administration']);
   await page.getByText('Version de test : données fictives').first().waitFor();
 
   etape("l'administrateur ouvre la fiche d'un berger et celle d'un nouveau (boutons de suppression)");
@@ -121,6 +121,20 @@ try {
   await facture.getByRole('button', { name: 'Marquer payée' }).waitFor({ timeout: 10000 });
   await page.goto(BASE + '/stats/finances');
   await page.getByRole('heading', { name: 'Encaissements par mois' }).waitFor();
+
+  etape('lot 7 : transmettre un contact d’évangélisation à l’ADNH, voir le registre et le journal');
+  await page.goto(BASE + '/evangelisation/contacts');
+  const premier = page.locator('main tbody tr', { has: page.getByRole('button', { name: "Transmettre à l'ADNH" }) }).first();
+  const contact = (await premier.locator('td').nth(1).textContent()).trim();
+  await premier.getByRole('button', { name: "Transmettre à l'ADNH" }).click();
+  await page.locator('main tbody tr', { hasText: contact }).getByText("Transmis à l'ADNH").waitFor({ timeout: 10000 });
+  await page.goto(BASE + '/ceremonies/baptemes');
+  assert.equal(await page.locator('main tbody tr').count(), 2);
+  await page.goto(BASE + '/admin/eglise');
+  await page.fill('#f-pasteur', 'Pasteur E2E');
+  await page.click('main form button[type=submit]');
+  await page.goto(BASE + '/admin/journal');
+  await page.locator('main tbody tr', { hasText: "Paramètres de l'église" }).first().waitFor();
 
   etape('lot 3 : marquer une tâche du conseil comme faite');
   await page.goto(BASE + '/reunions/taches?f=nonfaites');

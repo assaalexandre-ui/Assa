@@ -304,7 +304,19 @@ lot6.push(entretiens.map(([d, a, it, pr, c, nx], i) => `  (${[uuid('86000000', i
 lot6.push('insert into objectif (id, eglise_id, libelle, but, mesure, cible, date_debut, date_fin, responsable) values');
 lot6.push(`  (${[uuid('75000000', 8), EGLISE, 'Collecter 15 millions pour le temple en 2026', 'Financer les travaux sans emprunt.', 'dons', 15000000, '2026-01-01', '2026-12-31', 'Trésorier'].map(q).join(', ')});`, '');
 
-writeFileSync(out, [...lignes, ...lot2, ...lot3, ...lot4, ...lot5, ...lot6].join('\n'));
+const lot7 = ['-- Données FICTIVES du lot 7 (évangélisation, cérémonies, paramètres de l\'église).', ''];
+const sorties = [
+  ['2026-09-12', 'Marché de Treichville', 'Treichville', 'Équipe A', 12, 45, 3], ['2026-10-03', 'Gare de Yopougon', 'Yopougon', 'Équipe B', 9, 38, 2],
+  ['2026-10-24', 'Quartier Angré', 'Cocody', 'Équipe A', 14, 52, 4], ['2026-11-07', 'Abobo-Gare', 'Abobo', 'Équipe C', 8, 30, 2], ['2026-11-21', 'Marché de Koumassi', 'Koumassi', 'Équipe B', 11, 41, 3],
+];
+lot7.push('insert into sortie (id, eglise_id, date, lieu, commune, equipe, participants, rencontres, contacts, bilan) values');
+lot7.push(sorties.map(([d, l, c, e, p, r, k], i) => `  (${[uuid('87000000', i + 1), EGLISE, d, l, c, e, p, r, Array.from({ length: k }, () => `${nomPersonne()} – ${telephone().replace('+225 ', '')}`).join('\n'), 'Sortie fictive de test'].map(q).join(', ')})`).join(',\n') + ';', '');
+const ceremonies = [['Baptême', '2026-08-30', 6], ['Baptême', '2026-11-15', 4], ['Sainte-Cène', '2026-10-04', 0], ['Sainte-Cène', '2026-11-01', 0], ['Mariage', '2026-09-19', 1], ['Présentation d\'enfant', '2026-10-11', 1], ['Consécration', '2026-10-25', 2], ['Obsèques', '2026-11-08', 1]];
+lot7.push('insert into ceremonie (id, eglise_id, type, date, personnes, officiant, lieu, notes) values');
+lot7.push(ceremonies.map(([t, d, k], i) => `  (${[uuid('88000000', i + 1), EGLISE, t, d, t === 'Sainte-Cène' ? 'Assemblée réunie' : t === 'Mariage' ? `${nomPersonne()} et ${nomPersonne()}` : Array.from({ length: k }, () => nomPersonne()).join(', '), `Pasteur ${choix(NOMS)}`, 'Temple principal', 'Fiche fictive de test'].map(q).join(', ')})`).join(',\n') + ';', '');
+lot7.push(`update eglise set nom_complet = 'Église Missionnaire Christ Vivant', pasteur = 'Pasteur principal (fictif)', telephone = '+225 07 00 00 00 99', adresse = 'Adresse du temple (fictive)', commune = 'Cocody', email = 'contact@exemple.org', horaires = 'Dimanche : 1er culte 7 h 30, 2e culte 10 h\nMercredi : étude biblique 18 h 30\nVendredi : veillée 22 h' where id = ${q(EGLISE)};`, '');
+
+writeFileSync(out, [...lignes, ...lot2, ...lot3, ...lot4, ...lot5, ...lot6, ...lot7].join('\n'));
 // Fichier de mise à jour d'une base en ligne déjà installée avec le lot 1 : migration du lot 2 + ses données fictives.
 const dossier = fileURLToPath(new URL('../supabase/', import.meta.url));
 const migration = readFileSync(dossier + 'migrations/20261120000001_lot2.sql', 'utf8');
@@ -317,4 +329,6 @@ const migration5 = readFileSync(dossier + 'migrations/20261123000001_lot5.sql', 
 writeFileSync(dossier + 'mise-a-jour-lot5.sql', "-- Mise à jour d'une base déjà au lot 4 vers le lot 5. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration5 + '\n\n' + lot5.join('\n') + "\n\nnotify pgrst, 'reload schema';\n");
 const migration6 = readFileSync(dossier + 'migrations/20261124000001_lot6.sql', 'utf8');
 writeFileSync(dossier + 'mise-a-jour-lot6.sql', "-- Mise à jour d'une base déjà au lot 5 vers le lot 6. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration6 + '\n\n' + lot6.join('\n') + "\n\nnotify pgrst, 'reload schema';\n");
+const migration7 = readFileSync(dossier + 'migrations/20261126000001_lot7.sql', 'utf8');
+writeFileSync(dossier + 'mise-a-jour-lot7.sql', "-- Mise à jour d'une base déjà au lot 6 vers le lot 7. À exécuter UNE fois dans l'éditeur SQL de Supabase.\n-- Fichier généré par scripts/seed.mjs : ne pas le modifier à la main.\n\n" + migration7 + '\n\n' + lot7.join('\n') + "\n\nnotify pgrst, 'reload schema';\n");
 console.log(`seed.sql écrit : ${bergers.length} bergers, ${fideles.length} fidèles, ${nouveaux.length} nouveaux, ${appels.length} appels, ${cellules.length} cellules, ${activites.length} activités.`);

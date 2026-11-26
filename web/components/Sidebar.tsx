@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { MENUS, type MenuDef, type MenuId } from '@/lib/menus';
 import { Logo } from './Logo';
+import { ChoixTheme } from './ChoixTheme';
 import { seDeconnecter } from '@/app/connexion/actions';
 
 type Props = { menus: MenuId[]; nom: string; role: string };
@@ -45,7 +46,9 @@ export function Sidebar({ menus, nom, role }: Props) {
                         <svg viewBox="0 0 12 12" aria-hidden="true" style={{ transform: plie ? 'rotate(-90deg)' : 'none' }}><path d="M3 4.5l3 3 3-3" /></svg>
                       </button>
                     : <span className="fleche" aria-hidden="true" />}
-                  <Link href={lien(m)} className="nb" aria-current={on ? 'page' : undefined}>{m.t}</Link>
+                  <Link href={lien(m)} className="nb" aria-current={on ? 'page' : undefined}>
+                    <svg className="mi" viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{ __html: m.icone }} />{m.t}
+                  </Link>
                 </div>
                 {plusieurs && !plie && (
                   <div className="subs">
@@ -59,6 +62,7 @@ export function Sidebar({ menus, nom, role }: Props) {
             );
           })}
         </nav>
+        <ChoixTheme />
         <div className="me">
           <span className="avatar" aria-hidden="true">{initiales || '?'}</span>
           <div>
